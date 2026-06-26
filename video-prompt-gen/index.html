@@ -988,7 +988,7 @@ var state = {
 };
 
 var shotCount = 1;
-var history = [];
+var promptHistory = [];
 var typingTimer = null;
 var currentTypingHTML = '';
 var currentTypingPlain = '';
@@ -1175,19 +1175,19 @@ function randomGenerate() {
 function addHistory(plain) {
   var now = new Date();
   var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
-  history.unshift({ text: plain, time: timeStr });
-  if (history.length > 5) history.pop();
+  promptHistory.unshift({ text: plain, time: timeStr });
+  if (promptHistory.length > 5) promptHistory.pop();
   renderHistory();
 }
 
 function renderHistory() {
   var list = document.getElementById('historyList');
-  if (history.length === 0) {
+  if (promptHistory.length === 0) {
     list.innerHTML = '<div class="history-empty">NO HISTORY YET</div>';
     return;
   }
   var html = '';
-  history.forEach(function(item, i) {
+  promptHistory.forEach(function(item, i) {
     var short = item.text.length > 120 ? item.text.substring(0, 117) + '...' : item.text;
     html += '<div class="history-item" onclick="restoreHistory(' + i + ')">';
     html += '<span class="h-time">' + item.time + '</span>';
@@ -1199,8 +1199,8 @@ function renderHistory() {
 
 function restoreHistory(idx) {
   // Just copy text to clipboard for easy paste
-  if (history[idx]) {
-    navigator.clipboard.writeText(history[idx].text).then(function() {
+  if (promptHistory[idx]) {
+    navigator.clipboard.writeText(promptHistory[idx].text).then(function() {
       var el = document.getElementById('promptOutput');
       el.innerHTML = '<div class="prompt-placeholder"><span>📋</span>COPIED TO CLIPBOARD<br>已复制到剪贴板</div>';
       var wcBar = document.getElementById('wordCountBar');
