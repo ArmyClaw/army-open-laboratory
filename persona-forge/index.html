@@ -751,6 +751,7 @@
 
     // Simple markdown to HTML (inline)
     function renderMarkdown(text) {
+      if (typeof text !== 'string') text = String(text || '');
       return text
         .replace(/^>\s*(.+)/gm, '<blockquote>$1</blockquote>')
         .replace(/^(\*\*[^*]+\*\*)\s*[:：]?(.*)/gm, '<strong>$1</strong>$2')
