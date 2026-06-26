@@ -40,27 +40,7 @@ function extractDomains(personality, metaphors, brief) {
   return domains;
 }
 function getArchetype(p) {
-  var pb = p.personality + ' ' + p.brief;
-  var all = pb + ' ' + p.language_style;
-  // High confidence: personality+brief only
-  if (/领袖|团长|老板|CEO|总统|统帅|首领|将军|教父|掌门人|统治者|温和.*统治/.test(pb)) return 'leader';
-  if (/守护|保护|照顾|母亲|管家|守护者/.test(pb)) return 'guardian';
-  if (/探险|冒险|航海|旅行|海上|浪人|船长|海盗/.test(pb)) return 'explorer';
-  if (/叛逆|不羁|革命|解构|消费主义/.test(pb)) return 'rebel';
-  if (/黑暗骑士|恐惧作为|复仇|犯罪|混乱中立|反派|偏执到极/.test(pb)) return 'shadow';
-  if (/战士|格斗|佣兵|特种兵|忍者|狭路相逢|剑道|打拳/.test(pb)) return 'warrior';
-  if (/天才|科学家|发明家|哲学家|分析|才华|推理|逻辑|理性|教授|谋士|智多星|智慧|完美主义/.test(pb)) return 'thinker';
-  if (/混沌|荒诞解构|喜剧的外壳|享受混乱/.test(pb)) return 'joker';
-  if (/梦想|纯真|天真|善良|永不放弃|极度坚韧|站起来|乐观/.test(pb)) return 'dreamer';
-  // Broader: also check full text for borderline cases
-  if (/犀利|冷峻|不妥协|讽刺|尖锐|锤子/.test(all)) return 'rebel';
-  if (/沉默寡言|疲惫|厌世|内心撕裂|压抑/.test(all)) return 'shadow';
-  if (/懒|贪吃|毒舌|丧|讽刺/.test(all)) return 'joker';
-  if (/浪漫|豁达|洒脱|不被理解/.test(all)) return 'dreamer';
-  if (/耐心|等待|有远见|冷峻|深思/.test(all)) return 'thinker';
-  if (/恐怖|力量|强大|战斗/.test(all)) return 'warrior';
-  if (/礼貌|标准|规范|中性|冷静/.test(all)) return 'guardian';
-  return 'everyman';
+  return p.archetype || 'everyman';
 }
 
 function generatePersona(persona) {
@@ -154,6 +134,7 @@ function generateEmotionStyle(p) {
 function generateBehaviorRules(p) {
   var arch = getArchetype(p), kw = extractKeywords(p.personality), dm = _dm(p);
   var t1 = kw[0] || p.title, t2 = kw[1] || kw[0] || t1, d = dm[0] || '日常';
+  var m0 = p.metaphors[0] || '', m1 = p.metaphors[1] || '', f0 = p.forbidden[0] || '';
   var pool = {
     leader: ['用' + p.title + '的方式做决定——先看清全局再果断行动', '在任何' + d + '场景中，优先级：人 > 目标 > 自我', t1 + '的底线：不把困难留给别人', '做最坏的准备，期望最好的结果——但不把期望当计划', t2 + '不是口号，是每天早上的第一件事'],
     warrior: ['面对困难第一反应是迎上去——' + t1 + '不允许后退', '在' + d + '中信奉：能打就不要谈，能快就不要慢', t2 + '的执行标准：不做完不算开始', '受伤继续战斗不是勇敢，是不允许有"做不到"的念头', '战斗之外的时间用来变强——' + t1 + '是训练到吐的结果'],
@@ -167,7 +148,11 @@ function generateBehaviorRules(p) {
     everyman: ['用最简单的方式处理问题——' + t1 + '不是偷懒是效率', '在' + d + '中：能做就做，不能做就学，学了再试', t2 + '是常态——不需要每次都完美但每次都要认真', '遇到不懂就问——' + t1 + '让"不知道"变"下次就知道"', '保持' + t2 + '的节奏——不急不躁一步一个脚印']
   };
   var rules = pool[arch] || pool.everyman;
-  return rules.map(function(r) { return '- ' + r; }).join('\n');
+  // Add character-specific rules using their own metaphors and forbidden
+  var extra = [];
+  if (m0 && m0.length > 3) extra.push('- ' + p.name + '的信念："' + m0 + '"');
+  if (f0 && f0.length > 3) extra.push('- 绝不：' + f0 + '——这是刻在骨子里的');
+  return rules.map(function(r) { return '- ' + r; }).concat(extra).join('\n');
 }
 
 function generateInteractionRules(p) {
