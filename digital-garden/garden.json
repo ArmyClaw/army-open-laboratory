@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T14:26:17.590741",
+  "generated_at": "2026-06-26T14:32:45.212909",
   "flowers": [
     {
       "name": "月季",
@@ -5049,6 +5049,1842 @@
       "description": "粉色温馨浪漫",
       "fun_fact": "花期最长可达三个月",
       "seed": 2000092
+    },
+    {
+      "date": "2025-03-21",
+      "name": "荷花白",
+      "english": "White Lotus",
+      "family": "莲科",
+      "colors": [
+        "#f8f0f0",
+        "#d0c8c8",
+        "#ffffff"
+      ],
+      "petals": 6,
+      "style": "lotus",
+      "floriography": "清纯",
+      "description": "白色荷花如玉",
+      "fun_fact": "最经典荷花品种",
+      "seed": 3000000
+    },
+    {
+      "date": "2025-03-24",
+      "name": "荷花粉",
+      "english": "Pink Lotus",
+      "family": "莲科",
+      "colors": [
+        "#f0b0c0",
+        "#c88898",
+        "#ffd8e8"
+      ],
+      "petals": 6,
+      "style": "lotus",
+      "floriography": "温柔",
+      "description": "粉色荷花如少女",
+      "fun_fact": "杭州西湖最著名",
+      "seed": 3000001
+    },
+    {
+      "date": "2025-03-27",
+      "name": "杜鹃白",
+      "english": "White Azalea",
+      "family": "杜鹃花科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "cherry",
+      "floriography": "节制",
+      "description": "白色素雅",
+      "fun_fact": "长白山天池边白色杜鹃",
+      "seed": 3000002
+    },
+    {
+      "date": "2025-03-30",
+      "name": "杜鹃紫",
+      "english": "Purple Azalea",
+      "family": "杜鹃花科",
+      "colors": [
+        "#8050a0",
+        "#582878",
+        "#a878c8"
+      ],
+      "petals": 5,
+      "style": "cherry",
+      "floriography": "乡愁",
+      "description": "紫色深沉",
+      "fun_fact": "云南高黎贡山野生杜鹃",
+      "seed": 3000003
+    },
+    {
+      "date": "2025-04-02",
+      "name": "杜鹃红",
+      "english": "Red Azalea",
+      "family": "杜鹃花科",
+      "colors": [
+        "#e02040",
+        "#b80018",
+        "#ff4868"
+      ],
+      "petals": 5,
+      "style": "cherry",
+      "floriography": "热情",
+      "description": "漫山遍野",
+      "fun_fact": "百里杜鹃最大花海",
+      "seed": 3000004
+    },
+    {
+      "date": "2025-04-05",
+      "name": "康乃馨白",
+      "english": "White Carnation",
+      "family": "石竹科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 8,
+      "style": "daisy",
+      "floriography": "纯粹的爱",
+      "description": "白色纪念母亲",
+      "fun_fact": "逝世母亲的节日花",
+      "seed": 3000005
+    },
+    {
+      "date": "2025-04-08",
+      "name": "康乃馨粉",
+      "english": "Pink Carnation",
+      "family": "石竹科",
+      "colors": [
+        "#f0a0b0",
+        "#c87888",
+        "#ffc8d8"
+      ],
+      "petals": 8,
+      "style": "daisy",
+      "floriography": "母爱",
+      "description": "粉色最经典",
+      "fun_fact": "母亲节最畅销",
+      "seed": 3000006
+    },
+    {
+      "date": "2025-04-11",
+      "name": "康乃馨红",
+      "english": "Red Carnation",
+      "family": "石竹科",
+      "colors": [
+        "#e02040",
+        "#b80018",
+        "#ff4868"
+      ],
+      "petals": 8,
+      "style": "daisy",
+      "floriography": "深深的爱",
+      "description": "红色热烈",
+      "fun_fact": "母亲健在时送红色",
+      "seed": 3000007
+    },
+    {
+      "date": "2025-04-14",
+      "name": "康乃馨黄",
+      "english": "Yellow Carnation",
+      "family": "石竹科",
+      "colors": [
+        "#f0d040",
+        "#c8a818",
+        "#fff868"
+      ],
+      "petals": 8,
+      "style": "daisy",
+      "floriography": "失望",
+      "description": "黄色代表失望",
+      "fun_fact": "花语不吉利但美丽",
+      "seed": 3000008
+    },
+    {
+      "date": "2025-04-17",
+      "name": "三色堇蓝",
+      "english": "Blue Pansy",
+      "family": "堇菜科",
+      "colors": [
+        "#5060c0",
+        "#283898",
+        "#7888e8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "沉思",
+      "description": "蓝色最经典",
+      "fun_fact": "欧洲冬天象征",
+      "seed": 3000009
+    },
+    {
+      "date": "2025-04-20",
+      "name": "三色堇白",
+      "english": "White Pansy",
+      "family": "堇菜科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "天真",
+      "description": "白色纯洁如雪",
+      "fun_fact": "有笑脸基因",
+      "seed": 3000010
+    },
+    {
+      "date": "2025-04-23",
+      "name": "三色堇黄",
+      "english": "Yellow Pansy",
+      "family": "堇菜科",
+      "colors": [
+        "#e0c030",
+        "#b89808",
+        "#ffe858"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "欢欣",
+      "description": "黄色温暖明亮",
+      "fun_fact": "英国花园必备",
+      "seed": 3000011
+    },
+    {
+      "date": "2025-04-26",
+      "name": "大丽花白",
+      "english": "White Dahlia",
+      "family": "菊科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 8,
+      "style": "chrysanthemum",
+      "floriography": "优雅",
+      "description": "白色如瓷器",
+      "fun_fact": "墨西哥国花之一",
+      "seed": 3000012
+    },
+    {
+      "date": "2025-04-29",
+      "name": "大丽花粉",
+      "english": "Pink Dahlia",
+      "family": "菊科",
+      "colors": [
+        "#e0a0b0",
+        "#b87888",
+        "#ffc8d8"
+      ],
+      "petals": 8,
+      "style": "chrysanthemum",
+      "floriography": "华丽",
+      "description": "粉色如公主裙",
+      "fun_fact": "维多利亚时代最爱",
+      "seed": 3000013
+    },
+    {
+      "date": "2025-05-02",
+      "name": "大丽花紫",
+      "english": "Purple Dahlia",
+      "family": "菊科",
+      "colors": [
+        "#9060b0",
+        "#683888",
+        "#b888d8"
+      ],
+      "petals": 8,
+      "style": "chrysanthemum",
+      "floriography": "尊严",
+      "description": "紫色深邃",
+      "fun_fact": "荷兰每年大丽花节",
+      "seed": 3000014
+    },
+    {
+      "date": "2025-05-05",
+      "name": "大丽花红",
+      "english": "Red Dahlia",
+      "family": "菊科",
+      "colors": [
+        "#e02040",
+        "#b80018",
+        "#ff4868"
+      ],
+      "petals": 8,
+      "style": "chrysanthemum",
+      "floriography": "激情",
+      "description": "红色热烈",
+      "fun_fact": "英国女王最爱",
+      "seed": 3000015
+    },
+    {
+      "date": "2025-05-08",
+      "name": "睡莲白",
+      "english": "White Water Lily",
+      "family": "睡莲科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 8,
+      "style": "lotus",
+      "floriography": "纯净",
+      "description": "白色如仙女",
+      "fun_fact": "莫奈画中最常出现",
+      "seed": 3000016
+    },
+    {
+      "date": "2025-05-11",
+      "name": "睡莲粉",
+      "english": "Pink Water Lily",
+      "family": "睡莲科",
+      "colors": [
+        "#f0a0b0",
+        "#c87888",
+        "#ffc8d8"
+      ],
+      "petals": 8,
+      "style": "lotus",
+      "floriography": "温柔",
+      "description": "粉色含羞",
+      "fun_fact": "热带最受欢迎",
+      "seed": 3000017
+    },
+    {
+      "date": "2025-05-14",
+      "name": "睡莲蓝",
+      "english": "Blue Water Lily",
+      "family": "睡莲科",
+      "colors": [
+        "#4070c0",
+        "#184898",
+        "#6898e8"
+      ],
+      "petals": 8,
+      "style": "lotus",
+      "floriography": "智慧",
+      "description": "蓝色是埃及国花",
+      "fun_fact": "法老墓中常见",
+      "seed": 3000018
+    },
+    {
+      "date": "2025-05-17",
+      "name": "睡莲黄",
+      "english": "Yellow Water Lily",
+      "family": "睡莲科",
+      "colors": [
+        "#f0d040",
+        "#c8a818",
+        "#fff868"
+      ],
+      "petals": 8,
+      "style": "lotus",
+      "floriography": "光明",
+      "description": "黄色明亮",
+      "fun_fact": "原产北美耐寒",
+      "seed": 3000019
+    },
+    {
+      "date": "2025-05-20",
+      "name": "铃兰粉",
+      "english": "Pink Lily of Valley",
+      "family": "百合科",
+      "colors": [
+        "#f0b0b8",
+        "#c88890",
+        "#ffd8e0"
+      ],
+      "petals": 5,
+      "style": "lily",
+      "floriography": "甜蜜",
+      "description": "粉色稀有",
+      "fun_fact": "阿尔卑斯山偶有发现",
+      "seed": 3000020
+    },
+    {
+      "date": "2025-05-23",
+      "name": "蓝雪花白",
+      "english": "White Plumbago",
+      "family": "白花丹科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "纯净",
+      "description": "白色清新",
+      "fun_fact": "南非白色变种",
+      "seed": 3000021
+    },
+    {
+      "date": "2025-05-26",
+      "name": "蓟花紫",
+      "english": "Purple Thistle",
+      "family": "菊科",
+      "colors": [
+        "#7040a0",
+        "#481878",
+        "#9868c8"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "守护",
+      "description": "紫色经典",
+      "fun_fact": "苏格兰国花正统色",
+      "seed": 3000022
+    },
+    {
+      "date": "2025-05-29",
+      "name": "蓝铃花白",
+      "english": "White Bluebell",
+      "family": "百合科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "lily",
+      "floriography": "谦逊",
+      "description": "白色如珍珠",
+      "fun_fact": "英国受保护稀有色",
+      "seed": 3000023
+    },
+    {
+      "date": "2025-06-01",
+      "name": "蓝铃花粉",
+      "english": "Pink Bluebell",
+      "family": "百合科",
+      "colors": [
+        "#e0a0b8",
+        "#b87890",
+        "#ffc8e0"
+      ],
+      "petals": 5,
+      "style": "lily",
+      "floriography": "甜蜜",
+      "description": "粉色如梦",
+      "fun_fact": "蓝铃花罕见变异",
+      "seed": 3000024
+    },
+    {
+      "date": "2025-06-04",
+      "name": "薰衣草粉",
+      "english": "Pink Lavender",
+      "family": "唇形科",
+      "colors": [
+        "#e0a0b0",
+        "#b87888",
+        "#ffc8d8"
+      ],
+      "petals": 5,
+      "style": "lavender",
+      "floriography": "浪漫",
+      "description": "粉色温柔",
+      "fun_fact": "法国南部少见品种",
+      "seed": 3000025
+    },
+    {
+      "date": "2025-06-07",
+      "name": "薰衣草白",
+      "english": "White Lavender",
+      "family": "唇形科",
+      "colors": [
+        "#e0d8d0",
+        "#b8b0a8",
+        "#fffff8"
+      ],
+      "petals": 5,
+      "style": "lavender",
+      "floriography": "纯洁",
+      "description": "白色最稀有",
+      "fun_fact": "普罗旺斯少数品种",
+      "seed": 3000026
+    },
+    {
+      "date": "2025-06-10",
+      "name": "波斯菊白",
+      "english": "White Cosmos",
+      "family": "菊科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 8,
+      "style": "cosmos",
+      "floriography": "纯洁",
+      "description": "白色如丝绸",
+      "fun_fact": "最耐热波斯菊",
+      "seed": 3000027
+    },
+    {
+      "date": "2025-06-13",
+      "name": "波斯菊橙",
+      "english": "Orange Cosmos",
+      "family": "菊科",
+      "colors": [
+        "#f0a030",
+        "#c87808",
+        "#ffc858"
+      ],
+      "petals": 8,
+      "style": "cosmos",
+      "floriography": "热情",
+      "description": "橙色有活力",
+      "fun_fact": "原产墨西哥高原",
+      "seed": 3000028
+    },
+    {
+      "date": "2025-06-16",
+      "name": "波斯菊红",
+      "english": "Red Cosmos",
+      "family": "菊科",
+      "colors": [
+        "#e04050",
+        "#b81828",
+        "#ff6878"
+      ],
+      "petals": 8,
+      "style": "cosmos",
+      "floriography": "活力",
+      "description": "深红如夕阳",
+      "fun_fact": "最引人注目品种",
+      "seed": 3000029
+    },
+    {
+      "date": "2025-06-19",
+      "name": "桔梗蓝",
+      "english": "Blue Balloon Flower",
+      "family": "桔梗科",
+      "colors": [
+        "#5070d0",
+        "#2848a8",
+        "#7898f8"
+      ],
+      "petals": 5,
+      "style": "lily",
+      "floriography": "永恒",
+      "description": "蓝色最经典",
+      "fun_fact": "桔梗谣民歌主角",
+      "seed": 3000030
+    },
+    {
+      "date": "2025-06-22",
+      "name": "桔梗白",
+      "english": "White Balloon Flower",
+      "family": "桔梗科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "lily",
+      "floriography": "纯粹",
+      "description": "白色清雅",
+      "fun_fact": "日本秋天七草",
+      "seed": 3000031
+    },
+    {
+      "date": "2025-06-25",
+      "name": "桔梗粉",
+      "english": "Pink Balloon Flower",
+      "family": "桔梗科",
+      "colors": [
+        "#e0a0b0",
+        "#b87888",
+        "#ffc8d8"
+      ],
+      "petals": 5,
+      "style": "lily",
+      "floriography": "温柔",
+      "description": "粉色柔美",
+      "fun_fact": "近年园艺新品种",
+      "seed": 3000032
+    },
+    {
+      "date": "2025-06-28",
+      "name": "雏菊红",
+      "english": "Red Daisy",
+      "family": "菊科",
+      "colors": [
+        "#e06060",
+        "#b83838",
+        "#ff8888"
+      ],
+      "petals": 8,
+      "style": "daisy",
+      "floriography": "年轻的爱",
+      "description": "红色热情",
+      "fun_fact": "花语词典常见",
+      "seed": 3000033
+    },
+    {
+      "date": "2025-07-01",
+      "name": "雏菊蓝",
+      "english": "Blue Daisy",
+      "family": "菊科",
+      "colors": [
+        "#6080c0",
+        "#385898",
+        "#88a8e8"
+      ],
+      "petals": 8,
+      "style": "daisy",
+      "floriography": "独立",
+      "description": "蓝色稀有",
+      "fun_fact": "澳大利亚特有野生",
+      "seed": 3000034
+    },
+    {
+      "date": "2025-07-04",
+      "name": "满天星粉",
+      "english": "Pink Babys Breath",
+      "family": "石竹科",
+      "colors": [
+        "#f0c0c8",
+        "#c898a0",
+        "#ffe8f0"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "永恒的爱",
+      "description": "粉色浪漫",
+      "fun_fact": "婚礼花束最受欢迎",
+      "seed": 3000035
+    },
+    {
+      "date": "2025-07-07",
+      "name": "勿忘我粉",
+      "english": "Pink Forget-me-not",
+      "family": "紫草科",
+      "colors": [
+        "#e090b0",
+        "#b86888",
+        "#ffb8d8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "相思",
+      "description": "粉色温柔",
+      "fun_fact": "少见的粉色变异",
+      "seed": 3000036
+    },
+    {
+      "date": "2025-07-10",
+      "name": "勿忘我白",
+      "english": "White Forget-me-not",
+      "family": "紫草科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "纯净",
+      "description": "白色稀有",
+      "fun_fact": "阿尔卑斯高山植物",
+      "seed": 3000037
+    },
+    {
+      "date": "2025-07-13",
+      "name": "银莲花白",
+      "english": "White Anemone",
+      "family": "毛茛科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 6,
+      "style": "daisy",
+      "floriography": "期待",
+      "description": "白色优雅",
+      "fun_fact": "地中海春天标志",
+      "seed": 3000038
+    },
+    {
+      "date": "2025-07-16",
+      "name": "银莲花紫",
+      "english": "Purple Anemone",
+      "family": "毛茛科",
+      "colors": [
+        "#9060b0",
+        "#683888",
+        "#b888d8"
+      ],
+      "petals": 6,
+      "style": "daisy",
+      "floriography": "追忆",
+      "description": "紫色深邃",
+      "fun_fact": "秋天最常见品种",
+      "seed": 3000039
+    },
+    {
+      "date": "2025-07-19",
+      "name": "银莲花红",
+      "english": "Red Anemone",
+      "family": "毛茛科",
+      "colors": [
+        "#e04050",
+        "#b81828",
+        "#ff6878"
+      ],
+      "petals": 6,
+      "style": "daisy",
+      "floriography": "期盼",
+      "description": "红色热情",
+      "fun_fact": "欧洲花园经典春花",
+      "seed": 3000040
+    },
+    {
+      "date": "2025-07-22",
+      "name": "福禄考粉",
+      "english": "Pink Phlox",
+      "family": "花荵科",
+      "colors": [
+        "#e0a0b0",
+        "#b87888",
+        "#ffc8d8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "和谐",
+      "description": "粉色如花毯",
+      "fun_fact": "北美最经典春花",
+      "seed": 3000041
+    },
+    {
+      "date": "2025-07-25",
+      "name": "福禄考白",
+      "english": "White Phlox",
+      "family": "花荵科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "同意",
+      "description": "白色纯洁",
+      "fun_fact": "花园边界最佳选择",
+      "seed": 3000042
+    },
+    {
+      "date": "2025-07-28",
+      "name": "福禄考紫",
+      "english": "Purple Phlox",
+      "family": "花荵科",
+      "colors": [
+        "#8060b0",
+        "#583888",
+        "#a888d8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "团结",
+      "description": "紫色迷人",
+      "fun_fact": "美国最流行多年生花卉",
+      "seed": 3000043
+    },
+    {
+      "date": "2025-07-31",
+      "name": "天竺葵红",
+      "english": "Red Geranium",
+      "family": "牻牛儿苗科",
+      "colors": [
+        "#e02040",
+        "#b80018",
+        "#ff4868"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "安慰",
+      "description": "红色最经典",
+      "fun_fact": "欧洲阳台最常见花",
+      "seed": 3000044
+    },
+    {
+      "date": "2025-08-03",
+      "name": "天竺葵粉",
+      "english": "Pink Geranium",
+      "family": "牻牛儿苗科",
+      "colors": [
+        "#e0a0b0",
+        "#b87888",
+        "#ffc8d8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "挚爱",
+      "description": "粉色温柔",
+      "fun_fact": "最流行阳台花卉",
+      "seed": 3000045
+    },
+    {
+      "date": "2025-08-06",
+      "name": "天竺葵白",
+      "english": "White Geranium",
+      "family": "牻牛儿苗科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "纯洁",
+      "description": "白色清新",
+      "fun_fact": "薰衣草天竺葵近亲",
+      "seed": 3000046
+    },
+    {
+      "date": "2025-08-09",
+      "name": "天竺葵紫",
+      "english": "Purple Geranium",
+      "family": "牻牛儿苗科",
+      "colors": [
+        "#8060b0",
+        "#583888",
+        "#a888d8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "高贵",
+      "description": "紫色优雅",
+      "fun_fact": "伊甸园计划太空花",
+      "seed": 3000047
+    },
+    {
+      "date": "2025-08-12",
+      "name": "玫瑰金",
+      "english": "Gold Rose",
+      "family": "蔷薇科",
+      "colors": [
+        "#f0c040",
+        "#c89818",
+        "#ffe868"
+      ],
+      "petals": 12,
+      "style": "rose",
+      "floriography": "永恒",
+      "description": "金玫瑰象征永恒",
+      "fun_fact": "近年流行品种",
+      "seed": 3000048
+    },
+    {
+      "date": "2025-08-15",
+      "name": "玫瑰黑",
+      "english": "Black Rose",
+      "family": "蔷薇科",
+      "colors": [
+        "#402020",
+        "#180000",
+        "#684848"
+      ],
+      "petals": 12,
+      "style": "rose",
+      "floriography": "奇迹",
+      "description": "深紫近乎黑色",
+      "fun_fact": "日本基因工程育成",
+      "seed": 3000049
+    },
+    {
+      "date": "2025-08-18",
+      "name": "玫瑰绿",
+      "english": "Green Rose",
+      "family": "蔷薇科",
+      "colors": [
+        "#80c080",
+        "#589858",
+        "#a8e8a8"
+      ],
+      "petals": 12,
+      "style": "rose",
+      "floriography": "青春",
+      "description": "绿色稀有",
+      "fun_fact": "最特别玫瑰变种",
+      "seed": 3000050
+    },
+    {
+      "date": "2025-08-21",
+      "name": "玫瑰蓝",
+      "english": "Blue Rose",
+      "family": "蔷薇科",
+      "colors": [
+        "#6080d0",
+        "#3858a8",
+        "#88a8f8"
+      ],
+      "petals": 12,
+      "style": "rose",
+      "floriography": "奇迹",
+      "description": "自然界没有蓝玫瑰",
+      "fun_fact": "三得利育成蓝色",
+      "seed": 3000051
+    },
+    {
+      "date": "2025-08-24",
+      "name": "桂花银桂",
+      "english": "Silver Osmanthus",
+      "family": "木犀科",
+      "colors": [
+        "#f0e8c0",
+        "#c8c098",
+        "#ffffe8"
+      ],
+      "petals": 8,
+      "style": "daisy",
+      "floriography": "珍贵",
+      "description": "银桂香气淡雅",
+      "fun_fact": "产量少价格高",
+      "seed": 3000052
+    },
+    {
+      "date": "2025-08-27",
+      "name": "桂花金桂",
+      "english": "Gold Osmanthus",
+      "family": "木犀科",
+      "colors": [
+        "#f0c040",
+        "#c89818",
+        "#ffe868"
+      ],
+      "petals": 8,
+      "style": "daisy",
+      "floriography": "财富",
+      "description": "金桂香气浓郁",
+      "fun_fact": "桂花糕用金桂",
+      "seed": 3000053
+    },
+    {
+      "date": "2025-08-30",
+      "name": "桂花丹桂",
+      "english": "Red Osmanthus",
+      "family": "木犀科",
+      "colors": [
+        "#f0a040",
+        "#c87818",
+        "#ffc868"
+      ],
+      "petals": 8,
+      "style": "daisy",
+      "floriography": "热情",
+      "description": "丹桂橘红温暖",
+      "fun_fact": "丹桂飘香秋天标志",
+      "seed": 3000054
+    },
+    {
+      "date": "2025-09-02",
+      "name": "玉簪紫",
+      "english": "Purple Hosta",
+      "family": "百合科",
+      "colors": [
+        "#a080c0",
+        "#785898",
+        "#c8a8e8"
+      ],
+      "petals": 6,
+      "style": "lily",
+      "floriography": "清雅",
+      "description": "紫萼叶也美",
+      "fun_fact": "耐阴花园明星",
+      "seed": 3000055
+    },
+    {
+      "date": "2025-09-05",
+      "name": "萱草红",
+      "english": "Red Daylily",
+      "family": "百合科",
+      "colors": [
+        "#e06030",
+        "#b83808",
+        "#ff8858"
+      ],
+      "petals": 6,
+      "style": "lily",
+      "floriography": "忘忧",
+      "description": "红色热情似火",
+      "fun_fact": "中国南北广泛种植",
+      "seed": 3000056
+    },
+    {
+      "date": "2025-09-08",
+      "name": "萱草黄",
+      "english": "Yellow Daylily",
+      "family": "百合科",
+      "colors": [
+        "#f5c030",
+        "#cd9808",
+        "#ffe858"
+      ],
+      "petals": 6,
+      "style": "lily",
+      "floriography": "忘忧",
+      "description": "黄花菜是传统食材",
+      "fun_fact": "食用有千年历史",
+      "seed": 3000057
+    },
+    {
+      "date": "2025-09-11",
+      "name": "流苏花",
+      "english": "Fringetree",
+      "family": "木犀科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 4,
+      "style": "star",
+      "floriography": "优雅",
+      "description": "如丝线流苏",
+      "fun_fact": "四月如白雪覆树",
+      "seed": 3000058
+    },
+    {
+      "date": "2025-09-14",
+      "name": "木槿紫",
+      "english": "Purple Mallow",
+      "family": "锦葵科",
+      "colors": [
+        "#8050a0",
+        "#582878",
+        "#a878c8"
+      ],
+      "petals": 5,
+      "style": "hibiscus",
+      "floriography": "永恒",
+      "description": "紫色优雅",
+      "fun_fact": "希腊语意为永恒",
+      "seed": 3000059
+    },
+    {
+      "date": "2025-09-17",
+      "name": "木槿白",
+      "english": "White Mallow",
+      "family": "锦葵科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "hibiscus",
+      "floriography": "坚定",
+      "description": "白色如月光",
+      "fun_fact": "马来西亚国花",
+      "seed": 3000060
+    },
+    {
+      "date": "2025-09-20",
+      "name": "金露梅",
+      "english": "Shrubby Cinquefoil",
+      "family": "蔷薇科",
+      "colors": [
+        "#f0d040",
+        "#c8a818",
+        "#fff868"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "珍贵的爱",
+      "description": "黄色铺满灌木",
+      "fun_fact": "青藏高原常见花卉",
+      "seed": 3000061
+    },
+    {
+      "date": "2025-09-23",
+      "name": "银露梅",
+      "english": "White Cinquefoil",
+      "family": "蔷薇科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "纯洁",
+      "description": "白色清新",
+      "fun_fact": "和金露梅是姐妹种",
+      "seed": 3000062
+    },
+    {
+      "date": "2025-09-26",
+      "name": "龙胆花",
+      "english": "Gentian",
+      "family": "龙胆科",
+      "colors": [
+        "#4070c0",
+        "#184898",
+        "#6898e8"
+      ],
+      "petals": 5,
+      "style": "lily",
+      "floriography": "悲恋",
+      "description": "深蓝如宝石",
+      "fun_fact": "日本代表性高山植物",
+      "seed": 3000063
+    },
+    {
+      "date": "2025-09-29",
+      "name": "报春花",
+      "english": "Primrose",
+      "family": "报春花科",
+      "colors": [
+        "#f06090",
+        "#c83868",
+        "#ff88b8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "初恋",
+      "description": "早春最先开放",
+      "fun_fact": "报春花属有500多种",
+      "seed": 3000064
+    },
+    {
+      "date": "2025-10-02",
+      "name": "仙客来红",
+      "english": "Red Cyclamen",
+      "family": "报春花科",
+      "colors": [
+        "#e02040",
+        "#b80018",
+        "#ff4868"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "迎接贵客",
+      "description": "红色最热烈",
+      "fun_fact": "欧洲圣诞花卉",
+      "seed": 3000065
+    },
+    {
+      "date": "2025-10-05",
+      "name": "仙客来白",
+      "english": "White Cyclamen",
+      "family": "报春花科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "纯洁欢迎",
+      "description": "白色优雅",
+      "fun_fact": "圣诞节最常见盆花",
+      "seed": 3000066
+    },
+    {
+      "date": "2025-10-08",
+      "name": "仙客来粉",
+      "english": "Pink Cyclamen",
+      "family": "报春花科",
+      "colors": [
+        "#f0a0b0",
+        "#c87888",
+        "#ffc8d8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "温柔迎接",
+      "description": "粉色温馨",
+      "fun_fact": "花期可达三个月",
+      "seed": 3000067
+    },
+    {
+      "date": "2025-10-11",
+      "name": "绿绒蒿",
+      "english": "Himalayan Poppy",
+      "family": "罂粟科",
+      "colors": [
+        "#4080d0",
+        "#1858a8",
+        "#68a8f8"
+      ],
+      "petals": 4,
+      "style": "poppy",
+      "floriography": "蓝色梦幻",
+      "description": "高原蓝色罂粟",
+      "fun_fact": "喜马拉雅蓝色罂粟",
+      "seed": 3000068
+    },
+    {
+      "date": "2025-10-14",
+      "name": "紫茉莉黄",
+      "english": "Yellow Four Oclock",
+      "family": "紫茉莉科",
+      "colors": [
+        "#f0d040",
+        "#c8a818",
+        "#fff868"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "欢快",
+      "description": "黄色少见",
+      "fun_fact": "同一株可有不同颜色",
+      "seed": 3000069
+    },
+    {
+      "date": "2025-10-17",
+      "name": "紫茉莉白",
+      "english": "White Four Oclock",
+      "family": "紫茉莉科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "纯洁",
+      "description": "白色清新",
+      "fun_fact": "种子天然黑色颗粒",
+      "seed": 3000070
+    },
+    {
+      "date": "2025-10-20",
+      "name": "紫茉莉紫",
+      "english": "Purple Four Oclock",
+      "family": "紫茉莉科",
+      "colors": [
+        "#a060c0",
+        "#783898",
+        "#c888e8"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "神秘",
+      "description": "紫色经典",
+      "fun_fact": "原产南美热带",
+      "seed": 3000071
+    },
+    {
+      "date": "2025-10-23",
+      "name": "诸葛菜",
+      "english": "Orychophragmus",
+      "family": "十字花科",
+      "colors": [
+        "#6080d0",
+        "#3858a8",
+        "#88a8f8"
+      ],
+      "petals": 4,
+      "style": "star",
+      "floriography": "谦逊",
+      "description": "又叫二月兰",
+      "fun_fact": "诸葛亮曾用它充军粮",
+      "seed": 3000072
+    },
+    {
+      "date": "2025-10-26",
+      "name": "点地梅",
+      "english": "Androsace",
+      "family": "报春花科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "微小之美",
+      "description": "高山最小花之一",
+      "fun_fact": "能在海拔5000米生存",
+      "seed": 3000073
+    },
+    {
+      "date": "2025-10-29",
+      "name": "醉蝶花",
+      "english": "Cleome",
+      "family": "白花菜科",
+      "colors": [
+        "#e060a0",
+        "#b83878",
+        "#ff88c8"
+      ],
+      "petals": 5,
+      "style": "wild",
+      "floriography": "梦幻",
+      "description": "花丝如蝶须",
+      "fun_fact": "热带美洲花坛新宠",
+      "seed": 3000074
+    },
+    {
+      "date": "2025-11-01",
+      "name": "茑萝花",
+      "english": "Cypress Vine",
+      "family": "旋花科",
+      "colors": [
+        "#ff2030",
+        "#d70008",
+        "#ff4858"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "相互依存",
+      "description": "红色如星星",
+      "fun_fact": "天然篱笆植物",
+      "seed": 3000075
+    },
+    {
+      "date": "2025-11-04",
+      "name": "金铃花",
+      "english": "Abutilon",
+      "family": "锦葵科",
+      "colors": [
+        "#f0d040",
+        "#c8a818",
+        "#fff868"
+      ],
+      "petals": 5,
+      "style": "hibiscus",
+      "floriography": "精致",
+      "description": "如小灯笼下垂",
+      "fun_fact": "又名灯笼花南方常见",
+      "seed": 3000076
+    },
+    {
+      "date": "2025-11-07",
+      "name": "花烟草",
+      "english": "Flowering Tobacco",
+      "family": "茄科",
+      "colors": [
+        "#f0f0e0",
+        "#c8c8b8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "诱惑",
+      "description": "夜间管状花",
+      "fun_fact": "重要夜间授粉花卉",
+      "seed": 3000077
+    },
+    {
+      "date": "2025-11-10",
+      "name": "狼毒花",
+      "english": "Stellera",
+      "family": "瑞香科",
+      "colors": [
+        "#e060a0",
+        "#b83878",
+        "#ff88c8"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "勇气",
+      "description": "草原最醒目",
+      "fun_fact": "藏族用其造纸",
+      "seed": 3000078
+    },
+    {
+      "date": "2025-11-13",
+      "name": "红纸扇",
+      "english": "Mussaenda Red",
+      "family": "茜草科",
+      "colors": [
+        "#ff4060",
+        "#d71838",
+        "#ff6888"
+      ],
+      "petals": 5,
+      "style": "hibiscus",
+      "floriography": "热情",
+      "description": "一片鲜红萼片",
+      "fun_fact": "热带花园最亮眼",
+      "seed": 3000079
+    },
+    {
+      "date": "2025-11-16",
+      "name": "白纸扇",
+      "english": "Mussaenda White",
+      "family": "茜草科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "hibiscus",
+      "floriography": "清纯",
+      "description": "白色大萼片",
+      "fun_fact": "东南亚传统装饰",
+      "seed": 3000080
+    },
+    {
+      "date": "2025-11-19",
+      "name": "姜荷花",
+      "english": "Siam Tulip",
+      "family": "姜科",
+      "colors": [
+        "#e880a0",
+        "#c05878",
+        "#ffa8c8"
+      ],
+      "petals": 5,
+      "style": "tulip",
+      "floriography": "优雅",
+      "description": "粉色如莲",
+      "fun_fact": "原产泰国近年引入",
+      "seed": 3000081
+    },
+    {
+      "date": "2025-11-22",
+      "name": "石蒜",
+      "english": "Lycoris",
+      "family": "石蒜科",
+      "colors": [
+        "#e02020",
+        "#b80000",
+        "#ff4848"
+      ],
+      "petals": 7,
+      "style": "wild",
+      "floriography": "分离",
+      "description": "秋日盛开叶先枯",
+      "fun_fact": "中国有20余种石蒜",
+      "seed": 3000082
+    },
+    {
+      "date": "2025-11-25",
+      "name": "忽地笑",
+      "english": "Golden Lycoris",
+      "family": "石蒜科",
+      "colors": [
+        "#f0d020",
+        "#c8a800",
+        "#fff848"
+      ],
+      "petals": 7,
+      "style": "wild",
+      "floriography": "惊醒",
+      "description": "金黄色突然绽放",
+      "fun_fact": "和彼岸花是近亲",
+      "seed": 3000083
+    },
+    {
+      "date": "2025-11-28",
+      "name": "蝴蝶兰白",
+      "english": "White Phalaenopsis",
+      "family": "兰科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "orchid",
+      "floriography": "纯洁",
+      "description": "白色最经典",
+      "fun_fact": "最畅销室内兰花",
+      "seed": 3000084
+    },
+    {
+      "date": "2025-12-01",
+      "name": "蝴蝶兰紫",
+      "english": "Purple Phalaenopsis",
+      "family": "兰科",
+      "colors": [
+        "#9060b0",
+        "#683888",
+        "#b888d8"
+      ],
+      "petals": 5,
+      "style": "orchid",
+      "floriography": "高贵",
+      "description": "紫色如天鹅绒",
+      "fun_fact": "台湾省花之一",
+      "seed": 3000085
+    },
+    {
+      "date": "2025-12-04",
+      "name": "蝴蝶兰黄",
+      "english": "Yellow Phalaenopsis",
+      "family": "兰科",
+      "colors": [
+        "#f0d040",
+        "#c8a818",
+        "#fff868"
+      ],
+      "petals": 5,
+      "style": "orchid",
+      "floriography": "快乐",
+      "description": "黄色活泼",
+      "fun_fact": "兰花展会常客",
+      "seed": 3000086
+    },
+    {
+      "date": "2025-12-07",
+      "name": "蝴蝶兰粉",
+      "english": "Pink Phalaenopsis",
+      "family": "兰科",
+      "colors": [
+        "#e0a0b0",
+        "#b87888",
+        "#ffc8d8"
+      ],
+      "petals": 5,
+      "style": "orchid",
+      "floriography": "幸福",
+      "description": "粉色温馨浪漫",
+      "fun_fact": "新娘手捧花常用",
+      "seed": 3000087
+    },
+    {
+      "date": "2025-07-31",
+      "name": "番红花",
+      "english": "Saffron Crocus",
+      "family": "鸢尾科",
+      "colors": [
+        "#9020c0",
+        "#680098",
+        "#b848e8"
+      ],
+      "petals": 3,
+      "style": "lily",
+      "floriography": "欢乐与治愈",
+      "description": "一朵只有三根柱头",
+      "fun_fact": "1克番红花需150朵花",
+      "seed": 4000000
+    },
+    {
+      "date": "2025-08-03",
+      "name": "月见草",
+      "english": "Evening Primrose",
+      "family": "柳叶菜科",
+      "colors": [
+        "#f0e040",
+        "#c8b818",
+        "#ffff68"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "默默的爱",
+      "description": "夜间开放黄色小花",
+      "fun_fact": "月见草油富含Omega-6",
+      "seed": 4000001
+    },
+    {
+      "date": "2025-08-06",
+      "name": "酢浆草",
+      "english": "Wood Sorrel",
+      "family": "酢浆草科",
+      "colors": [
+        "#f08080",
+        "#c85858",
+        "#ffa8a8"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "明艳欢快",
+      "description": "心形小叶配黄花",
+      "fun_fact": "叶片可食酸甜可口",
+      "seed": 4000002
+    },
+    {
+      "date": "2025-08-09",
+      "name": "曼陀罗",
+      "english": "Angel Trumpet",
+      "family": "茄科",
+      "colors": [
+        "#f0f0e0",
+        "#c8c8b8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "tulip",
+      "floriography": "危险魅力",
+      "description": "白色喇叭散发迷幻香",
+      "fun_fact": "全株有毒但花朵美丽",
+      "seed": 4000003
+    },
+    {
+      "date": "2025-08-12",
+      "name": "紫叶李",
+      "english": "Purple Leaf Plum",
+      "family": "蔷薇科",
+      "colors": [
+        "#f0a0b0",
+        "#c87888",
+        "#ffc8d8"
+      ],
+      "petals": 5,
+      "style": "cherry",
+      "floriography": "美丽忧郁",
+      "description": "紫叶白色花朵",
+      "fun_fact": "北方最常见行道树",
+      "seed": 4000004
+    },
+    {
+      "date": "2025-08-15",
+      "name": "西府海棠",
+      "english": "Midget Crabapple",
+      "family": "蔷薇科",
+      "colors": [
+        "#e060a0",
+        "#b83878",
+        "#ff88c8"
+      ],
+      "petals": 5,
+      "style": "cherry",
+      "floriography": "相思快乐",
+      "description": "花粉红果红色",
+      "fun_fact": "故宫御花园名花",
+      "seed": 4000005
+    },
+    {
+      "date": "2025-08-18",
+      "name": "垂丝海棠",
+      "english": "Weeping Crabapple",
+      "family": "蔷薇科",
+      "colors": [
+        "#f090a0",
+        "#c86878",
+        "#ffb8c8"
+      ],
+      "petals": 5,
+      "style": "cherry",
+      "floriography": "温柔缠绵",
+      "description": "花梗细长下垂如丝",
+      "fun_fact": "宋代花中十友之一",
+      "seed": 4000006
+    },
+    {
+      "date": "2025-08-21",
+      "name": "贴梗海棠",
+      "english": "Flowering Quince",
+      "family": "蔷薇科",
+      "colors": [
+        "#e03030",
+        "#b80808",
+        "#ff5858"
+      ],
+      "petals": 5,
+      "style": "cherry",
+      "floriography": "平凡的爱",
+      "description": "花贴枝干开放",
+      "fun_fact": "果实可做果脯入药",
+      "seed": 4000007
+    },
+    {
+      "date": "2025-08-24",
+      "name": "锦带花",
+      "english": "Weigela",
+      "family": "忍冬科",
+      "colors": [
+        "#e060a0",
+        "#b83878",
+        "#ff88c8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "前程似锦",
+      "description": "花筒状如锦带",
+      "fun_fact": "东北最常见春季灌木",
+      "seed": 4000008
+    },
+    {
+      "date": "2025-08-27",
+      "name": "天女花",
+      "english": "Oyama Magnolia",
+      "family": "木兰科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 6,
+      "style": "lily",
+      "floriography": "圣洁美丽",
+      "description": "花大如碗洁白如玉",
+      "fun_fact": "日本原始森林中的名花",
+      "seed": 4000009
+    },
+    {
+      "date": "2025-08-30",
+      "name": "溲疏",
+      "english": "Deutzia",
+      "family": "绣球科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "纯洁谦逊",
+      "description": "白色小花密集如雪",
+      "fun_fact": "初夏花园不可缺少的灌木",
+      "seed": 4000010
+    },
+    {
+      "date": "2025-09-02",
+      "name": "太平花",
+      "english": "Philadelphus",
+      "family": "绣球科",
+      "colors": [
+        "#f0f0f0",
+        "#c8c8c8",
+        "#ffffff"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "平安祥和",
+      "description": "乳白色散发清香",
+      "fun_fact": "故宫御花园经典花卉",
+      "seed": 4000011
+    },
+    {
+      "date": "2025-09-05",
+      "name": "金丝桃",
+      "english": "St Johns Wort",
+      "family": "金丝桃科",
+      "colors": [
+        "#f0d040",
+        "#c8a818",
+        "#fff868"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "迷信神奇",
+      "description": "金色雄蕊如丝闪耀",
+      "fun_fact": "中草药抗抑郁重要来源",
+      "seed": 4000012
+    },
+    {
+      "date": "2025-09-08",
+      "name": "沙棘花",
+      "english": "Sea Buckthorn",
+      "family": "胡颓子科",
+      "colors": [
+        "#f0d040",
+        "#c8a818",
+        "#fff868"
+      ],
+      "petals": 4,
+      "style": "star",
+      "floriography": "生命力忍耐",
+      "description": "金色小花不起眼",
+      "fun_fact": "沙棘果维C是猕猴桃8倍",
+      "seed": 4000013
+    },
+    {
+      "date": "2025-09-11",
+      "name": "火轮花",
+      "english": "Fire Wheel",
+      "family": "菊科",
+      "colors": [
+        "#e04030",
+        "#b81808",
+        "#ff6858"
+      ],
+      "petals": 8,
+      "style": "cosmos",
+      "floriography": "炽热之爱",
+      "description": "红色花瓣旋转排列",
+      "fun_fact": "是最耐旱的野生花卉",
+      "seed": 4000014
+    },
+    {
+      "date": "2025-09-14",
+      "name": "黄蝉花",
+      "english": "Yellow Oleander",
+      "family": "夹竹桃科",
+      "colors": [
+        "#f0d040",
+        "#c8a818",
+        "#fff868"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "光辉荣耀",
+      "description": "金黄如喇叭",
+      "fun_fact": "全株有毒但花期超长",
+      "seed": 4000015
+    },
+    {
+      "date": "2025-09-17",
+      "name": "旱金莲",
+      "english": "Nasturtium",
+      "family": "旱金莲科",
+      "colors": [
+        "#ff8020",
+        "#d75800",
+        "#ffa848"
+      ],
+      "petals": 5,
+      "style": "star",
+      "floriography": "爱国心",
+      "description": "圆叶配鲜艳花",
+      "fun_fact": "叶片味道类似水芹",
+      "seed": 4000016
+    },
+    {
+      "date": "2025-09-20",
+      "name": "水晶花",
+      "english": "Love in Mist",
+      "family": "毛茛科",
+      "colors": [
+        "#6080c0",
+        "#385898",
+        "#88a8e8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "迷惑复杂",
+      "description": "花瓣藏毛茸苞片",
+      "fun_fact": "种荚膨大如气球",
+      "seed": 4000017
+    },
+    {
+      "date": "2025-09-23",
+      "name": "黑种草",
+      "english": "Nigella",
+      "family": "毛茛科",
+      "colors": [
+        "#3050a0",
+        "#082878",
+        "#5878c8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "神秘爱意",
+      "description": "花中藏毛茸苞片",
+      "fun_fact": "种子是流行香料",
+      "seed": 4000018
+    },
+    {
+      "date": "2025-09-26",
+      "name": "落地生根",
+      "english": "Air Plant",
+      "family": "景天科",
+      "colors": [
+        "#e06080",
+        "#b83858",
+        "#ff88a8"
+      ],
+      "petals": 5,
+      "style": "daisy",
+      "floriography": "坚韧生命",
+      "description": "叶缘生小苗落地生根",
+      "fun_fact": "繁殖方式极其独特",
+      "seed": 4000019
     }
   ]
 }

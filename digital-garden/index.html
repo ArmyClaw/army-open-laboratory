@@ -340,6 +340,86 @@ body[data-theme] .sunspot{opacity:var(--sunspot-opacity)}
 }
 .garden-field *{pointer-events:auto}
 
+/* ---- Plant More Button & Panel ---- */
+.plant-more-btn{
+  position:fixed;bottom:70px;right:20px;z-index:60;
+  background:var(--card);color:var(--accent);
+  border:1px solid var(--border);border-radius:40px;
+  padding:10px 22px;font-family:'Noto Serif SC',serif;font-size:.85rem;
+  cursor:pointer;backdrop-filter:blur(12px);
+  transition:all .3s ease;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,.2);
+}
+.plant-more-btn:hover{background:var(--card-hover);transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,0,0,.3)}
+.plant-more-btn .count{font-family:'DM Mono',monospace;font-size:.75rem;opacity:.7;margin-left:6px}
+
+.plant-panel-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,.4);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+}
+.plant-panel-overlay.active{opacity:1;pointer-events:auto}
+
+.plant-panel{
+  position:fixed;bottom:90px;right:20px;z-index:101;
+  width:320px;max-height:70vh;overflow-y:auto;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;
+  backdrop-filter:blur(16px);
+  box-shadow:0 12px 40px rgba(0,0,0,.3);
+  transform:translateY(20px) scale(.95);opacity:0;
+  pointer-events:none;transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.plant-panel.active{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
+.plant-panel h3{font-size:1rem;color:var(--accent);margin-bottom:4px}
+.plant-panel .sub{font-size:.7rem;color:var(--fg-muted);margin-bottom:16px;font-family:'DM Mono',monospace}
+.plant-panel .quick-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.plant-panel .quick-btns button{
+  flex:1;min-width:60px;padding:8px 4px;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid var(--border);border-radius:10px;
+  font-family:'DM Mono',monospace;font-size:.75rem;
+  cursor:pointer;transition:all .2s ease;
+}
+.plant-panel .quick-btns button:hover{background:var(--accent);color:var(--bg)}
+.plant-panel .quick-btns button.active{background:var(--accent);color:var(--bg)}
+.plant-panel .slider-row{margin-bottom:16px}
+.plant-panel .slider-row label{font-size:.75rem;color:var(--fg-muted);display:block;margin-bottom:6px}
+.plant-panel .slider-row input[type=range]{
+  width:100%;-webkit-appearance:none;appearance:none;
+  height:6px;background:var(--border);border-radius:3px;outline:none;
+}
+.plant-panel .slider-row input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:20px;height:20px;background:var(--accent);border-radius:50%;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.plant-panel .slider-val{font-family:'DM Mono',monospace;font-size:1.2rem;color:var(--accent);text-align:center;margin:8px 0}
+.plant-panel .confirm-btn{
+  width:100%;padding:12px;
+  background:linear-gradient(135deg,var(--accent),#8a6a3a);color:#fff;
+  border:none;border-radius:12px;
+  font-family:'Noto Serif SC',serif;font-size:.95rem;
+  cursor:pointer;transition:all .2s ease;
+  box-shadow:0 4px 15px rgba(200,169,110,.3);
+}
+.plant-panel .confirm-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,169,110,.4)}
+.plant-panel .confirm-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.plant-panel .cancel-btn{
+  width:100%;padding:8px;margin-top:8px;
+  background:transparent;color:var(--fg-muted);
+  border:1px solid var(--border);border-radius:10px;
+  font-family:'DM Mono',monospace;font-size:.75rem;
+  cursor:pointer;transition:all .2s ease;
+}
+.plant-panel .cancel-btn:hover{color:var(--fg);border-color:var(--fg-muted)}
+.plant-panel .categories{margin-bottom:16px;max-height:180px;overflow-y:auto}
+.plant-panel .cat-group{margin-bottom:8px}
+.plant-panel .cat-group label{font-size:.75rem;color:var(--fg-muted);display:flex;align-items:center;gap:6px;cursor:pointer;padding:3px 0}
+.plant-panel .cat-group input[type=checkbox]{accent-color:var(--accent)}
+.plant-panel .cat-group .cat-count{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--fg-dim);margin-left:auto}
+
 /* ---- Single Flower Unit ---- */
 .flower-unit{
   position:absolute;
@@ -578,6 +658,24 @@ body[data-theme] .sunspot{opacity:var(--sunspot-opacity)}
 <footer class="footer">
   电子花园 · 由阿呆每天种一朵花 · 共 <span id="totalCount">0</span> 朵
 </footer>
+
+<button class="plant-more-btn" id="plantMoreBtn" style="display:none" onclick="openPlantPanel()">
+  种下更多花 🌱<span class="count" id="plantMoreCount"></span>
+</button>
+<div class="plant-panel-overlay" id="plantPanelOverlay" onclick="closePlantPanel()"></div>
+<div class="plant-panel" id="plantPanel">
+  <h3>🌸 选择要种下的花</h3>
+  <div class="sub" id="panelSub"></div>
+  <div class="quick-btns" id="quickBtns"></div>
+  <div class="slider-row">
+    <label>滑动选择数量</label>
+    <input type="range" id="plantSlider" min="16" max="500" value="16" oninput="updateSliderVal()">
+    <div class="slider-val" id="sliderVal">16</div>
+  </div>
+  <div class="categories" id="plantCategories"></div>
+  <button class="confirm-btn" id="confirmPlantBtn" onclick="confirmPlant()">确认种植</button>
+  <button class="cancel-btn" onclick="closePlantPanel()">取消</button>
+</div>
 
 <script>
 // ---- Time Period System ----
@@ -1611,11 +1709,16 @@ document.addEventListener('keydown', function(e) {
 window.closeDetail = closeDetail;
 
 // ---- Load & Render ----
+let allFlowersCache = null;
+let currentDisplayCount = 16;
+const INITIAL_COUNT = 16;
+
 async function init() {
   const field = document.getElementById('gardenField');
   const emptyEl = document.getElementById('gardenEmpty');
   const genInfo = document.getElementById('genInfo');
   const countEl = document.getElementById('totalCount');
+  const plantBtn = document.getElementById('plantMoreBtn');
 
   try {
     const resp = await fetch('/data/garden.json');
@@ -1627,6 +1730,7 @@ async function init() {
     }
 
     const flowers = data.flowers || [];
+    allFlowersCache = flowers;
     countEl.textContent = flowers.length;
 
     if (!flowers.length) {
@@ -1634,124 +1738,262 @@ async function init() {
       return;
     }
 
-    const sorted = [...flowers].reverse();
-    const isMobile = window.innerWidth < 768;
-    const viewScale = Math.min(window.innerWidth / 1000, 1);
-    const minDist = isMobile ? 0.07 : 0.08;
-
-    const positions = generatePositions(sorted, minDist);
-
-    sorted.forEach((flower, i) => {
-      const size = getFlowerSize(flower.style, flower.seed);
-      const actualSize = Math.round(size * Math.max(0.5, viewScale) * (isMobile ? 0.8 : 1));
-      const randomScale = 0.85 + seededRandom(flower.seed || i) * 0.3;
-      const headSize = Math.round(actualSize * randomScale);
-
-      const groundY = 0.62;
-      const pos = positions[i];
-      const stemRatio = Math.max(0, (groundY - pos.y)) / (groundY - 0.50);
-      const stemH = Math.round(30 + stemRatio * 120) * (headSize / 100);
-
-      const unit = document.createElement('div');
-      unit.className = 'flower-unit';
-      unit.style.left = (pos.x * 100) + '%';
-      unit.style.bottom = ((1 - pos.y) * 100) + '%';
-      unit.style.transform = 'translate(-50%, 0)';
-      unit.style.setProperty('--bloom-dur', (0.6 + seededRandom(flower.seed || i) * 0.4) + 's');
-      unit.style.setProperty('--bloom-delay', (i * 0.35) + 's');
-
-      const stem = document.createElement('div');
-      stem.className = 'flower-stem';
-      stem.style.height = stemH + 'px';
-      stem.style.width = Math.max(1, Math.round(2 * (headSize / 100))) + 'px';
-      const head = document.createElement('div');
-      head.className = 'flower-head';
-      head.style.width = headSize + 'px';
-      head.style.height = headSize + 'px';
-      head.style.setProperty('--sway-dur', (3.5 + seededRandom(flower.seed || i) * 3) + 's');
-      head.style.setProperty('--sway-delay', (-seededRandom(flower.seed || i+99) * 4) + 's');
-      head.appendChild(renderFlower(flower, 1));
-      unit.appendChild(head);
-      unit.appendChild(stem);
-
-      unit.addEventListener('click', function(e) {
-        e.stopPropagation();
-        showDetail(flower);
-      });
-
-      field.appendChild(unit);
-    });
-
-    // ---- Ground Decorations ----
-    const flowerPositions = positions.map(p => ({x: p.x, y: p.y}));
-    function tooClose(x, y) {
-      for (const fp of flowerPositions) {
-        const dx = x - fp.x, dy = y - fp.y;
-        if (Math.sqrt(dx*dx + dy*dy) < 0.035) return true;
-      }
-      return false;
+    // Show plant-more button if there are more flowers than initial
+    if (flowers.length > INITIAL_COUNT) {
+      plantBtn.style.display = 'block';
+      updatePlantBtn();
+      initPlantPanel();
     }
-    // Mushrooms
-    const shroomColors = ['#c45a3a','#d4703a','#b8502e','#a84530'];
-    for (let i = 0; i < 4; i++) {
-      let sx, sy, att = 0;
-      do { sx = 0.1 + seededRandom(i*71+500)*0.8; sy = 0.78 + seededRandom(i*83+600)*0.18; att++; } while (tooClose(sx, sy) && att < 50);
-      if (att >= 30) continue;
-      const sw = 10 + seededRandom(i*97+700)*8;
-      const sh = document.createElement('div'); sh.className = 'ground-shroom';
-      sh.style.setProperty('--gb', ((1-sy)*100)+'%');
-      sh.style.setProperty('--gl', (sx*100)+'%');
-      sh.style.setProperty('--sw', sw+'px');
-      sh.style.setProperty('--sc', shroomColors[i % shroomColors.length]);
- // Add cap dots
-      const dots = document.createElement('div'); dots.className = 'shroom-dots';
-      dots.style.position = 'absolute';
-      for (let d = 0; d < 3; d++) {
-        const dot = document.createElement('div');
-        dot.style.cssText = `position:absolute;width:2px;height:2px;border-radius:50%;
-          background:rgba(255,255,255,.4);
-          left:${20+seededRandom(i*111+d)*60}%;top:${30+seededRandom(i*127+d)*40}%`;
-        dots.appendChild(dot);
-      }
-      sh.appendChild(dots);
-      field.appendChild(sh);
-    }
-    // Pebbles
-    for (let i = 0; i < 7; i++) {
-      let px, py, att = 0;
-      do { px = 0.05 + seededRandom(i*41+800)*0.9; py = 0.80 + seededRandom(i*53+900)*0.18; att++; } while (tooClose(px, py) && att < 50);
-      if (att >= 30) continue;
-      const pw = 4 + seededRandom(i*67+1000)*5;
-      const ph = 3 + seededRandom(i*79+1100)*3;
-      const pebble = document.createElement('div'); pebble.className = 'ground-pebble';
-      pebble.style.setProperty('--gb', ((1-py)*100)+'%');
-      pebble.style.setProperty('--gl', (px*100)+'%');
-      pebble.style.setProperty('--pw', pw+'px');
-      pebble.style.setProperty('--ph', ph+'px');
-      const grey = 100 + Math.floor(seededRandom(i*91+1200)*60);
-      pebble.style.setProperty('--pc', `rgb(${grey},${grey-10},${grey-20})`);
-      field.appendChild(pebble);
-    }
-    // Moss patches
-    for (let i = 0; i < 3; i++) {
-      let mx, my, att = 0;
-      do { mx = 0.1 + seededRandom(i*37+1300)*0.8; my = 0.82 + seededRandom(i*43+1400)*0.15; att++; } while (tooClose(mx, my) && att < 50);
-      if (att >= 30) continue;
-      const mw = 15 + seededRandom(i*59+1500)*20;
-      const mh = 5 + seededRandom(i*61+1600)*6;
-      const moss = document.createElement('div'); moss.className = 'ground-moss';
-      moss.style.setProperty('--gb', ((1-my)*100)+'%');
-      moss.style.setProperty('--gl', (mx*100)+'%');
-      moss.style.setProperty('--mw', mw+'px');
-      moss.style.setProperty('--mh', mh+'px');
-      field.appendChild(moss);
-    }
+
+    // Only render the last INITIAL_COUNT flowers initially
+    const sorted = [...flowers].reverse().slice(0, INITIAL_COUNT);
+    currentDisplayCount = sorted.length;
+    renderFlowers(sorted, 0);
+
+    // Ground decorations use all positions (or just visible ones)
+    renderGroundDecorations(sorted);
 
   } catch(e) {
     emptyEl.style.display = 'flex';
     countEl.textContent = '0';
   }
 }
+
+function renderFlowers(sorted, delayOffset) {
+  const field = document.getElementById('gardenField');
+  const isMobile = window.innerWidth < 768;
+  const viewScale = Math.min(window.innerWidth / 1000, 1);
+  const minDist = isMobile ? 0.07 : 0.08;
+
+  // Generate positions for just these flowers
+  const positions = generatePositions(sorted, minDist);
+
+  sorted.forEach((flower, i) => {
+    const size = getFlowerSize(flower.style, flower.seed);
+    const actualSize = Math.round(size * Math.max(0.5, viewScale) * (isMobile ? 0.8 : 1));
+    const randomScale = 0.85 + seededRandom(flower.seed || i) * 0.3;
+    const headSize = Math.round(actualSize * randomScale);
+
+    const groundY = 0.62;
+    const pos = positions[i];
+    const stemRatio = Math.max(0, (groundY - pos.y)) / (groundY - 0.50);
+    const stemH = Math.round(30 + stemRatio * 120) * (headSize / 100);
+
+    const unit = document.createElement('div');
+    unit.className = 'flower-unit';
+    unit.dataset.seed = flower.seed || 0;
+    unit.style.left = (pos.x * 100) + '%';
+    unit.style.bottom = ((1 - pos.y) * 100) + '%';
+    unit.style.transform = 'translate(-50%, 0)';
+    unit.style.setProperty('--bloom-dur', (0.6 + seededRandom(flower.seed || i) * 0.4) + 's');
+    unit.style.setProperty('--bloom-delay', (delayOffset + i * 0.15) + 's');
+
+    const stem = document.createElement('div');
+    stem.className = 'flower-stem';
+    stem.style.height = stemH + 'px';
+    stem.style.width = Math.max(1, Math.round(2 * (headSize / 100))) + 'px';
+    const head = document.createElement('div');
+    head.className = 'flower-head';
+    head.style.width = headSize + 'px';
+    head.style.height = headSize + 'px';
+    head.style.setProperty('--sway-dur', (3.5 + seededRandom(flower.seed || i) * 3) + 's');
+    head.style.setProperty('--sway-delay', (-seededRandom(flower.seed || i+99) * 4) + 's');
+    head.appendChild(renderFlower(flower, 1));
+    unit.appendChild(head);
+    unit.appendChild(stem);
+
+    unit.addEventListener('click', function(e) {
+      e.stopPropagation();
+      showDetail(flower);
+    });
+
+    field.appendChild(unit);
+  });
+}
+
+function renderGroundDecorations(sorted) {
+  const field = document.getElementById('gardenField');
+  const isMobile = window.innerWidth < 768;
+  const viewScale = Math.min(window.innerWidth / 1000, 1);
+  const minDist = isMobile ? 0.07 : 0.08;
+  const positions = generatePositions(sorted, minDist);
+  const flowerPositions = positions.map(p => ({x: p.x, y: p.y}));
+  function tooClose(x, y) {
+    for (const fp of flowerPositions) {
+      const dx = x - fp.x, dy = y - fp.y;
+      if (Math.sqrt(dx*dx + dy*dy) < 0.035) return true;
+    }
+    return false;
+  }
+  const shroomColors = ['#c45a3a','#d4703a','#b8502e','#a84530'];
+  for (let i = 0; i < 4; i++) {
+    let sx, sy, att = 0;
+    do { sx = 0.1 + seededRandom(i*71+500)*0.8; sy = 0.78 + seededRandom(i*83+600)*0.18; att++; } while (tooClose(sx, sy) && att < 50);
+    if (att >= 30) continue;
+    const sw = 10 + seededRandom(i*97+700)*8;
+    const sh = document.createElement('div'); sh.className = 'ground-shroom';
+    sh.style.setProperty('--gb', ((1-sy)*100)+'%');
+    sh.style.setProperty('--gl', (sx*100)+'%');
+    sh.style.setProperty('--sw', sw+'px');
+    sh.style.setProperty('--sc', shroomColors[i % shroomColors.length]);
+    const dots = document.createElement('div'); dots.className = 'shroom-dots';
+    dots.style.position = 'absolute';
+    for (let d = 0; d < 3; d++) {
+      const dot = document.createElement('div');
+      dot.style.cssText = `position:absolute;width:2px;height:2px;border-radius:50%;background:rgba(255,255,255,.4);left:${20+seededRandom(i*111+d)*60}%;top:${30+seededRandom(i*127+d)*40}%`;
+      dots.appendChild(dot);
+    }
+    sh.appendChild(dots);
+    field.appendChild(sh);
+  }
+  for (let i = 0; i < 7; i++) {
+    let px, py, att = 0;
+    do { px = 0.05 + seededRandom(i*41+800)*0.9; py = 0.80 + seededRandom(i*53+900)*0.18; att++; } while (tooClose(px, py) && att < 50);
+    if (att >= 30) continue;
+    const pw = 4 + seededRandom(i*67+1000)*5;
+    const ph = 3 + seededRandom(i*79+1100)*3;
+    const pebble = document.createElement('div'); pebble.className = 'ground-pebble';
+    pebble.style.setProperty('--gb', ((1-py)*100)+'%');
+    pebble.style.setProperty('--gl', (px*100)+'%');
+    pebble.style.setProperty('--pw', pw+'px');
+    pebble.style.setProperty('--ph', ph+'px');
+    const grey = 100 + Math.floor(seededRandom(i*91+1200)*60);
+    pebble.style.setProperty('--pc', `rgb(${grey},${grey-10},${grey-20})`);
+    field.appendChild(pebble);
+  }
+  for (let i = 0; i < 3; i++) {
+    let mx, my, att = 0;
+    do { mx = 0.1 + seededRandom(i*37+1300)*0.8; my = 0.82 + seededRandom(i*43+1400)*0.15; att++; } while (tooClose(mx, my) && att < 50);
+    if (att >= 30) continue;
+    const mw = 15 + seededRandom(i*59+1500)*20;
+    const mh = 5 + seededRandom(i*61+1600)*6;
+    const moss = document.createElement('div'); moss.className = 'ground-moss';
+    moss.style.setProperty('--gb', ((1-my)*100)+'%');
+    moss.style.setProperty('--gl', (mx*100)+'%');
+    moss.style.setProperty('--mw', mw+'px');
+    moss.style.setProperty('--mh', mh+'px');
+    field.appendChild(moss);
+  }
+}
+
+// ---- Plant More Panel Logic ----
+function updatePlantBtn() {
+  const btn = document.getElementById('plantMoreBtn');
+  const countSpan = document.getElementById('plantMoreCount');
+  if (!allFlowersCache) return;
+  const remaining = allFlowersCache.length - currentDisplayCount;
+  if (remaining <= 0) {
+    btn.style.display = 'none';
+  } else {
+    btn.style.display = 'block';
+    countSpan.textContent = `(${remaining} 可选)`;
+  }
+}
+
+function initPlantPanel() {
+  if (!allFlowersCache) return;
+  const sub = document.getElementById('panelSub');
+  const slider = document.getElementById('plantSlider');
+  const total = allFlowersCache.length;
+  sub.textContent = `花园共 ${total} 种花 · 当前展示 ${INITIAL_COUNT} 朵 · 还可种下 ${total - INITIAL_COUNT} 朵`;
+  slider.max = total;
+  slider.value = INITIAL_COUNT;
+  updateSliderVal();
+
+  // Quick buttons
+  const quickBtns = document.getElementById('quickBtns');
+  const presets = [INITIAL_COUNT, 50, 100, 200, total].filter((v, i, a) => a.indexOf(v) === i && v <= total);
+  quickBtns.innerHTML = presets.map(v => `<button onclick="setSlider(${v})">${v === total ? '全部' : '+' + (v - INITIAL_COUNT)}</button>`).join('');
+
+  // Categories
+  const catContainer = document.getElementById('plantCategories');
+  const families = {};
+  allFlowersCache.forEach(f => { families[f.family] = (families[f.family] || 0) + 1; });
+  const sortedFamilies = Object.entries(families).sort((a, b) => b[1] - a[1]);
+  catContainer.innerHTML = '<div style="font-size:.7rem;color:var(--fg-muted);margin-bottom:6px">按科属浏览</div>' +
+    sortedFamilies.map(([fam, count]) => `<div class="cat-group"><label><input type="checkbox" checked> ${fam} <span class="cat-count">${count}</span></label></div>`).join('');
+}
+
+function setSlider(val) {
+  const slider = document.getElementById('plantSlider');
+  slider.value = val;
+  updateSliderVal();
+  // Highlight active quick button
+  document.querySelectorAll('#quickBtns button').forEach(b => b.classList.remove('active'));
+}
+
+function updateSliderVal() {
+  const slider = document.getElementById('plantSlider');
+  const val = document.getElementById('sliderVal');
+  val.textContent = slider.value;
+  // Update confirm button
+  const btn = document.getElementById('confirmPlantBtn');
+  const diff = parseInt(slider.value) - currentDisplayCount;
+  btn.textContent = diff > 0 ? `确认种植 ${diff} 朵新花 🌱` : '当前已是最大展示量';
+  btn.disabled = diff <= 0;
+}
+
+function openPlantPanel() {
+  document.getElementById('plantPanelOverlay').classList.add('active');
+  document.getElementById('plantPanel').classList.add('active');
+}
+
+function closePlantPanel() {
+  document.getElementById('plantPanelOverlay').classList.remove('active');
+  document.getElementById('plantPanel').classList.remove('active');
+}
+
+function confirmPlant() {
+  const slider = document.getElementById('plantSlider');
+  const targetCount = parseInt(slider.value);
+  if (targetCount <= currentDisplayCount) return;
+
+  if (!allFlowersCache) return;
+
+  // Get checked families
+  const checkedFamilies = new Set();
+  document.querySelectorAll('#plantCategories input[type=checkbox]:checked').forEach(cb => {
+    const label = cb.closest('label').textContent.trim();
+    const fam = label.split(/[0-9]/)[0].trim();
+    if (fam) checkedFamilies.add(fam);
+  });
+
+  // Determine which flowers to add
+  const sorted = [...allFlowersCache].reverse();
+  // Filter by checked families if not all checked
+  let candidates = sorted.slice(currentDisplayCount);
+  if (checkedFamilies.size > 0 && checkedFamilies.size < Object.keys(allFlowersCache.reduce((a, f) => { a[f.family] = 1; return a; }, {})).length) {
+    candidates = candidates.filter(f => checkedFamilies.has(f.family));
+  }
+  const toAdd = candidates.slice(0, targetCount - currentDisplayCount);
+
+  if (toAdd.length === 0) {
+    closePlantPanel();
+    return;
+  }
+
+  closePlantPanel();
+
+  // Render new flowers with staggered bloom
+  const existingUnits = document.querySelectorAll('.flower-unit');
+  const delayOffset = existingUnits.length * 0.1;
+  renderFlowers(toAdd, delayOffset);
+
+  // Update current count
+  const field = document.getElementById('gardenField');
+  currentDisplayCount = field.querySelectorAll('.flower-unit').length;
+  updatePlantBtn();
+}
+
+// ESC to close panel too
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePlantPanel();
+});
+window.openPlantPanel = openPlantPanel;
+window.closePlantPanel = closePlantPanel;
+window.confirmPlant = confirmPlant;
+window.setSlider = setSlider;
+window.updateSliderVal = updateSliderVal;
 
 init();
 </script>
