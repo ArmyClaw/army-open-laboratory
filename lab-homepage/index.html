@@ -483,6 +483,30 @@ a{color:inherit;text-decoration:none}
 }
 .proj-10:hover{border-color:rgba(212,168,87,.25);box-shadow:0 16px 48px rgba(212,168,87,.1)}
 
+.proj-11{
+  background:#0d1117;
+  color:#e8edf5;
+  border:1px solid rgba(245,158,11,.12);
+}
+.proj-11 .proj-nr{color:#f59e0b}
+.proj-11 .proj-tag{color:#f59e0b}
+.proj-11 .proj-name em{color:#fbbf24}
+.proj-11 .proj-desc{color:rgba(232,237,245,.4)}
+.proj-11 .proj-enter{color:#f59e0b;border-color:rgba(245,158,11,.25)}
+.proj-11::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 250px 120px at 30% 40%, rgba(245,158,11,.05), transparent),
+    radial-gradient(ellipse 200px 100px at 80% 70%, rgba(6,182,212,.03), transparent);
+}
+.proj-11::after{
+  content:'ΔS';position:absolute;
+  top:14px;right:18px;
+  font-size:1.1em;color:rgba(245,158,11,.2);
+  z-index:0;
+}
+.proj-11:hover{border-color:rgba(245,158,11,.2);box-shadow:0 16px 48px rgba(245,158,11,.08)}
+
 /* ── Footer ── */
 .footer{
   max-width:1200px;margin:0 auto;
@@ -653,6 +677,16 @@ a{color:inherit;text-decoration:none}
         <div class="proj-tag">🎭 Persona Forge</div>
         <div class="proj-name">Persona <em>Forge</em></div>
         <div class="proj-desc">影视角色/名人AGENTS.md人设生成器。语言特征、行为准则、标志性口号、比喻素材库，一键导出。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-11" data-proj="entropy-lab" href="/study/entropy-lab/">
+      <div class="proj-nr">11</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🔬 Entropy Lab</div>
+        <div class="proj-name">Entropy <em>Lab</em></div>
+        <div class="proj-desc">熵的直觉实验室。气体扩散、墨水入水、高尔顿板、沙堡崩塌、冰融化——亲眼看见无序是如何生长的。</div>
         <div class="proj-enter">Enter <span class="arr">→</span></div>
       </div>
     </a>

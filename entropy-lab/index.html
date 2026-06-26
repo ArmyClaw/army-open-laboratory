@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>熵实验室 — Entropy Lab</title>
+<meta property="og:title" content="熵实验室 — Entropy Lab">
+<meta property="og:description" content="用自然现象模拟熵的概念。气体扩散、墨水入水、高尔顿板、沙堡崩塌、冰融化——亲眼看见无序是如何生长的。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0a0e17;color:#e2e8f0;font-family:'Space Grotesk',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::after{content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#0a0e17}
+::-webkit-scrollbar-thumb{background:#1e293b;border-radius:3px}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,14,23,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(245,158,11,.08)}
+.nav-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05em;color:#f59e0b;text-decoration:none}
+.nav-brand svg{width:24px;height:24px}
+.nav-links{display:flex;gap:24px}
+.nav-links a{color:#64748b;text-decoration:none;font-size:.85em;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:#f59e0b}
+
+/* Hero */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 32px 60px;overflow:hidden}
+.hero canvas{position:absolute;inset:0;z-index:0;width:100%;height:100%}
+.hero-content{position:relative;z-index:2;text-align:center}
+.hero-label{font-family:'IBM Plex Mono',monospace;font-size:.75em;color:#06b6d4;letter-spacing:.2em;text-transform:uppercase;margin-bottom:16px}
+.hero h1{font-size:clamp(3em,8vw,6.5em);font-weight:700;color:#f59e0b;line-height:1.05;letter-spacing:-.02em}
+.hero h1 span{color:#06b6d4}
+.hero-sub{margin-top:24px;font-size:clamp(1em,2vw,1.25em);color:#64748b;max-width:600px;line-height:1.6}
+.hero-scroll{position:relative;z-index:2;margin-top:48px;color:#475569;font-family:'IBM Plex Mono',monospace;font-size:.75em;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* Entropy Info Panel */
+.info-panel{max-width:900px;margin:-20px auto 0;padding:0 32px;position:relative;z-index:2}
+.info-box{background:rgba(15,23,42,.8);border:1px solid rgba(245,158,11,.1);border-radius:12px;padding:28px 32px;display:flex;gap:24px;align-items:center;backdrop-filter:blur(8px)}
+.info-text{flex:1}
+.info-text h3{font-size:1em;color:#f59e0b;margin-bottom:8px;font-weight:600}
+.info-text p{font-size:.88em;color:#94a3b8;line-height:1.65}
+.info-gauge{flex-shrink:0;text-align:center}
+.info-gauge canvas{display:block;margin:0 auto}
+.info-gauge-val{font-family:'IBM Plex Mono',monospace;font-size:1.6em;font-weight:600;color:#f59e0b;margin-top:6px}
+.info-gauge-lbl{font-family:'IBM Plex Mono',monospace;font-size:.65em;color:#475569;text-transform:uppercase;letter-spacing:.15em}
+
+/* Experiments Grid */
+.experiments{max-width:1100px;margin:80px auto 0;padding:0 32px}
+.section-title{font-size:clamp(1.8em,4vw,2.8em);font-weight:700;color:#f59e0b;margin-bottom:8px}
+.section-sub{color:#64748b;font-size:.95em;margin-bottom:40px}
+.experiment-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.exp-card{position:relative;background:rgba(15,23,42,.6);border:1px solid rgba(245,158,11,.08);border-radius:12px;padding:24px;cursor:pointer;transition:all .3s;overflow:hidden}
+.exp-card:hover{border-color:rgba(245,158,11,.25);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.exp-card canvas{width:100%;height:120px;border-radius:8px;margin-bottom:16px;background:#080c14}
+.exp-card-nr{position:absolute;top:12px;right:16px;font-family:'IBM Plex Mono',monospace;font-size:.7em;color:rgba(245,158,11,.3)}
+.exp-card-tag{font-family:'IBM Plex Mono',monospace;font-size:.7em;color:#06b6d4;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.exp-card h3{font-size:1.15em;color:#e2e8f0;margin-bottom:6px;font-weight:600}
+.exp-card p{font-size:.82em;color:#64748b;line-height:1.5}
+
+/* Experiment Detail Panel */
+.exp-detail{display:none;position:relative;z-index:10;max-width:1200px;margin:60px auto 0;padding:0 32px}
+.exp-detail.active{display:block}
+.exp-detail-back{display:inline-flex;align-items:center;gap:8px;color:#64748b;text-decoration:none;font-size:.85em;margin-bottom:20px;cursor:pointer;transition:color .2s}
+.exp-detail-back:hover{color:#f59e0b}
+.exp-detail-header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.exp-detail-header h2{font-size:1.8em;color:#f59e0b;font-weight:700}
+.exp-detail-header .exp-tag{font-family:'IBM Plex Mono',monospace;font-size:.7em;color:#06b6d4;letter-spacing:.1em;text-transform:uppercase;background:rgba(6,182,212,.1);padding:4px 10px;border-radius:4px}
+.exp-detail-layout{display:grid;grid-template-columns:1fr 340px;gap:24px}
+.exp-canvas-wrap{background:#080c14;border:1px solid rgba(245,158,11,.08);border-radius:12px;overflow:hidden;position:relative}
+.exp-canvas-wrap canvas{display:block;width:100%;height:auto}
+.exp-sidebar{display:flex;flex-direction:column;gap:16px}
+.exp-entropy-box{background:rgba(15,23,42,.8);border:1px solid rgba(245,158,11,.1);border-radius:12px;padding:20px}
+.exp-entropy-box h4{font-family:'IBM Plex Mono',monospace;font-size:.7em;color:#06b6d4;text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px}
+.exp-entropy-val{font-family:'IBM Plex Mono',monospace;font-size:2.2em;font-weight:600;color:#f59e0b}
+.exp-entropy-bar{height:4px;background:#1e293b;border-radius:2px;margin-top:12px;overflow:hidden}
+.exp-entropy-bar-fill{height:100%;background:linear-gradient(90deg,#06b6d4,#f59e0b);border-radius:2px;transition:width .3s;width:0%}
+.exp-chart{background:rgba(15,23,42,.8);border:1px solid rgba(245,158,11,.1);border-radius:12px;padding:20px}
+.exp-chart h4{font-family:'IBM Plex Mono',monospace;font-size:.7em;color:#06b6d4;text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px}
+.exp-chart canvas{width:100%;height:140px;border-radius:6px}
+.exp-controls{background:rgba(15,23,42,.8);border:1px solid rgba(245,158,11,.1);border-radius:12px;padding:20px}
+.exp-controls h4{font-family:'IBM Plex Mono',monospace;font-size:.7em;color:#06b6d4;text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px}
+.exp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.08);color:#f59e0b;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.88em;font-weight:500;cursor:pointer;transition:all .2s}
+.exp-btn:hover{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4)}
+.exp-btn.primary{background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.4)}
+.exp-btn-group{display:flex;gap:8px;flex-wrap:wrap}
+.exp-slider{margin-top:12px}
+.exp-slider label{display:flex;justify-content:space-between;font-size:.8em;color:#94a3b8;margin-bottom:6px}
+.exp-slider label span{color:#f59e0b;font-family:'IBM Plex Mono',monospace}
+.exp-slider input[type=range]{width:100%;-webkit-appearance:none;height:4px;background:#1e293b;border-radius:2px;outline:none}
+.exp-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:#f59e0b;border-radius:50%;cursor:pointer}
+.exp-desc{background:rgba(15,23,42,.8);border:1px solid rgba(245,158,11,.1);border-radius:12px;padding:20px}
+.exp-desc h4{font-family:'IBM Plex Mono',monospace;font-size:.7em;color:#06b6d4;text-transform:uppercase;letter-spacing:.15em;margin-bottom:8px}
+.exp-desc p{font-size:.82em;color:#94a3b8;line-height:1.6}
+
+/* Footer */
+.footer{max-width:900px;margin:100px auto 0;padding:40px 32px;border-top:1px solid rgba(245,158,11,.08);text-align:center}
+.footer h3{font-size:1.5em;color:#f59e0b;margin-bottom:12px}
+.footer p{font-size:.9em;color:#64748b;line-height:1.7;max-width:600px;margin:0 auto}
+.footer-eq{font-family:'IBM Plex Mono',monospace;font-size:1.3em;color:#06b6d4;margin-top:20px;opacity:.6}
+
+/* Responsive */
+@media(max-width:768px){
+  .nav{padding:12px 16px}
+  .nav-links{display:none}
+  .hero{padding:100px 20px 40px}
+  .info-box{flex-direction:column;text-align:center}
+  .experiment-grid{grid-template-columns:1fr}
+  .exp-detail-layout{grid-template-columns:1fr}
+  .experiments,.exp-detail,.info-panel{padding:0 16px}
+  .section-title{font-size:1.6em}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <a class="nav-brand" href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Entropy Lab
+  </a>
+  <div class="nav-links">
+    <a href="#experiments">Experiments</a>
+    <a href="#detail">Detail</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <canvas id="heroCanvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-label">Thermodynamic Exploration</div>
+    <h1>理解<span>熵</span></h1>
+    <p class="hero-sub">熵是宇宙中无序程度的度量。从气体扩散到沙堡崩塌，观察有序如何不可避免地滑向混沌。</p>
+  </div>
+  <div class="hero-scroll">↓ 开始探索</div>
+</section>
+
+<!-- Entropy Info -->
+<div class="info-panel">
+  <div class="info-box">
+    <div class="info-text">
+      <h3>什么是熵？</h3>
+      <p>熵（S）衡量一个系统的无序程度。热力学第二定律告诉我们：孤立系统的熵只会增加，不会减少。这意味着宇宙的最终命运是最大熵——热寂。你现在看到的粒子正在从有序走向无序。</p>
+    </div>
+    <div class="info-gauge">
+      <canvas id="globalGauge" width="100" height="100"></canvas>
+      <div class="info-gauge-val" id="globalEntropy">0.00</div>
+      <div class="info-gauge-lbl">Global S</div>
+    </div>
+  </div>
+</div>
+
+<!-- Experiments Grid -->
+<section class="experiments" id="experiments">
+  <h2 class="section-title">实验室实验</h2>
+  <p class="section-sub">七个经典模拟，每个揭示熵的一个侧面</p>
+  <div class="experiment-grid" id="expGrid"></div>
+</section>
+
+<!-- Experiment Detail -->
+<section class="exp-detail" id="detail">
+  <a class="exp-detail-back" id="expBack">← 返回实验列表</a>
+  <div class="exp-detail-header">
+    <h2 id="expDetailTitle"></h2>
+    <div class="exp-tag" id="expDetailTag"></div>
+  </div>
+  <div class="exp-detail-layout">
+    <div class="exp-canvas-wrap">
+      <canvas id="expCanvas" width="800" height="500"></canvas>
+    </div>
+    <div class="exp-sidebar">
+      <div class="exp-entropy-box">
+        <h4>Current Entropy</h4>
+        <div class="exp-entropy-val" id="expEntropyVal">0.000</div>
+        <div class="exp-entropy-bar"><div class="exp-entropy-bar-fill" id="expEntropyBar"></div></div>
+      </div>
+      <div class="exp-chart">
+        <h4>Entropy Over Time</h4>
+        <canvas id="chartCanvas" width="300" height="140"></canvas>
+      </div>
+      <div class="exp-controls" id="expControls"></div>
+      <div class="exp-desc">
+        <h4>About This Experiment</h4>
+        <p id="expDescText"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <h3>ΔS ≥ 0</h3>
+  <p>熵增是宇宙最不可违抗的法则之一。从有序到无序，从结构到混沌——这是时间箭头的方向。每一个实验都在诉说同一个故事。</p>
+  <div class="footer-eq">S = k<sub>B</sub> ln Ω</div>
+</footer>
+
+<script>
+// ==================== UTILITIES ====================
+var DPR = Math.min(window.devicePixelRatio || 1, 2);
+function setupCanvas(cvs, w, h) {
+  cvs.width = w * DPR;
+  cvs.height = h * DPR;
+  cvs.style.width = w + 'px';
+  cvs.style.height = h + 'px';
+  var ctx = cvs.getContext('2d');
+  ctx.scale(DPR, DPR);
+  return ctx;
+}
+function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+function rand(a, b) { return Math.random() * (b - a) + a; }
+
+// ==================== HERO PARTICLES ====================
+(function() {
+  var cvs = document.getElementById('heroCanvas');
+  var rect = cvs.parentElement.getBoundingClientRect();
+  var W = rect.width, H = rect.height;
+  var ctx = setupCanvas(cvs, W, H);
+  var particles = [];
+  var N = 200;
+  for (var i = 0; i < N; i++) {
+    particles.push({
+      x: W * 0.5 + rand(-60, 60),
+      y: H * 0.5 + rand(-60, 60),
+      vx: rand(-0.3, 0.3),
+      vy: rand(-0.3, 0.3),
+      r: rand(1.5, 3),
+      color: Math.random() > 0.5 ? 'rgba(245,158,11,' : 'rgba(6,182,212,'
+    });
+  }
+  var heroEntropy = 0;
+  var gaugeCanvas = document.getElementById('globalGauge');
+  var gaugeCtx = setupCanvas(gaugeCanvas, 100, 100);
+  var globalEntropyEl = document.getElementById('globalEntropy');
+
+  function calcHeroEntropy() {
+    // Calculate spread of particles
+    var cx = 0, cy = 0;
+    for (var i = 0; i < particles.length; i++) { cx += particles[i].x; cy += particles[i].y; }
+    cx /= N; cy /= N;
+    var variance = 0;
+    for (var i = 0; i < particles.length; i++) {
+      var dx = particles[i].x - cx, dy = particles[i].y - cy;
+      variance += dx * dx + dy * dy;
+    }
+    variance /= N;
+    // Normalize to 0-1
+    var maxV = (W * W + H * H) / 4;
+    return clamp(variance / maxV, 0, 1);
+  }
+
+  function drawGauge(val) {
+    var cx = 50, cy = 50, r = 38;
+    gaugeCtx.clearRect(0, 0, 100, 100);
+    gaugeCtx.beginPath();
+    gaugeCtx.arc(cx, cy, r, 0, Math.PI * 2);
+    gaugeCtx.strokeStyle = 'rgba(30,41,59,.6)';
+    gaugeCtx.lineWidth = 6;
+    gaugeCtx.stroke();
+    var startAngle = -Math.PI / 2;
+    var endAngle = startAngle + Math.PI * 2 * val;
+    gaugeCtx.beginPath();
+    gaugeCtx.arc(cx, cy, r, startAngle, endAngle);
+    var grad = gaugeCtx.createLinearGradient(0, 0, 100, 100);
+    grad.addColorStop(0, '#06b6d4');
+    grad.addColorStop(1, '#f59e0b');
+    gaugeCtx.strokeStyle = grad;
+    gaugeCtx.lineWidth = 6;
+    gaugeCtx.lineCap = 'round';
+    gaugeCtx.stroke();
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.vx += rand(-0.05, 0.05);
+      p.vy += rand(-0.05, 0.05);
+      p.vx *= 0.99; p.vy *= 0.99;
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + '0.6)';
+      ctx.fill();
+    }
+    heroEntropy = lerp(heroEntropy, calcHeroEntropy(), 0.05);
+    drawGauge(heroEntropy);
+    globalEntropyEl.textContent = heroEntropy.toFixed(2);
+    requestAnimationFrame(tick);
+  }
+  tick();
+  window.addEventListener('resize', function() {
+    var r = cvs.parentElement.getBoundingClientRect();
+    W = r.width; H = r.height;
+    ctx = setupCanvas(cvs, W, H);
+  });
+})();
+
+// ==================== EXPERIMENT DEFINITIONS ====================
+var experiments = [
+  { id:'gas', nr:'01', tag:'GAS DIFFUSION', name:'气体扩散', desc:'粒子从容器一侧扩散到整个空间，观察熵值如何随扩散上升。点击反混可以尝试逆转这个过程。', longDesc:'模拟理想气体在容器中的自由扩散。初始状态粒子集中在左侧（低熵），释放后通过随机运动逐渐充满整个容器（高熵）。熵的计算基于粒子在空间中的分布均匀度。注意："反混"操作可以逆转扩散，但它需要外部做功——这正是热力学第二定律的核心：自发过程熵增，逆转需要消耗能量。' },
+  { id:'coffee', nr:'02', tag:'COFFEE & MILK', name:'咖啡与牛奶', desc:'一滴牛奶在咖啡中扩散。可以搅拌加速，对比自然扩散的熵增曲线。', longDesc:'模拟牛奶在咖啡中的扩散过程。牛奶分子通过布朗运动逐渐扩散到整个杯子中。搅拌会加速扩散过程但最终熵值相同——只是到达平衡的时间不同。这说明搅拌并不改变热力学终点，只改变到达终点的路径。' },
+  { id:'ink', nr:'03', tag:'INK IN WATER', name:'墨水入水', desc:'一滴墨水落入清水中，以丝状方式优雅地扩散开来。', longDesc:'墨水在水中的扩散是一个经典的熵增可视化。墨水分子从高浓度区域向低浓度区域扩散，形成美丽的丝状图案。这个过程完全由随机运动驱动，最终达到均匀混合——最大熵状态。' },
+  { id:'galton', nr:'04', tag:'GALTON BOARD', name:'弹珠跌落', desc:'经典高尔顿板：弹珠经过钉子随机左右弹，最终形成正态分布。', longDesc:'高尔顿板是统计力学的经典模型。每个弹珠在每一层钉子处随机选择左或右，这种微小的随机性累积起来形成了宏观上的正态分布。从信息论角度看，单个弹珠的轨迹不可预测（高熵），但大量弹珠的统计分布是确定的。' },
+  { id:'room', nr:'05', tag:'ROOM MESSINESS', name:'房间混乱度', desc:'扔东西让房间变乱（熵增），整理让房间恢复有序——但需要消耗能量。', longDesc:'维持有序需要持续的能量输入。扔出物品的过程几乎不需要能量但熵快速增加；整理需要精确的动作和能量消耗。这正是为什么房间总是趋向混乱——熵增是自然趋势，维持秩序是对抗自然。' },
+  { id:'sandcastle', nr:'06', tag:'SANDCASTLE', name:'沙堡崩塌', desc:'移除关键支撑粒子，观察精心建造的沙堡如何在重力下崩塌成无序的沙堆。', longDesc:'建造沙堡需要精心的劳动——将沙粒从随机位置精确排列成有序结构（低熵）。崩塌只需要移除少量关键支撑，重力就会完成剩下的工作——将有序结构拉回随机的沙堆状态（高熵）。建造耗费能量，崩塌自然发生。' },
+  { id:'ice', nr:'07', tag:'ICE MELTING', name:'冰融化', desc:'冰晶在温度作用下逐渐融化，分子从有序排列变为随机运动。用温度滑块控制速度。', longDesc:'冰的融化是相变与熵增的经典例子。在冰中，水分子排列成规则的晶体结构（低熵）。随着温度升高，分子获得更多动能，逐渐脱离晶格束缚，变为自由运动状态（高熵）。调节温度可以观察融化速度的变化。' }
+];
+
+// ==================== BUILD EXPERIMENT CARDS ====================
+(function() {
+  var grid = document.getElementById('expGrid');
+  for (var i = 0; i < experiments.length; i++) {
+    var exp = experiments[i];
+    var card = document.createElement('div');
+    card.className = 'exp-card';
+    card.setAttribute('data-id', exp.id);
+    var html = '<div class="exp-card-nr">' + exp.nr + '</div>';
+    html += '<canvas class="preview-canvas" width="300" height="120"></canvas>';
+    html += '<div class="exp-card-tag">' + exp.tag + '</div>';
+    html += '<h3>' + exp.name + '</h3>';
+    html += '<p>' + exp.desc + '</p>';
+    card.innerHTML = html;
+    card.addEventListener('click', (function(eid) {
+      return function() { openExperiment(eid); };
+    })(exp.id));
+    grid.appendChild(card);
+  }
+  // Draw preview canvases
+  setTimeout(drawPreviews, 100);
+})();
+
+function drawPreviews() {
+  var previews = document.querySelectorAll('.preview-canvas');
+  for (var i = 0; i < previews.length; i++) {
+    var cvs = previews[i];
+    var ctx = cvs.getContext('2d');
+    var w = 300, h = 120;
+    var colors = ['#f59e0b','#06b6d4','#8b5cf6','#ef4444','#10b981','#d97706','#3b82f6'];
+    ctx.fillStyle = '#080c14';
+    ctx.fillRect(0, 0, w, h);
+    // Draw abstract particles
+    var col = colors[i % colors.length];
+    for (var j = 0; j < 40; j++) {
+      ctx.beginPath();
+      ctx.arc(rand(10, w-10), rand(10, h-10), rand(1, 4), 0, Math.PI * 2);
+      ctx.fillStyle = col;
+      ctx.globalAlpha = rand(0.2, 0.7);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // Add some structure hints
+    if (i === 0) { // Gas: half filled
+      ctx.fillStyle = 'rgba(245,158,11,0.15)';
+      ctx.fillRect(0, 0, w/2, h);
+      ctx.strokeStyle = 'rgba(245,158,11,0.3)';
+      ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h); ctx.stroke();
+      ctx.setLineDash([]);
+    } else if (i === 3) { // Galton: triangle
+      ctx.strokeStyle = 'rgba(6,182,212,0.3)';
+      for (var row = 0; row < 4; row++) {
+        for (var peg = 0; peg <= row; peg++) {
+          var px = w/2 + (peg - row/2) * 20;
+          var py = 15 + row * 22;
+          ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2); ctx.stroke();
+        }
+      }
+    } else if (i === 5) { // Sandcastle: triangle shape
+      ctx.fillStyle = 'rgba(217,119,6,0.2)';
+      ctx.beginPath(); ctx.moveTo(w/2, 15); ctx.lineTo(w/2+50, h-10); ctx.lineTo(w/2-50, h-10); ctx.closePath(); ctx.fill();
+    } else if (i === 6) { // Ice: crystal pattern
+      ctx.strokeStyle = 'rgba(59,130,246,0.3)';
+      var cx = w/2, cy = h/2;
+      for (var a = 0; a < 6; a++) {
+        var angle = a * Math.PI / 3;
+        ctx.beginPath(); ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(angle)*35, cy + Math.sin(angle)*35); ctx.stroke();
+      }
+    }
+  }
+}
+
+// ==================== EXPERIMENT ENGINE ====================
+var currentExp = null;
+var expRunning = false;
+var expAnimId = null;
+var expData = null;
+var entropyHistory = [];
+
+function openExperiment(id) {
+  for (var i = 0; i < experiments.length; i++) {
+    if (experiments[i].id === id) {
+      currentExp = experiments[i];
+      break;
+    }
+  }
+  if (!currentExp) return;
+  document.getElementById('expDetailTitle').textContent = currentExp.name;
+  document.getElementById('expDetailTag').textContent = currentExp.tag;
+  document.getElementById('expDescText').textContent = currentExp.longDesc;
+  entropyHistory = [];
+  buildControls(id);
+  initExperiment(id);
+  var detail = document.getElementById('detail');
+  detail.classList.add('active');
+  detail.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeExperiment() {
+  expRunning = false;
+  if (expAnimId) cancelAnimationFrame(expAnimId);
+  expAnimId = null;
+  currentExp = null;
+  expData = null;
+  document.getElementById('detail').classList.remove('active');
+}
+
+document.getElementById('expBack').addEventListener('click', closeExperiment);
+
+function buildControls(id) {
+  var ctrl = document.getElementById('expControls');
+  var html = '<div class="exp-btn-group">';
+  html += '<button class="exp-btn primary" id="btnStart">▶ 开始</button>';
+  html += '<button class="exp-btn" id="btnReset">↻ 重置</button>';
+  if (id === 'gas') {
+    html += '<button class="exp-btn" id="btnSpecial">⟵ 反混</button>';
+  } else if (id === 'coffee') {
+    html += '<button class="exp-btn" id="btnSpecial">🥄 搅拌</button>';
+  } else if (id === 'room') {
+    html += '<button class="exp-btn" id="btnSpecial2">🧹 整理</button>';
+  }
+  html += '</div>';
+  if (id === 'gas' || id === 'galton') {
+    html += '<div class="exp-slider"><label>粒子数量 <span id="sliderVal">150</span></label>';
+    html += '<input type="range" id="particleSlider" min="50" max="500" value="150"></div>';
+  }
+  if (id === 'ice') {
+    html += '<div class="exp-slider"><label>温度 <span id="tempVal">25°C</span></label>';
+    html += '<input type="range" id="tempSlider" min="0" max="100" value="25"></div>';
+  }
+  ctrl.innerHTML = html;
+  document.getElementById('btnStart').addEventListener('click', function() {
+    expRunning = !expRunning;
+    this.textContent = expRunning ? '⏸ 暂停' : '▶ 继续';
+    if (expRunning && !expAnimId) expLoop();
+  });
+  document.getElementById('btnReset').addEventListener('click', function() {
+    expRunning = false;
+    if (expAnimId) cancelAnimationFrame(expAnimId);
+    expAnimId = null;
+    entropyHistory = [];
+    document.getElementById('btnStart').textContent = '▶ 开始';
+    initExperiment(id);
+  });
+  var specBtn = document.getElementById('btnSpecial');
+  if (specBtn) {
+    specBtn.addEventListener('click', function() {
+      if (id === 'gas' && expData) reverseMix();
+      if (id === 'coffee' && expData) stirCoffee();
+    });
+  }
+  var specBtn2 = document.getElementById('btnSpecial2');
+  if (specBtn2) {
+    specBtn2.addEventListener('click', function() {
+      if (id === 'room' && expData) tidyRoom();
+    });
+  }
+  var slider = document.getElementById('particleSlider');
+  if (slider) {
+    slider.addEventListener('input', function() {
+      document.getElementById('sliderVal').textContent = this.value;
+    });
+  }
+  var tempSlider = document.getElementById('tempSlider');
+  if (tempSlider) {
+    tempSlider.addEventListener('input', function() {
+      document.getElementById('tempVal').textContent = this.value + '°C';
+      if (expData) expData.temperature = parseInt(this.value);
+    });
+  }
+}
+
+function updateEntropyDisplay(val) {
+  var maxE = 1;
+  var normalized = clamp(val / maxE, 0, 1);
+  document.getElementById('expEntropyVal').textContent = val.toFixed(3);
+  document.getElementById('expEntropyBar').style.width = (normalized * 100) + '%';
+}
+
+function updateChart() {
+  var cvs = document.getElementById('chartCanvas');
+  var ctx = cvs.getContext('2d');
+  var w = 300, h = 140;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#080c14';
+  ctx.fillRect(0, 0, w, h);
+  // Grid
+  ctx.strokeStyle = 'rgba(30,41,59,.4)';
+  ctx.lineWidth = 0.5;
+  for (var i = 0; i <= 4; i++) {
+    var y = 10 + (h - 20) * i / 4;
+    ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(w - 10, y); ctx.stroke();
+  }
+  if (entropyHistory.length < 2) return;
+  var maxPts = 200;
+  var data = entropyHistory.length > maxPts ? entropyHistory.slice(-maxPts) : entropyHistory;
+  var maxVal = 0;
+  for (var i = 0; i < data.length; i++) { if (data[i] > maxVal) maxVal = data[i]; }
+  maxVal = Math.max(maxVal, 0.01);
+  ctx.beginPath();
+  for (var i = 0; i < data.length; i++) {
+    var x = 10 + (w - 20) * i / (data.length - 1);
+    var y = h - 10 - (h - 20) * data[i] / maxVal;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // Fill
+  ctx.lineTo(10 + (w - 20), h - 10);
+  ctx.lineTo(10, h - 10);
+  ctx.closePath();
+  var grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, 'rgba(245,158,11,0.2)');
+  grad.addColorStop(1, 'rgba(245,158,11,0)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+
+// ==================== EXPERIMENT INITIALIZERS ====================
+function initExperiment(id) {
+  var cvs = document.getElementById('expCanvas');
+  var ctx = setupCanvas(cvs, 800, 500);
+  ctx.fillStyle = '#080c14';
+  ctx.fillRect(0, 0, 800, 500);
+  updateEntropyDisplay(0);
+  updateChart();
+  if (id === 'gas') initGas(ctx);
+  else if (id === 'coffee') initCoffee(ctx);
+  else if (id === 'ink') initInk(ctx);
+  else if (id === 'galton') initGalton(ctx);
+  else if (id === 'room') initRoom(ctx);
+  else if (id === 'sandcastle') initSandcastle(ctx);
+  else if (id === 'ice') initIce(ctx);
+}
+
+// ==================== EXP 1: GAS DIFFUSION ====================
+function initGas(ctx) {
+  var slider = document.getElementById('particleSlider');
+  var N = slider ? parseInt(slider.value) : 150;
+  expData = { particles: [], N: N, W: 800, H: 500 };
+  for (var i = 0; i < N; i++) {
+    expData.particles.push({
+      x: rand(20, 200),
+      y: rand(20, 480),
+      vx: rand(-2, 2),
+      vy: rand(-2, 2),
+      r: rand(2, 4),
+      hue: rand(20, 50)
+    });
+  }
+  drawGas(ctx);
+}
+
+function drawGas(ctx) {
+  if (!expData) return;
+  var W = expData.W, H = expData.H;
+  ctx.fillStyle = '#080c14';
+  ctx.fillRect(0, 0, W, H);
+  // Container walls
+  ctx.strokeStyle = 'rgba(245,158,11,0.3)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(10, 10, W - 20, H - 20);
+  // Middle line (initial divider, faded)
+  ctx.strokeStyle = 'rgba(245,158,11,0.08)';
+  ctx.setLineDash([6, 6]);
+  ctx.beginPath(); ctx.moveTo(W / 2, 10); ctx.lineTo(W / 2, H - 10); ctx.stroke();
+  ctx.setLineDash([]);
+  // Particles
+  for (var i = 0; i < expData.particles.length; i++) {
+    var p = expData.particles[i];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'hsl(' + p.hue + ',90%,60%)';
+    ctx.fill();
+  }
+}
+
+function calcGasEntropy() {
+  if (!expData || expData.particles.length === 0) return 0;
+  // Divide container into grid cells, count particles per cell
+  var cols = 10, rows = 6;
+  var grid = new Array(cols * rows);
+  for (var i = 0; i < grid.length; i++) grid[i] = 0;
+  var cw = (expData.W - 20) / cols, ch = (expData.H - 20) / rows;
+  for (var i = 0; i < expData.particles.length; i++) {
+    var p = expData.particles[i];
+    var cx = clamp(Math.floor((p.x - 10) / cw), 0, cols - 1);
+    var cy = clamp(Math.floor((p.y - 10) / ch), 0, rows - 1);
+    grid[cy * cols + cx]++;
+  }
+  // Shannon entropy of distribution
+  var N = expData.particles.length;
+  var H = 0;
+  for (var i = 0; i < grid.length; i++) {
+    if (grid[i] > 0) {
+      var p = grid[i] / N;
+      H -= p * Math.log2(p);
+    }
+  }
+  return H / Math.log2(cols * rows); // Normalize to 0-1
+}
+
+function reverseMix() {
+  if (!expData) return;
+  for (var i = 0; i < expData.particles.length; i++) {
+    var p = expData.particles[i];
+    p.x = rand(20, 200);
+    p.y = rand(20, 480);
+    p.vx = rand(-0.5, 0.5);
+    p.vy = rand(-0.5, 0.5);
+  }
+}
+
+function tickGas() {
+  if (!expData) return;
+  var W = expData.W, H = expData.H;
+  for (var i = 0; i < expData.particles.length; i++) {
+    var p = expData.particles[i];
+    p.vx += rand(-0.3, 0.3);
+    p.vy += rand(-0.3, 0.3);
+    p.vx = clamp(p.vx, -3, 3);
+    p.vy = clamp(p.vy, -3, 3);
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 10 + p.r) { p.x = 10 + p.r; p.vx = Math.abs(p.vx); }
+    if (p.x > W - 10 - p.r) { p.x = W - 10 - p.r; p.vx = -Math.abs(p.vx); }
+    if (p.y < 10 + p.r) { p.y = 10 + p.r; p.vy = Math.abs(p.vy); }
+    if (p.y > H - 10 - p.r) { p.y = H - 10 - p.r; p.vy = -Math.abs(p.vy); }
+  }
+}
+
+// ==================== EXP 2: COFFEE & MILK ====================
+function initCoffee(ctx) {
+  expData = { milk: [], coffeeColor: 'rgba(101,67,33,', stirred: false, stirAngle: 0, W: 800, H: 500 };
+  // Cup dimensions
+  expData.cx = 400; expData.cy = 280; expData.cupR = 200;
+  // Coffee base
+  for (var i = 0; i < 500; i++) {
+    var angle = rand(0, Math.PI * 2);
+    var r = Math.sqrt(rand(0, 1)) * 190;
+    expData.milk.push({
+      x: expData.cx + r * Math.cos(angle),
+      y: expData.cy + r * Math.sin(angle),
+      baseX: expData.cx, baseY: expData.cy,
+      opacity: 0, // Will become milk drops
+      isMilk: false
+    });
+  }
+  // Milk drops at center
+  for (var i = 0; i < 80; i++) {
+    var angle = rand(0, Math.PI * 2);
+    var r = rand(0, 15);
+    expData.milk.push({
+      x: expData.cx + r * Math.cos(angle),
+      y: expData.cy - 80 + r * Math.sin(angle),
+      baseX: expData.cx, baseY: expData.cy - 80,
+      opacity: 1,
+      isMilk: true,
+      r: rand(2, 5)
+    });
+  }
+  drawCoffee(ctx);
+}
+
+function drawCoffee(ctx) {
+  if (!expData) return;
+  var W = expData.W, H = expData.H;
+  ctx.fillStyle = '#080c14';
+  ctx.fillRect(0, 0, W, H);
+  // Cup body
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(expData.cx, expData.cy + 160, 210, 40, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(30,20,10,0.8)';
+  ctx.fill();
+  // Coffee surface
+  ctx.beginPath();
+  ctx.ellipse(expData.cx, expData.cy, 200, 180, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#3d2817';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(245,158,11,0.15)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // Clip to cup
+  ctx.beginPath();
+  ctx.ellipse(expData.cx, expData.cy, 198, 178, 0, 0, Math.PI * 2);
+  ctx.clip();
+  // Draw milk
+  for (var i = 0; i < expData.milk.length; i++) {
+    var m = expData.milk[i];
+    if (!m.isMilk) continue;
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,253,240,' + m.opacity + ')';
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function calcCoffeeEntropy() {
+  if (!expData) return 0;
+  var milkParticles = [];
+  for (var i = 0; i < expData.milk.length; i++) {
+    if (expData.milk[i].isMilk) milkParticles.push(expData.milk[i]);
+  }
+  if (milkParticles.length === 0) return 0;
+  // Calculate spread of milk from drop point
+  var variance = 0;
+  for (var i = 0; i < milkParticles.length; i++) {
+    var dx = milkParticles[i].x - expData.cx;
+    var dy = milkParticles[i].y - expData.cy;
+    variance += Math.sqrt(dx * dx + dy * dy);
+  }
+  variance /= milkParticles.length;
+  return clamp(variance / 150, 0, 1);
+}
+
+function stirCoffee() {
+  if (!expData) return;
+  expData.stirred = true;
+  expData.stirAngle += Math.PI * 4;
+}
+
+function tickCoffee() {
+  if (!expData) return;
+  for (var i = 0; i < expData.milk.length; i++) {
+    var m = expData.milk[i];
+    if (!m.isMilk) continue;
+    // Brownian motion
+    m.x += rand(-1.5, 1.5);
+    m.y += rand(-1.5, 1.5);
+    if (expData.stirred) {
+      // Swirl
+      var dx = m.x - expData.cx;
+      var dy = m.y - expData.cy;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 1) {
+        var angle = Math.atan2(dy, dx) + 0.08;
+        m.x = expData.cx + dist * Math.cos(angle);
+        m.y = expData.cy + dist * Math.sin(angle);
+        m.x += rand(-3, 3);
+        m.y += rand(-3, 3);
+      }
+    }
+    // Keep in cup
+    var dx = m.x - expData.cx;
+    var dy = m.y - expData.cy;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 180) {
+      m.x = expData.cx + dx / dist * 180;
+      m.y = expData.cy + dy / dist * 180;
+    }
+    m.r = lerp(m.r, 3, 0.001); // Milk spreads
+  }
+  if (expData.stirred) {
+    expData.stirAngle *= 0.98;
+    if (Math.abs(expData.stirAngle) < 0.01) expData.stirred = false;
+  }
+}
+
+// ==================== EXP 3: INK IN WATER ====================
+function initInk(ctx) {
+  expData = { particles: [], W: 800, H: 500 };
+  // Ink drop at top center
+  for (var i = 0; i < 300; i++) {
+    var angle = rand(0, Math.PI * 2);
+    var r = Math.sqrt(rand(0, 1)) * 20;
+    expData.particles.push({
+      x: 400 + r * Math.cos(angle),
+      y: 60 + r * Math.sin(angle),
+      vx: rand(-0.5, 0.5),
+      vy: rand(0.5, 2),
+      r: rand(1.5, 4),
+      opacity: rand(0.6, 1),
+      hue: rand(240, 280) // Blue-purple ink
+    });
+  }
+  drawInk(ctx);
+}
+
+function drawInk(ctx) {
+  if (!expData) return;
+  ctx.fillStyle = '#0a1520';
+  ctx.fillRect(0, 0, 800, 500);
+  // Water background gradient
+  var grad = ctx.createLinearGradient(0, 0, 0, 500);
+  grad.addColorStop(0, 'rgba(10,30,50,0.5)');
+  grad.addColorStop(1, 'rgba(5,15,30,0.5)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 800, 500);
+  // Ink particles
+  for (var i = 0; i < expData.particles.length; i++) {
+    var p = expData.particles[i];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'hsla(' + p.hue + ',70%,50%,' + p.opacity + ')';
+    ctx.fill();
+  }
+  // Water container
+  ctx.strokeStyle = 'rgba(6,182,212,0.2)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 20, 760, 460);
+}
+
+function calcInkEntropy() {
+  if (!expData || expData.particles.length === 0) return 0;
+  var cx = 0, cy = 0;
+  for (var i = 0; i < expData.particles.length; i++) { cx += expData.particles[i].x; cy += expData.particles[i].y; }
+  cx /= expData.particles.length; cy /= expData.particles.length;
+  var variance = 0;
+  for (var i = 0; i < expData.particles.length; i++) {
+    var dx = expData.particles[i].x - cx;
+    var dy = expData.particles[i].y - cy;
+    variance += dx * dx + dy * dy;
+  }
+  variance /= expData.particles.length;
+  return clamp(variance / 60000, 0, 1);
+}
+
+function tickInk() {
+  if (!expData) return;
+  for (var i = 0; i < expData.particles.length; i++) {
+    var p = expData.particles[i];
+    // Brownian motion with gravity
+    p.vx += rand(-0.15, 0.15);
+    p.vy += rand(-0.1, 0.15);
+    p.vx *= 0.98;
+    p.vy *= 0.98;
+    // Slight gravity
+    p.vy += 0.02;
+    p.x += p.vx;
+    p.y += p.vy;
+    // Bounds
+    if (p.x < 25) { p.x = 25; p.vx *= -0.5; }
+    if (p.x > 775) { p.x = 775; p.vx *= -0.5; }
+    if (p.y < 25) { p.y = 25; p.vy *= -0.5; }
+    if (p.y > 475) { p.y = 475; p.vy *= -0.5; }
+    // Fade slightly over time
+    p.opacity = Math.max(0.15, p.opacity - 0.0002);
+  }
+}
+
+// ==================== EXP 4: GALTON BOARD ====================
+function initGalton(ctx) {
+  var slider = document.getElementById('particleSlider');
+  var maxN = slider ? parseInt(slider.value) : 150;
+  expData = {
+    balls: [], settled: [], pegs: [], bins: [],
+    W: 800, H: 500, maxBalls: maxN, ballQueue: maxN,
+    rows: 12, binCount: 13, spawnTimer: 0
+  };
+  // Create pegs
+  for (var row = 0; row < expData.rows; row++) {
+    for (var peg = 0; peg <= row; peg++) {
+      var px = 400 + (peg - row / 2) * 36;
+      var py = 60 + row * 32;
+      expData.pegs.push({ x: px, y: py });
+    }
+  }
+  // Bins
+  for (var i = 0; i < expData.binCount; i++) {
+    expData.bins.push(0);
+  }
+  drawGalton(ctx);
+}
+
+function spawnGaltonBall() {
+  if (!expData || expData.ballQueue <= 0) return;
+  expData.ballQueue--;
+  expData.balls.push({
+    x: 400 + rand(-3, 3),
+    y: 30,
+    vy: 0,
+    vx: 0,
+    r: 4,
+    active: true,
+    color: 'hsl(' + rand(20, 50) + ',85%,55%)'
+  });
+}
+
+function tickGalton() {
+  if (!expData) return;
+  expData.spawnTimer++;
+  if (expData.spawnTimer >= 8 && expData.ballQueue > 0) {
+    spawnGaltonBall();
+    expData.spawnTimer = 0;
+  }
+  for (var i = expData.balls.length - 1; i >= 0; i--) {
+    var b = expData.balls[i];
+    if (!b.active) continue;
+    b.vy += 0.25; // gravity
+    b.x += b.vx;
+    b.y += b.vy;
+    b.vx *= 0.99;
+    // Check peg collisions
+    for (var j = 0; j < expData.pegs.length; j++) {
+      var peg = expData.pegs[j];
+      var dx = b.x - peg.x;
+      var dy = b.y - peg.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 10) {
+        b.vx = dx > 0 ? 1.5 : -1.5;
+        b.vy = -1;
+        b.y = peg.y - 10;
+      }
+    }
+    // Bottom
+    if (b.y > 460) {
+      b.active = false;
+      var binIdx = clamp(Math.round((b.x - 400) / 36 + expData.binCount / 2), 0, expData.binCount - 1);
+      expData.bins[binIdx]++;
+      expData.settled.push({ x: b.x, y: 470 - expData.bins[binIdx] * 5, r: b.r, color: b.color, binIdx: binIdx });
+    }
+  }
+}
+
+function drawGalton(ctx) {
+  if (!expData) return;
+  ctx.fillStyle = '#080c14';
+  ctx.fillRect(0, 0, 800, 500);
+  // Funnel
+  ctx.strokeStyle = 'rgba(245,158,11,0.2)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(380, 10); ctx.lineTo(395, 40);
+  ctx.moveTo(420, 10); ctx.lineTo(405, 40);
+  ctx.stroke();
+  // Pegs
+  for (var i = 0; i < expData.pegs.length; i++) {
+    var peg = expData.pegs[i];
+    ctx.beginPath();
+    ctx.arc(peg.x, peg.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(148,163,184,0.5)';
+    ctx.fill();
+  }
+  // Settled balls
+  for (var i = 0; i < expData.settled.length; i++) {
+    var b = expData.settled[i];
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.fillStyle = b.color;
+    ctx.fill();
+  }
+  // Active balls
+  for (var i = 0; i < expData.balls.length; i++) {
+    var b = expData.balls[i];
+    if (!b.active) continue;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.fillStyle = b.color;
+    ctx.fill();
+  }
+  // Bin labels
+  ctx.fillStyle = 'rgba(148,163,184,0.3)';
+  ctx.font = '10px "IBM Plex Mono"';
+  for (var i = 0; i < expData.binCount; i++) {
+    var bx = 400 + (i - expData.binCount / 2) * 36;
+    ctx.fillText(expData.bins[i], bx - 4, 498);
+  }
+}
+
+function calcGaltonEntropy() {
+  if (!expData) return 0;
+  var total = 0;
+  for (var i = 0; i < expData.bins.length; i++) total += expData.bins[i];
+  if (total === 0) return 0;
+  var H = 0;
+  for (var i = 0; i < expData.bins.length; i++) {
+    if (expData.bins[i] > 0) {
+      var p = expData.bins[i] / total;
+      H -= p * Math.log2(p);
+    }
+  }
+  return H / Math.log2(expData.binCount);
+}
+
+// ==================== EXP 5: ROOM MESSINESS ====================
+function initRoom(ctx) {
+  expData = { items: [], W: 800, H: 500, entropy: 0, tidying: false };
+  var itemTypes = [
+    { emoji: '📚', w: 30, h: 20 }, { emoji: '👕', w: 25, h: 25 },
+    { emoji: '🎮', w: 22, h: 22 }, { emoji: '📝', w: 18, h: 24 },
+    { emoji: '🧸', w: 24, h: 24 }, { emoji: '📱', w: 16, h: 26 },
+    { emoji: '☕', w: 20, h: 20 }, { emoji: '🧦', w: 20, h: 22 },
+    { emoji: '🎒', w: 28, h: 28 }, { emoji: '🪑', w: 26, h: 28 }
+  ];
+  // Shelf positions (ordered)
+  var shelfX = [80, 120, 160, 200, 240, 280, 320, 360, 400, 440];
+  var shelfY = [150, 190, 230, 270, 310, 350, 390, 150, 190, 230];
+  for (var i = 0; i < 10; i++) {
+    var t = itemTypes[i % itemTypes.length];
+    expData.items.push({
+      type: i,
+      emoji: t.emoji,
+      x: shelfX[i],
+      y: shelfY[i],
+      homeX: shelfX[i],
+      homeY: shelfY[i],
+      vx: 0, vy: 0,
+      rotation: 0,
+      scattered: false
+    });
+  }
+  drawRoom(ctx);
+}
+
+function drawRoom(ctx) {
+  if (!expData) return;
+  ctx.fillStyle = '#080c14';
+  ctx.fillRect(0, 0, 800, 500);
+  // Room floor
+  ctx.fillStyle = 'rgba(30,41,59,0.3)';
+  ctx.fillRect(50, 50, 700, 400);
+  // Grid lines
+  ctx.strokeStyle = 'rgba(30,41,59,0.2)';
+  ctx.lineWidth = 0.5;
+  for (var x = 50; x <= 750; x += 50) {
+    ctx.beginPath(); ctx.moveTo(x, 50); ctx.lineTo(x, 450); ctx.stroke();
+  }
+  for (var y = 50; y <= 450; y += 50) {
+    ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(750, y); ctx.stroke();
+  }
+  // Shelf area
+  ctx.strokeStyle = 'rgba(6,182,212,0.15)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(60, 140, 400, 240);
+  ctx.fillStyle = 'rgba(6,182,212,0.05)';
+  ctx.fillRect(60, 140, 400, 240);
+  ctx.fillStyle = 'rgba(6,182,212,0.3)';
+  ctx.font = '11px "IBM Plex Mono"';
+  ctx.fillText('SHELF (HOME)', 70, 155);
+  // Items
+  ctx.font = '20px serif';
+  for (var i = 0; i < expData.items.length; i++) {
+    var item = expData.items[i];
+    ctx.save();
+    ctx.translate(item.x, item.y);
+    ctx.rotate(item.rotation);
+    ctx.fillText(item.emoji, -10, 8);
+    ctx.restore();
+  }
+}
+
+function scatterRoom() {
+  if (!expData) return;
+  // Pick a random unscattered item
+  var candidates = [];
+  for (var i = 0; i < expData.items.length; i++) {
+    if (!expData.items[i].scattered) candidates.push(i);
+  }
+  if (candidates.length === 0) return;
+  var idx = candidates[Math.floor(Math.random() * candidates.length)];
+  var item = expData.items[idx];
+  item.scattered = true;
+  item.vx = rand(-8, 8);
+  item.vy = rand(-8, 8);
+  item.rotation = rand(-Math.PI, Math.PI);
+}
+
+function tidyRoom() {
+  if (!expData) return;
+  expData.tidying = true;
+  for (var i = 0; i < expData.items.length; i++) {
+    var item = expData.items[i];
+    item.scattered = false;
+  }
+}
+
+function tickRoom() {
+  if (!expData) return;
+  // Auto scatter
+  if (Math.random() < 0.02 && expRunning) scatterRoom();
+  for (var i = 0; i < expData.items.length; i++) {
+    var item = expData.items[i];
+    if (expData.tidying) {
+      // Move toward home
+      item.vx = (item.homeX - item.x) * 0.05;
+      item.vy = (item.homeY - item.y) * 0.05;
+      item.rotation *= 0.95;
+      item.x += item.vx;
+      item.y += item.vy;
+    } else if (item.scattered) {
+      item.vy += 0.15; // gravity
+      item.x += item.vx;
+      item.y += item.vy;
+      item.vx *= 0.97;
+      item.vy *= 0.97;
+      // Bounds
+      if (item.x < 55) { item.x = 55; item.vx = Math.abs(item.vx) * 0.5; }
+      if (item.x > 745) { item.x = 745; item.vx = -Math.abs(item.vx) * 0.5; }
+      if (item.y < 55) { item.y = 55; item.vy = Math.abs(item.vy) * 0.5; }
+      if (item.y > 445) { item.y = 445; item.vy = -Math.abs(item.vy) * 0.3; }
+    }
+  }
+  // Check if tidying is done
+  if (expData.tidying) {
+    var allHome = true;
+    for (var i = 0; i < expData.items.length; i++) {
+      var dx = expData.items[i].x - expData.items[i].homeX;
+      var dy = expData.items[i].y - expData.items[i].homeY;
+      if (dx * dx + dy * dy > 4) { allHome = false; break; }
+    }
+    if (allHome) expData.tidying = false;
+  }
+}
+
+function calcRoomEntropy() {
+  if (!expData) return 0;
+  var scattered = 0;
+  for (var i = 0; i < expData.items.length; i++) {
+    if (expData.items[i].scattered) scattered++;
+  }
+  return scattered / expData.items.length;
+}
+
+// ==================== EXP 6: SANDCASTLE ====================
+function initSandcastle(ctx) {
+  expData = { grains: [], fallen: [], collapsed: false, W: 800, H: 500, groundY: 420 };
+  // Build sandcastle shape (triangle + towers)
+  var positions = [];
+  // Main body - triangle
+  for (var row = 0; row < 20; row++) {
+    var width = 3 + row * 2;
+    for (var col = 0; col < width; col++) {
+      var x = 400 - (width / 2) * 8 + col * 8;
+      var y = expData.groundY - row * 12;
+      positions.push({ x: x, y: y, homeX: x, homeY: y, settled: false, r: rand(3, 5) });
+    }
+  }
+  // Left tower
+  for (var row = 0; row < 8; row++) {
+    for (var col = 0; col < 3; col++) {
+      var x = 340 - col * 8;
+      var y = expData.groundY - 20 * 12 - row * 12;
+      positions.push({ x: x, y: y, homeX: x, homeY: y, settled: false, r: rand(3, 5) });
+    }
+  }
+  // Right tower
+  for (var row = 0; row < 8; row++) {
+    for (var col = 0; col < 3; col++) {
+      var x = 460 + col * 8;
+      var y = expData.groundY - 20 * 12 - row * 12;
+      positions.push({ x: x, y: y, homeX: x, homeY: y, settled: false, r: rand(3, 5) });
+    }
+  }
+  expData.grains = positions;
+  drawSandcastle(ctx);
+}
+
+function collapseSandcastle() {
+  if (!expData || expData.collapsed) return;
+  expData.collapsed = true;
+  // Remove support from bottom and let physics take over
+  for (var i = 0; i < expData.grains.length; i++) {
+    var g = expData.grains[i];
+    g.vy = rand(0, 2);
+    g.vx = rand(-1, 1);
+    g.settled = false;
+  }
+}
+
+function tickSandcastle() {
+  if (!expData) return;
+  if (!expData.collapsed) return;
+  for (var i = 0; i < expData.grains.length; i++) {
+    var g = expData.grains[i];
+    if (g.settled) continue;
+    g.vy += 0.3; // gravity
+    g.vx += rand(-0.1, 0.1);
+    g.x += g.vx;
+    g.y += g.vy;
+    // Ground collision
+    if (g.y >= expData.groundY) {
+      g.y = expData.groundY;
+      g.vy *= -0.2;
+      g.vx *= 0.8;
+      if (Math.abs(g.vy) < 0.5) {
+        g.settled = true;
+        g.vy = 0;
+        g.vx = 0;
+      }
+    }
+    // Side bounds
+    if (g.x < 100) { g.x = 100; g.vx *= -0.5; }
+    if (g.x > 700) { g.x = 700; g.vx *= -0.5; }
+  }
+}
+
+function drawSandcastle(ctx) {
+  if (!expData) return;
+  ctx.fillStyle = '#080c14';
+  ctx.fillRect(0, 0, 800, 500);
+  // Ground
+  ctx.fillStyle = 'rgba(217,119,6,0.15)';
+  ctx.fillRect(100, expData.groundY, 600, 60);
+  ctx.strokeStyle = 'rgba(217,119,6,0.3)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(100, expData.groundY);
+  ctx.lineTo(700, expData.groundY);
+  ctx.stroke();
+  // Grains
+  for (var i = 0; i < expData.grains.length; i++) {
+    var g = expData.grains[i];
+    ctx.beginPath();
+    ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
+    var brightness = 50 + (g.homeY - g.y) * 0.3;
+    ctx.fillStyle = 'hsl(35,70%,' + clamp(brightness, 40, 70) + '%)';
+    ctx.fill();
+  }
+}
+
+function calcSandcastleEntropy() {
+  if (!expData) return 0;
+  if (!expData.collapsed) return 0;
+  var totalDisplacement = 0;
+  for (var i = 0; i < expData.grains.length; i++) {
+    var g = expData.grains[i];
+    var dx = g.x - g.homeX;
+    var dy = g.y - g.homeY;
+    totalDisplacement += Math.sqrt(dx * dx + dy * dy);
+  }
+  totalDisplacement /= expData.grains.length;
+  return clamp(totalDisplacement / 150, 0, 1);
+}
+
+// ==================== EXP 7: ICE MELTING ====================
+function initIce(ctx) {
+  var tempSlider = document.getElementById('tempSlider');
+  var temp = tempSlider ? parseInt(tempSlider.value) : 25;
+  expData = {
+    molecules: [], W: 800, H: 500,
+    temperature: temp, iceRect: { x: 250, y: 200, w: 300, h: 200 },
+    meltProgress: 0
+  };
+  // Create ice crystal lattice
+  var startX = 270, startY = 220;
+  var cols = 20, rows = 12;
+  for (var row = 0; row < rows; row++) {
+    for (var col = 0; col < cols; col++) {
+      expData.molecules.push({
+        x: startX + col * 14,
+        y: startY + row * 14,
+        homeX: startX + col * 14,
+        homeY: startY + row * 14,
+        vx: 0, vy: 0,
+        frozen: true,
+        r: 4,
+        bonds: []
+      });
+    }
+  }
+  drawIce(ctx);
+}
+
+function tickIce() {
+  if (!expData) return;
+  var temp = expData.temperature;
+  var meltRate = temp / 1000;
+  for (var i = 0; i < expData.molecules.length; i++) {
+    var m = expData.molecules[i];
+    if (m.frozen) {
+      // Check if should melt
+      if (Math.random() < meltRate * (1 + (m.y - 200) / 200)) {
+        m.frozen = false;
+        m.vx = rand(-1, 1) * temp / 50;
+        m.vy = rand(0.5, 2) * temp / 50;
+      } else {
+        // Vibrate in place
+        m.x = m.homeX + rand(-0.5, 0.5) * temp / 30;
+        m.y = m.homeY + rand(-0.5, 0.5) * temp / 30;
+      }
+    } else {
+      // Free molecule - random walk
+      m.vx += rand(-0.2, 0.2) * temp / 40;
+      m.vy += rand(-0.15, 0.2) * temp / 40;
+      m.vy += 0.05; // slight gravity
+      m.vx *= 0.98;
+      m.vy *= 0.98;
+      m.x += m.vx;
+      m.y += m.vy;
+      // Bounds
+      if (m.x < 30) { m.x = 30; m.vx *= -0.5; }
+      if (m.x > 770) { m.x = 770; m.vx *= -0.5; }
+      if (m.y < 100) { m.y = 100; m.vy *= -0.5; }
+      if (m.y > 460) { m.y = 460; m.vy *= -0.3; }
+    }
+  }
+}
+
+function drawIce(ctx) {
+  if (!expData) return;
+  ctx.fillStyle = '#080c14';
+  ctx.fillRect(0, 0, 800, 500);
+  // Table surface
+  ctx.fillStyle = 'rgba(30,41,59,0.3)';
+  ctx.fillRect(100, 440, 600, 40);
+  ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(100, 440); ctx.lineTo(700, 440); ctx.stroke();
+  // Temperature display
+  ctx.fillStyle = 'rgba(245,158,11,0.6)';
+  ctx.font = '14px "IBM Plex Mono"';
+  ctx.fillText('T = ' + expData.temperature + '°C', 30, 30);
+  // Draw bonds for frozen molecules
+  ctx.strokeStyle = 'rgba(96,165,250,0.15)';
+  ctx.lineWidth = 1;
+  for (var i = 0; i < expData.molecules.length; i++) {
+    var m = expData.molecules[i];
+    if (!m.frozen) continue;
+    // Draw bonds to neighbors
+    for (var j = i + 1; j < expData.molecules.length; j++) {
+      var n = expData.molecules[j];
+      if (!n.frozen) continue;
+      var dx = m.x - n.x;
+      var dy = m.y - n.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 18) {
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y);
+        ctx.lineTo(n.x, n.y);
+        ctx.stroke();
+      }
+    }
+  }
+  // Molecules
+  for (var i = 0; i < expData.molecules.length; i++) {
+    var m = expData.molecules[i];
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+    if (m.frozen) {
+      ctx.fillStyle = 'rgba(96,165,250,0.8)';
+    } else {
+      ctx.fillStyle = 'rgba(59,130,246,0.5)';
+    }
+    ctx.fill();
+  }
+}
+
+function calcIceEntropy() {
+  if (!expData) return 0;
+  var melted = 0;
+  for (var i = 0; i < expData.molecules.length; i++) {
+    if (!expData.molecules[i].frozen) melted++;
+  }
+  return melted / expData.molecules.length;
+}
+
+// ==================== MAIN ANIMATION LOOP ====================
+var frameCount = 0;
+
+function expLoop() {
+  if (!currentExp || !expRunning) { expAnimId = null; return; }
+  var cvs = document.getElementById('expCanvas');
+  var ctx = cvs.getContext('2d');
+  ctx.save();
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  var id = currentExp.id;
+  if (id === 'gas') { tickGas(); drawGas(ctx); }
+  else if (id === 'coffee') { tickCoffee(); drawCoffee(ctx); }
+  else if (id === 'ink') { tickInk(); drawInk(ctx); }
+  else if (id === 'galton') { tickGalton(); drawGalton(ctx); }
+  else if (id === 'room') { tickRoom(); drawRoom(ctx); }
+  else if (id === 'sandcastle') {
+    // Auto-collapse after 2 seconds
+    if (!expData.collapsed && frameCount > 120) collapseSandcastle();
+    tickSandcastle(); drawSandcastle(ctx);
+  }
+  else if (id === 'ice') { tickIce(); drawIce(ctx); }
+  ctx.restore();
+  // Calculate entropy
+  var entropy = 0;
+  if (id === 'gas') entropy = calcGasEntropy();
+  else if (id === 'coffee') entropy = calcCoffeeEntropy();
+  else if (id === 'ink') entropy = calcInkEntropy();
+  else if (id === 'galton') entropy = calcGaltonEntropy();
+  else if (id === 'room') entropy = calcRoomEntropy();
+  else if (id === 'sandcastle') entropy = calcSandcastleEntropy();
+  else if (id === 'ice') entropy = calcIceEntropy();
+  updateEntropyDisplay(entropy);
+  // Record entropy history
+  frameCount++;
+  if (frameCount % 3 === 0) {
+    entropyHistory.push(entropy);
+    if (entropyHistory.length > 200) entropyHistory.shift();
+    updateChart();
+  }
+  expAnimId = requestAnimationFrame(expLoop);
+}
+</script>
+</body>
+</html>
