@@ -1,92 +1,1262 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Prompt Generator - AI视频提示词生成器</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="storyboard.css">
+  <link rel="icon" type="image/svg+xml" href="../../icons/favicon.svg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Prompt Gen — AI视频提示词生成器</title>
+<meta property="og:title" content="Video Prompt Gen — AI视频提示词生成器">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Source+Code+Pro:wght@400;500;600&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+:root{
+  --paper:#faf6f0;
+  --paper-dark:#f0ebe3;
+  --navy:#1a2744;
+  --navy-mid:#2a3d66;
+  --navy-light:#4a5f85;
+  --amber:#d4770b;
+  --amber-light:#e8943a;
+  --amber-pale:#fdf3e1;
+  --amber-muted:#b8906a;
+  --cream:#e8dcc8;
+  --warm-gray:#a09484;
+  --line:#ddd3c4;
+  --line-dark:#c4b8a4;
+  --red:#c0392b;
+}
+
+body{
+  background:var(--paper);
+  color:var(--navy);
+  font-family:'Newsreader',Georgia,serif;
+  font-size:16px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+/* Subtle paper texture */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  opacity:0.3;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:256px 256px;
+}
+
+a{color:var(--amber);text-decoration:none}
+a:hover{color:var(--navy)}
+
+/* ── Film strip edge (left) ── */
+body::after{
+  content:'';position:fixed;left:0;top:0;bottom:0;width:22px;z-index:998;pointer-events:none;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 6px,
+      var(--paper-dark) 6px, var(--paper-dark) 14px,
+      transparent 14px, transparent 20px
+    );
+  border-right:2px solid var(--line);
+  opacity:0.5;
+}
+
+/* ── Nav ── */
+.nav{
+  position:fixed;top:0;left:22px;right:0;z-index:100;
+  padding:0 32px;
+  height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--paper);
+  border-bottom:2px solid var(--navy);
+}
+
+.nav-brand{
+  display:flex;align-items:center;gap:10px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.2rem;letter-spacing:0.12em;
+  color:var(--navy);
+}
+
+/* CSS Clapperboard */
+.clap{
+  width:22px;height:16px;position:relative;
+  background:var(--navy);border-radius:2px;
+}
+.clap::before{
+  content:'';position:absolute;top:-7px;left:-1px;right:-1px;height:9px;
+  background:
+    repeating-linear-gradient(90deg,var(--navy) 0px,var(--navy) 4px,var(--amber) 4px,var(--amber) 7px);
+  transform:skewX(-15deg);border-radius:1px;
+}
+.clap::after{
+  content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
+  width:6px;height:1.5px;background:var(--amber);
+}
+
+.nav-links{
+  display:flex;gap:6px;
+  font-family:'Source Code Pro',monospace;
+  font-size:0.68rem;letter-spacing:0.08em;
+  color:var(--warm-gray);
+}
+.nav-links a{color:var(--warm-gray);padding:4px 8px;border:1px solid transparent;border-radius:2px;transition:all 0.2s}
+.nav-links a:hover{color:var(--navy);border-color:var(--navy)}
+
+/* ── Hero ── */
+.hero{
+  margin-left:22px;
+  padding:80px 40px 40px;
+  position:relative;z-index:1;
+  text-align:center;
+  border-bottom:2px solid var(--line);
+  background:
+    linear-gradient(180deg,var(--amber-pale) 0%,var(--paper) 100%);
+}
+
+.hero-meta{
+  font-family:'Source Code Pro',monospace;
+  font-size:0.65rem;letter-spacing:0.25em;
+  text-transform:uppercase;
+  color:var(--amber);
+  margin-bottom:12px;
+  opacity:0.8;
+}
+
+.hero h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3.5rem,10vw,8rem);
+  letter-spacing:0.08em;
+  line-height:0.9;
+  color:var(--navy);
+  margin-bottom:8px;
+}
+
+.hero h1 span{
+  color:var(--amber);
+}
+
+.hero-sub{
+  font-family:'Source Code Pro',monospace;
+  font-size:0.72rem;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:var(--navy-light);
+  margin-top:16px;
+}
+
+/* Camera settings stats */
+.hero-stats{
+  display:flex;justify-content:center;gap:28px;
+  margin-top:28px;flex-wrap:wrap;
+}
+
+.hero-stat{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-family:'Source Code Pro',monospace;
+}
+.hero-stat-val{
+  font-size:1.5rem;font-weight:600;
+  color:var(--navy);letter-spacing:0.05em;
+}
+.hero-stat-label{
+  font-size:0.55rem;letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--warm-gray);
+}
+
+/* Decorative line with sprocket holes */
+.hero-rule{
+  display:flex;align-items:center;justify-content:center;
+  gap:8px;margin-top:36px;color:var(--line-dark);
+}
+.hero-rule::before,.hero-rule::after{
+  content:'';flex:1;max-width:120px;height:1px;background:var(--line-dark);
+}
+.hero-rule span{
+  display:flex;gap:6px;
+}
+.hero-rule i{
+  width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line-dark);
+}
+
+/* ── Main Layout ── */
+.layout{
+  position:relative;z-index:1;
+  margin-left:22px;
+  max-width:1300px;
+  margin-left:auto;margin-right:auto;padding-left:22px;
+  padding:40px 32px 60px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:28px;
+  align-items:start;
+}
+
+/* ── Panel (Film Director's Notepad Style) ── */
+.panel{
+  background:var(--paper);
+  border:1.5px solid var(--navy);
+  overflow:hidden;
+  position:relative;
+}
+
+/* Corner marks */
+.panel::before,.panel::after{
+  content:'';position:absolute;width:10px;height:10px;
+  border-color:var(--amber);border-style:solid;
+}
+.panel::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.panel::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+
+.panel-hdr{
+  padding:12px 18px;
+  border-bottom:1.5px solid var(--navy);
+  display:flex;align-items:center;gap:10px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:0.95rem;letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:var(--navy);
+  background:var(--amber-pale);
+}
+
+.panel-hdr-icon{
+  color:var(--amber);font-size:1rem;
+}
+
+.panel-body{
+  padding:16px 18px;
+}
+
+/* ── Spec Sheet Styling ── */
+.opt-group{margin-bottom:16px}
+.opt-group:last-child{margin-bottom:0}
+
+.opt-label{
+  font-family:'Source Code Pro',monospace;
+  font-size:0.6rem;
+  color:var(--amber);
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  margin-bottom:10px;
+  padding-bottom:6px;
+  border-bottom:1px dashed var(--line);
+}
+
+/* Tags - improved spacing */
+.tag-row{
+  display:flex;flex-wrap:wrap;gap:8px 6px;
+}
+
+.tag{
+  padding:7px 14px;
+  font-family:'Source Code Pro',monospace;
+  font-size:0.65rem;
+  letter-spacing:0.04em;
+  border:1px solid var(--line);
+  background:var(--paper);
+  color:var(--navy-light);
+  cursor:pointer;
+  transition:all 0.15s;
+  user-select:none;
+  min-height:32px;
+  display:inline-flex;
+  align-items:center;
+}
+
+.tag:hover{
+  border-color:var(--navy);
+  color:var(--navy);
+  background:var(--amber-pale);
+}
+
+.tag.selected{
+  background:var(--navy);
+  border-color:var(--navy);
+  color:var(--amber-pale);
+  font-weight:600;
+  animation:tagBounce 0.3s ease;
+}
+
+@keyframes tagBounce{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.12)}
+  70%{transform:scale(0.97)}
+  100%{transform:scale(1)}
+}
+
+/* Text inputs */
+.text-input{
+  width:100%;
+  padding:10px 14px;
+  background:var(--paper);
+  border:1.5px solid var(--line);
+  color:var(--navy);
+  font-family:'Newsreader',serif;
+  font-size:0.88rem;
+  outline:none;
+  resize:vertical;
+  transition:border-color 0.2s;
+}
+.text-input:focus{border-color:var(--amber)}
+.text-input::placeholder{color:var(--warm-gray);font-style:italic}
+
+textarea.text-input{min-height:56px}
+
+/* ── Output Area ── */
+.output-area{
+  position:sticky;top:64px;
+  display:flex;flex-direction:column;
+  gap:20px;
+}
+
+/* Viewfinder styling */
+.script-panel{
+  background:var(--paper);
+  border:1.5px solid var(--navy);
+  flex:1;
+  position:relative;
+}
+
+/* Crosshair overlay */
+.script-panel::before{
+  content:'';position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:60px;height:60px;pointer-events:none;opacity:0.06;
+  border:1.5px solid var(--navy);
+  border-radius:50%;
+}
+.script-panel::after{
+  content:'';position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:1px;height:40px;
+  background:var(--navy);
+  opacity:0.06;pointer-events:none;
+}
+
+.script-hdr{
+  padding:12px 18px;
+  border-bottom:1.5px solid var(--navy);
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:0.9rem;letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:var(--navy);
+  background:var(--amber-pale);
+}
+
+.script-actions{display:flex;gap:6px}
+
+.script-btn{
+  padding:4px 10px;
+  font-family:'Source Code Pro',monospace;
+  font-size:0.6rem;letter-spacing:0.1em;
+  border:1px solid var(--navy);
+  background:transparent;
+  color:var(--navy);
+  cursor:pointer;
+  transition:all 0.15s;
+  text-transform:uppercase;
+}
+.script-btn:hover{
+  background:var(--navy);color:var(--amber-pale);
+}
+
+.script-body{
+  padding:20px 18px;
+  min-height:180px;
+}
+
+.prompt-output{
+  font-family:'Source Code Pro',monospace;
+  font-size:0.78rem;
+  line-height:2;
+  color:var(--navy-light);
+  white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:break-word;
+}
+
+.prompt-output .p-cam{color:var(--amber);font-weight:600}
+.prompt-output .p-style{color:var(--navy)}
+.prompt-output .p-action{color:var(--red)}
+.prompt-output .p-scene{color:var(--navy-light)}
+.prompt-output .p-light{color:var(--amber-muted)}
+.prompt-output .p-mood{color:var(--navy-mid)}
+
+.prompt-placeholder{
+  text-align:center;
+  padding:30px 0;
+  color:var(--warm-gray);
+}
+.prompt-placeholder span{font-size:1.8rem;display:block;margin-bottom:10px}
+
+/* Word count bar */
+.word-count-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 18px;
+  border-top:1px solid var(--line);
+  font-family:'Source Code Pro',monospace;
+  font-size:0.6rem;
+  letter-spacing:0.08em;
+  color:var(--warm-gray);
+}
+.word-count-bar .wc-label{opacity:0.7}
+.word-count-bar .wc-num{font-weight:600}
+.word-count-bar .wc-num.wc-green{color:#2e7d32}
+.word-count-bar .wc-num.wc-yellow{color:#f57f17}
+.word-count-bar .wc-num.wc-red{color:var(--red)}
+
+/* Typewriter cursor */
+.typing-cursor{
+  display:inline-block;
+  width:2px;
+  height:1em;
+  background:var(--amber);
+  margin-left:2px;
+  vertical-align:text-bottom;
+  animation:cursorBlink 0.6s step-end infinite;
+}
+@keyframes cursorBlink{
+  0%,100%{opacity:1}
+  50%{opacity:0}
+}
+
+/* Platform selector */
+.platform-row{display:flex;gap:5px;flex-wrap:wrap}
+
+.platform-tag{
+  padding:5px 10px;
+  font-family:'Source Code Pro',monospace;
+  font-size:0.6rem;letter-spacing:0.06em;
+  border:1px solid var(--line);
+  background:var(--paper);
+  color:var(--navy-light);
+  cursor:pointer;
+  transition:all 0.15s;
+  text-transform:uppercase;
+}
+.platform-tag:hover{border-color:var(--navy);color:var(--navy)}
+.platform-tag.selected{
+  background:var(--navy);border-color:var(--navy);color:var(--amber-pale);font-weight:600;
+}
+
+/* Shot list */
+.shot-list{margin-top:10px}
+
+.shot-card{
+  padding:10px 14px;
+  border:1px solid var(--line);
+  margin-bottom:6px;
+  display:flex;align-items:center;gap:10px;
+  font-size:0.78rem;
+  background:var(--paper);
+}
+.shot-card:hover{background:var(--amber-pale)}
+
+.shot-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:0.85rem;color:var(--amber);
+  width:28px;letter-spacing:0.1em;
+}
+
+.shot-content{
+  flex:1;
+  font-family:'Source Code Pro',monospace;
+  font-size:0.65rem;
+  color:var(--navy-light);
+  letter-spacing:0.02em;
+}
+
+.shot-remove{
+  cursor:pointer;color:var(--warm-gray);
+  font-size:0.75rem;transition:color 0.15s;
+}
+.shot-remove:hover{color:var(--red)}
+
+.add-shot-btn{
+  width:100%;padding:9px;
+  border:1px dashed var(--line);
+  background:transparent;
+  color:var(--warm-gray);
+  font-family:'Source Code Pro',monospace;
+  font-size:0.6rem;
+  cursor:pointer;
+  transition:all 0.15s;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+}
+.add-shot-btn:hover{border-color:var(--amber);color:var(--amber)}
+
+/* Generate button row */
+.gen-row{
+  display:flex;gap:10px;
+}
+.gen-btn{
+  flex:1;
+  padding:20px;
+  background:var(--navy);
+  border:2px solid var(--navy);
+  color:var(--amber-pale);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.4rem;
+  letter-spacing:0.18em;
+  cursor:pointer;
+  transition:all 0.2s;
+  text-transform:uppercase;
+  position:relative;
+  overflow:hidden;
+}
+
+.gen-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--amber) 0%,var(--amber-light) 100%);
+  opacity:0;transition:opacity 0.3s;
+}
+
+/* Film strip hover effect */
+.gen-btn::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    90deg,
+    transparent 0px, transparent 8px,
+    rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px
+  );
+  opacity:0;transition:opacity 0.3s;
+}
+
+.gen-btn:hover{
+  border-color:var(--amber);
+  transform:translateY(-2px);
+  box-shadow:0 6px 24px rgba(26,39,68,0.2);
+}
+.gen-btn:hover::before{opacity:1}
+.gen-btn:hover::after{opacity:1}
+.gen-btn:hover{color:var(--navy)}
+.gen-btn span{position:relative;z-index:1}
+
+.random-btn{
+  padding:20px 24px;
+  background:var(--paper);
+  border:2px solid var(--navy);
+  color:var(--navy);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.2rem;
+  letter-spacing:0.12em;
+  cursor:pointer;
+  transition:all 0.2s;
+  text-transform:uppercase;
+  position:relative;
+  overflow:hidden;
+}
+.random-btn:hover{
+  border-color:var(--amber);
+  background:var(--amber-pale);
+  color:var(--navy);
+  transform:translateY(-2px);
+  box-shadow:0 6px 24px rgba(26,39,68,0.15);
+}
+.random-btn span{position:relative;z-index:1}
+
+/* ── History Panel ── */
+.history-panel{
+  background:var(--paper);
+  border:1.5px solid var(--line);
+  overflow:hidden;
+}
+
+.history-hdr{
+  padding:10px 18px;
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:0.85rem;letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--warm-gray);
+}
+
+.history-list{
+  max-height:220px;
+  overflow-y:auto;
+}
+
+.history-item{
+  padding:10px 18px;
+  border-bottom:1px solid var(--line);
+  font-family:'Source Code Pro',monospace;
+  font-size:0.6rem;
+  color:var(--navy-light);
+  cursor:pointer;
+  transition:all 0.15s;
+  line-height:1.6;
+}
+.history-item:last-child{border-bottom:none}
+.history-item:hover{
+  background:var(--amber-pale);
+  color:var(--navy);
+}
+.history-item .h-time{
+  color:var(--warm-gray);
+  font-size:0.55rem;
+  display:block;
+  margin-bottom:4px;
+  letter-spacing:0.08em;
+}
+.history-empty{
+  padding:20px 18px;
+  text-align:center;
+  font-family:'Source Code Pro',monospace;
+  font-size:0.6rem;
+  color:var(--warm-gray);
+  letter-spacing:0.08em;
+}
+
+/* ── Footer ── */
+.footer{
+  position:relative;z-index:1;
+  text-align:center;
+  padding:32px 24px;
+  font-family:'Source Code Pro',monospace;
+  font-size:0.6rem;letter-spacing:0.25em;
+  color:var(--warm-gray);
+  text-transform:uppercase;
+  border-top:2px solid var(--navy);
+  margin-left:22px;
+}
+
+.footer a{color:var(--amber)}
+
+/* ── Sprocket hole decorations ── */
+.sprocket-strip{
+  display:none;
+}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  body::after{width:12px;background-size:12px 20px}
+  .nav{left:12px;padding:0 16px}
+  .hero{margin-left:12px;padding:70px 20px 30px}
+  .layout{
+    grid-template-columns:1fr;
+    margin-left:auto;padding-left:12px;
+    padding-right:16px;padding-top:16px;
+  }
+  .output-area{position:static}
+  .nav-links{gap:2px}
+  .nav-links a{padding:4px 6px;font-size:0.6rem}
+  .tag{padding:6px 10px;font-size:0.6rem;min-height:28px}
+  .tag-row{gap:6px 5px}
+  .gen-btn{font-size:1.1rem;padding:16px}
+  .random-btn{font-size:1rem;padding:16px 18px}
+  .hero-stats{gap:16px}
+  .hero h1{letter-spacing:0.04em}
+  .footer{margin-left:12px}
+}
+
+@media(max-width:480px){
+  body::after{display:none}
+  .nav,.hero,.layout,.footer{margin-left:0;padding-left:12px}
+  .nav{padding:0 12px}
+  .gen-row{flex-direction:column}
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--paper)}
+::-webkit-scrollbar-thumb{background:var(--line-dark);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--warm-gray)}
+
+/* ── Animations ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.panel,.script-panel,.history-panel{
+  animation:fadeUp 0.4s ease-out both;
+}
+.panel:nth-child(2){animation-delay:0.05s}
+.panel:nth-child(3){animation-delay:0.1s}
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎬 Video Prompt Generator</h1>
-            <p>专业级AI视频提示词编排工具</p>
-        </header>
 
-        <main>
-            <div class="mode-selector">
-                <button id="promptMode" onclick="switchMode('prompt')">提示词生成</button>
-                <button id="storyboardMode" onclick="switchMode('storyboard')">分镜编辑器</button>
-            </div>
-            
-            <section id="promptSection" class="parameter-section">
-                <h2>参数选择</h2>
-                <div class="parameter-grid" id="parameterGrid">
-                    <!-- 动态生成的参数选择器将在这里 -->
-                </div>
-            </section>
+<!-- Nav -->
 
-            <section id="storyboardSection" class="storyboard-section" style="display: none;">
-                <h2>分镜编辑器</h2>
-                
-                <div class="storyboard-controls">
-                    <button onclick="addNewShot()">添加镜头</button>
-                    <button onclick="clearTimeline()">清空时间线</button>
-                    <div class="platform-selector">
-                        <label for="platformSelect">导出平台:</label>
-                        <select id="platformSelect">
-                            <option value="sora">Sora 2 (OpenAI)</option>
-                            <option value="kling">Kling 3.0</option>
-                            <option value="runway">Runway Gen-4</option>
-                            <option value="veo">Google Veo 3.1</option>
-                            <option value="pika">Pika Labs 1.0</option>
-                        </select>
-                    </div>
-                    <button onclick="exportStoryboard()">导出分镜</button>
-                    <button onclick="exportPlatformPrompts()">平台导出</button>
-                </div>
-                
-                <div class="storyboard-timeline" id="storyboardTimeline">
-                    <div class="timeline-header">
-                        <div class="track-label">时间轴</div>
-                        <div class="track-content">0s</div>
-                        <div class="track-content">10s</div>
-                        <div class="track-content">20s</div>
-                        <div class="track-content">30s</div>
-                        <div class="track-content">40s</div>
-                        <div class="track-content">50s</div>
-                    </div>
-                    
-                    <div class="timeline-tracks">
-                        <div class="track" id="videoTrack">
-                            <div class="track-label">视频轨道</div>
-                            <div class="track-shots-container" id="videoShots">
-                                <!-- 镜头将在这里动态添加 -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="shot-details" id="shotDetails">
-                    <h3>镜头详情</h3>
-                    <div id="shotDetailsContent">
-                        <p>选择一个镜头查看详情</p>
-                    </div>
-                </div>
-            </section>
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="clap"></div>
+    VIDEO PROMPT GEN
+  </div>
+  <div class="nav-links">
+    <a href="/">← HOME</a>
+    <a href="/study/">LAB</a>
+    <a href="https://github.com/ArmyClaw/video-prompt-gen" target="_blank">GITHUB</a>
+  </div>
+</nav>
 
-            <section id="resultSection" class="result-section">
-                <h2>生成的提示词</h2>
-                <div class="result-output" id="resultOutput">
-                    <p>请选择参数组合来生成提示词...</p>
-                </div>
-                <button class="copy-btn" onclick="copyPrompt()">复制提示词</button>
-            </section>
-        </main>
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-meta">// AI VIDEO PROMPT ENGINE &mdash; DIRECTOR'S TOOLKIT</div>
+  <h1>VIDEO <span>PROMPT</span></h1>
+  <div class="hero-sub">COMPOSE YOUR VISION FRAME BY FRAME</div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-val">8</div>
+      <div class="hero-stat-label">PARAM GROUPS</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">90+</div>
+      <div class="hero-stat-label">OPTIONS</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">6</div>
+      <div class="hero-stat-label">PLATFORMS</div>
+    </div>
+  </div>
+
+  <div class="hero-rule"><span><i></i><i></i><i></i></span></div>
+</section>
+
+<!-- Main Layout -->
+<div class="layout">
+  <!-- Left: Controls -->
+  <div class="controls">
+
+    <!-- Camera -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-hdr-icon">◇</span> CAMERA &mdash; 镜头控制</div>
+      <div class="panel-body">
+        <div class="opt-group">
+          <div class="opt-label">Camera Type &sol; 相机运动</div>
+          <div class="tag-row" data-group="camera">
+            <div class="tag" data-val="static shot">Static 固定</div>
+            <div class="tag" data-val="slow pan left to right">Pan 左摇</div>
+            <div class="tag" data-val="slow pan right to left">Pan 右摇</div>
+            <div class="tag" data-val="slow tilt up">Tilt 上仰</div>
+            <div class="tag" data-val="slow tilt down">Tilt 下俯</div>
+            <div class="tag" data-val="slow dolly in">Dolly In 推进</div>
+            <div class="tag" data-val="slow dolly out">Dolly Out 拉出</div>
+            <div class="tag" data-val="tracking shot following">Tracking 跟踪</div>
+            <div class="tag" data-val="crane shot rising">Crane 升降</div>
+            <div class="tag" data-val="steadicam walk">Steadicam 走位</div>
+            <div class="tag" data-val="dolly zoom">Dolly Zoom 变焦</div>
+            <div class="tag" data-val="handheld shaky">Handheld 手持</div>
+            <div class="tag" data-val="orbit shot rotating">Orbit 环绕</div>
+            <div class="tag" data-val="aerial drone shot">Drone 航拍</div>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">Angle &sol; 角度</div>
+          <div class="tag-row" data-group="angle">
+            <div class="tag" data-val="eye level">Eye Level 平视</div>
+            <div class="tag" data-val="low angle looking up">Low Angle 仰拍</div>
+            <div class="tag" data-val="high angle looking down">High Angle 俯拍</div>
+            <div class="tag" data-val="bird's eye view">Bird's Eye 鸟瞰</div>
+            <div class="tag" data-val="dutch angle tilted">Dutch Angle 倾斜</div>
+            <div class="tag" data-val="worm's eye view">Worm's Eye 蚁视</div>
+            <div class="tag" data-val="over the shoulder">OTS 过肩</div>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">Shot Size &sol; 景别</div>
+          <div class="tag-row" data-group="shot">
+            <div class="tag" data-val="extreme wide shot">EWS 远景</div>
+            <div class="tag" data-val="wide shot">WS 全景</div>
+            <div class="tag" data-val="medium wide shot">MWS 中远景</div>
+            <div class="tag" data-val="medium shot">MS 中景</div>
+            <div class="tag" data-val="medium close-up">MCU 近景</div>
+            <div class="tag" data-val="close-up">CU 特写</div>
+            <div class="tag" data-val="extreme close-up">ECU 大特写</div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+    <!-- Style -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-hdr-icon">◆</span> STYLE &mdash; 视觉风格</div>
+      <div class="panel-body">
+        <div class="opt-group">
+          <div class="opt-label">Genre &sol; 流派</div>
+          <div class="tag-row" data-group="genre">
+            <div class="tag" data-val="cinematic">Cinematic 电影</div>
+            <div class="tag" data-val="sci-fi futuristic">Sci-Fi 科幻</div>
+            <div class="tag" data-val="film noir">Noir 黑色</div>
+            <div class="tag" data-val="documentary style">Documentary 纪录</div>
+            <div class="tag" data-val="anime style">Anime 动画</div>
+            <div class="tag" data-val="wuxia martial arts">Wuxia 武侠</div>
+            <div class="tag" data-val="horror">Horror 恐怖</div>
+            <div class="tag" data-val="fantasy magical">Fantasy 奇幻</div>
+            <div class="tag" data-val="cyberpunk neon">Cyberpunk 赛博</div>
+            <div class="tag" data-val="vintage retro">Vintage 复古</div>
+            <div class="tag" data-val="surreal dreamlike">Surreal 超现实</div>
+            <div class="tag" data-val="minimalist">Minimalist 极简</div>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">Lighting &sol; 灯光</div>
+          <div class="tag-row" data-group="lighting">
+            <div class="tag" data-val="natural daylight">自然光</div>
+            <div class="tag" data-val="golden hour warm">黄金时刻</div>
+            <div class="tag" data-val="neon lights glowing">霓虹灯</div>
+            <div class="tag" data-val="dramatic chiaroscuro">戏剧明暗</div>
+            <div class="tag" data-val="soft diffused">柔光漫射</div>
+            <div class="tag" data-val="backlit silhouette">逆光剪影</div>
+            <div class="tag" data-val="moonlit night">月光夜景</div>
+            <div class="tag" data-val="studio three-point">棚拍三点</div>
+            <div class="tag" data-val="volumetric god rays">丁达尔光</div>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">Color Grade &sol; 调色</div>
+          <div class="tag-row" data-group="color">
+            <div class="tag" data-val="warm tones">暖调</div>
+            <div class="tag" data-val="cool blue tones">冷调</div>
+            <div class="tag" data-val="desaturated muted">去饱和</div>
+            <div class="tag" data-val="high contrast">高对比</div>
+            <div class="tag" data-val="monochrome black and white">黑白</div>
+            <div class="tag" data-val="teal and orange">青橙</div>
+            <div class="tag" data-val="pastel soft">柔和淡彩</div>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">Film Stock &sol; 胶片</div>
+          <div class="tag-row" data-group="film">
+            <div class="tag" data-val="35mm film grain">35mm 胶片</div>
+            <div class="tag" data-val="digital sharp clean">数码锐利</div>
+            <div class="tag" data-val="vhs retro lo-fi">VHS 复古</div>
+            <div class="tag" data-val="16mm vintage">16mm 复古</div>
+            <div class="tag" data-val="IMAX epic scale">IMAX 史诗</div>
+            <div class="tag" data-val="infrared surreal">红外超现实</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subject & Scene -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-hdr-icon">▸</span> SUBJECT &amp; SCENE &mdash; 主体与场景</div>
+      <div class="panel-body">
+        <div class="opt-group">
+          <div class="opt-label">Action &sol; 动作</div>
+          <div class="tag-row" data-group="action">
+            <div class="tag" data-val="walking slowly">缓慢行走</div>
+            <div class="tag" data-val="running fast">奔跑</div>
+            <div class="tag" data-val="standing still looking into camera">凝视镜头</div>
+            <div class="tag" data-val="turning around slowly">缓缓转身</div>
+            <div class="tag" data-val="sitting contemplatively">静坐沉思</div>
+            <div class="tag" data-val="reaching out hand">伸出手</div>
+            <div class="tag" data-val="dancing gracefully">优雅舞蹈</div>
+            <div class="tag" data-val="falling in slow motion">慢速坠落</div>
+            <div class="tag" data-val="opening eyes">睁开双眼</div>
+            <div class="tag" data-val="breathing gently">轻柔呼吸</div>
+            <div class="tag" data-val="writing or drawing">书写/绘画</div>
+            <div class="tag" data-val="fighting choreographed">武打编排</div>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">Environment &sol; 环境</div>
+          <div class="tag-row" data-group="env">
+            <div class="tag" data-val="dense forest">森林</div>
+            <div class="tag" data-val="vast desert">沙漠</div>
+            <div class="tag" data-val="modern city skyline">城市天际线</div>
+            <div class="tag" data-val="narrow alley rain">雨巷</div>
+            <div class="tag" data-val="open ocean waves">海洋</div>
+            <div class="tag" data-val="snowy mountain peak">雪山</div>
+            <div class="tag" data-val="abandoned building">废弃建筑</div>
+            <div class="tag" data-val="crowded street market">市场</div>
+            <div class="tag" data-val="minimalist white room">纯白空间</div>
+            <div class="tag" data-val="abstract void">虚空</div>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">Mood &sol; 情绪</div>
+          <div class="tag-row" data-group="mood">
+            <div class="tag" data-val="melancholic lonely">忧郁</div>
+            <div class="tag" data-val="hopeful uplifting">希望</div>
+            <div class="tag" data-val="mysterious eerie">神秘</div>
+            <div class="tag" data-val="epic grand">史诗</div>
+            <div class="tag" data-val="peaceful serene">宁静</div>
+            <div class="tag" data-val="intense tense">紧张</div>
+            <div class="tag" data-val="romantic tender">浪漫</div>
+            <div class="tag" data-val="nostalgic wistful">怀旧</div>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">Subject Description &sol; 主体描述</div>
+          <textarea class="text-input" id="subjectDesc" placeholder="e.g. a young woman in a red dress, an old samurai, a robot..."></textarea>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">Extra Details &sol; 补充细节</div>
+          <textarea class="text-input" id="extraDetails" placeholder="e.g. cherry blossom petals falling, rain drops on glass, sparks flying..."></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right: Output -->
+  <div class="output-area">
+
+    <div class="script-panel">
+      <div class="script-hdr">
+        <span>◆ GENERATED PROMPT</span>
+        <div class="script-actions">
+          <button class="script-btn" onclick="copyPrompt()">COPY</button>
+          <button class="script-btn" onclick="clearAll()">CLEAR</button>
+        </div>
+      </div>
+      <div class="script-body">
+        <div class="prompt-output" id="promptOutput">
+          <div class="prompt-placeholder">
+            <span>◇</span>
+            SELECT PARAMETERS &sol; CLICK GENERATE<br>
+            选择参数后点击生成
+          </div>
+        </div>
+      </div>
+      <div class="word-count-bar" id="wordCountBar" style="display:none">
+        <span class="wc-label">CHAR COUNT:</span>
+        <span class="wc-num" id="wcNum">0</span>
+      </div>
+    </div>
+
+    <!-- Platform -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-hdr-icon">◎</span> TARGET PLATFORM &mdash; 目标平台</div>
+      <div class="panel-body">
+        <div class="platform-row" data-group="platform">
+          <div class="platform-tag selected" data-val="generic">Generic</div>
+          <div class="platform-tag" data-val="runway">Runway ML</div>
+          <div class="platform-tag" data-val="pika">Pika Labs</div>
+          <div class="platform-tag" data-val="kling">Kling 可灵</div>
+          <div class="platform-tag" data-val="sora">Sora</div>
+          <div class="platform-tag" data-val="haiper">Haiper</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shot Sequence -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-hdr-icon">▧</span> SHOT SEQUENCE &mdash; 分镜序列</div>
+      <div class="panel-body">
+        <div class="shot-list" id="shotList">
+          <div class="shot-card" data-shot="1">
+            <div class="shot-num">S01</div>
+            <div class="shot-content">AWAITING FIRST GENERATION...</div>
+          </div>
+        </div>
+        <button class="add-shot-btn" onclick="addShot()">+ ADD SHOT &sol; 添加镜头</button>
+      </div>
+    </div>
+
+    <!-- Generate + Random -->
+    <div class="gen-row">
+      <button class="gen-btn" onclick="generate()"><span>▶ GENERATE PROMPT</span></button>
+      <button class="random-btn" onclick="randomGenerate()"><span>🎲 RANDOM</span></button>
+    </div>
+
+    <!-- History -->
+    <div class="history-panel">
+      <div class="history-hdr"><span>▧</span> HISTORY &mdash; 历史记录</div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">NO HISTORY YET</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  VIDEO-PROMPT-GEN &middot; BY <a href="/">阿呆</a>
+</footer>
+
+<script>
+// ── State ──
+var state = {
+  camera: null, angle: null, shot: null,
+  genre: null, lighting: null, color: null, film: null,
+  action: null, env: null, mood: null,
+  platform: 'generic'
+};
+
+var shotCount = 1;
+var history = [];
+var typingTimer = null;
+var currentTypingHTML = '';
+var currentTypingPlain = '';
+
+// ── Tag Selection ──
+document.querySelectorAll('.tag-row').forEach(function(row) {
+  row.querySelectorAll('.tag').forEach(function(tag) {
+    tag.addEventListener('click', function() {
+      var group = row.dataset.group;
+      row.querySelectorAll('.tag').forEach(function(t) { t.classList.remove('selected'); });
+      tag.classList.add('selected');
+      state[group] = tag.dataset.val;
+    });
+  });
+});
+
+// ── Platform Selection ──
+document.querySelectorAll('.platform-tag').forEach(function(tag) {
+  tag.addEventListener('click', function() {
+    document.querySelectorAll('.platform-tag').forEach(function(t) { t.classList.remove('selected'); });
+    tag.classList.add('selected');
+    state.platform = tag.dataset.val;
+  });
+});
+
+// ── Typewriter Effect ──
+function typewriterEffect(fullHTML, plainText, callback) {
+  if (typingTimer) { clearInterval(typingTimer); typingTimer = null; }
+
+  var el = document.getElementById('promptOutput');
+  var wcBar = document.getElementById('wordCountBar');
+  var wcNum = document.getElementById('wcNum');
+
+  // Extract visible text characters for typing speed
+  var temp = document.createElement('div');
+  temp.innerHTML = fullHTML;
+  var visibleText = temp.textContent || temp.innerText || '';
+  var totalChars = visibleText.length;
+  if (totalChars === 0) { el.innerHTML = fullHTML; if (callback) callback(); return; }
+
+  // Split HTML into tokens: tags and text
+  var tokens = [];
+  var regex = /(<[^>]+>)|([^<]+)/g;
+  var match;
+  while ((match = regex.exec(fullHTML)) !== null) {
+    tokens.push(match[0]);
+  }
+
+  var charCount = 0;
+  var builtHTML = '';
+  var idx = 0;
+  var speed = Math.max(8, Math.min(25, Math.floor(2000 / totalChars)));
+
+  // Clear and add cursor
+  el.innerHTML = '<span class="typing-cursor"></span>';
+
+  typingTimer = setInterval(function() {
+    if (idx >= tokens.length) {
+      clearInterval(typingTimer);
+      typingTimer = null;
+      // Remove cursor after a delay
+      setTimeout(function() {
+        el.innerHTML = fullHTML;
+      }, 1500);
+      if (callback) callback();
+      return;
+    }
+    var token = tokens[idx];
+    if (token.charAt(0) === '<') {
+      builtHTML += token;
+      idx++;
+    } else {
+      var chunk = Math.ceil(totalChars / 40);
+      var take = Math.min(chunk, token.length);
+      builtHTML += token.substring(0, take);
+      charCount += take;
+      idx++;
+    }
+    el.innerHTML = builtHTML + '<span class="typing-cursor"></span>';
+
+    // Update word count live
+    var partialPlain = fullHTML.replace(/<[^>]*>/g, '').substring(0, charCount);
+    updateWordCount(partialPlain.length);
+  }, speed);
+}
+
+// ── Word Count ──
+function updateWordCount(len) {
+  var wcBar = document.getElementById('wordCountBar');
+  var wcNum = document.getElementById('wcNum');
+  wcBar.style.display = 'flex';
+  wcNum.textContent = len;
+  wcNum.className = 'wc-num';
+  if (len < 100) {
+    wcNum.classList.add('wc-green');
+  } else if (len <= 200) {
+    wcNum.classList.add('wc-yellow');
+  } else {
+    wcNum.classList.add('wc-red');
+  }
+}
+
+// ── Generate ──
+function generate() {
+  var subject = document.getElementById('subjectDesc').value.trim();
+  var extra = document.getElementById('extraDetails').value.trim();
+
+  if (!state.camera && !state.genre && !subject && !state.action) {
+    alert('请至少选择一些参数！');
+    return;
+  }
+
+  var parts = [];
+
+  if (state.shot) parts.push({ text: state.shot, cls: 'p-cam' });
+  if (state.angle) parts.push({ text: state.angle, cls: 'p-cam' });
+  if (state.camera) parts.push({ text: state.camera, cls: 'p-cam' });
+  if (subject) parts.push({ text: subject, cls: 'p-action' });
+  if (state.action) parts.push({ text: state.action, cls: 'p-action' });
+  if (state.env) parts.push({ text: 'in a ' + state.env, cls: 'p-scene' });
+  if (state.genre) parts.push({ text: state.genre + ' style', cls: 'p-style' });
+  if (state.lighting) parts.push({ text: state.lighting, cls: 'p-light' });
+  if (state.color) parts.push({ text: state.color + ' color grading', cls: 'p-light' });
+  if (state.film) parts.push({ text: state.film + ' look', cls: 'p-style' });
+  if (state.mood) parts.push({ text: state.mood + ' mood', cls: 'p-mood' });
+  if (extra) parts.push({ text: extra, cls: 'p-scene' });
+  parts.push({ text: 'cinematic quality, 4K, highly detailed', cls: '' });
+
+  var prefix = '', suffix = '';
+  if (state.platform === 'runway') {
+    suffix = ', smooth camera motion, consistent motion';
+  } else if (state.platform === 'kling') {
+    prefix = '高清电影感，';
+  } else if (state.platform === 'pika') {
+    suffix = ', smooth transition, consistent character';
+  }
+
+  var sep = '<span style="color:var(--line-dark)">, </span>';
+  var plain = (prefix ? prefix + ' ' : '') + parts.map(function(p) { return p.text; }).join(', ') + (suffix ? ', ' + suffix : '');
+  var colored = parts.map(function(p) { return '<span class="' + p.cls + '">' + p.text + '</span>'; }).join(sep);
+  if (prefix) colored = '<span style="color:var(--navy-light)">' + prefix + '</span> ' + colored;
+  if (suffix) colored += sep + '<span style="color:var(--navy-light)">' + suffix + '</span>';
+
+  currentTypingHTML = colored;
+  currentTypingPlain = plain;
+
+  // Typewriter then history
+  typewriterEffect(colored, plain, function() {
+    addHistory(plain);
+  });
+
+  document.getElementById('promptOutput').dataset.plain = plain;
+
+  // Update shot card
+  var shots = document.querySelectorAll('.shot-card');
+  var currentShot = shots[shots.length - 1];
+  if (currentShot) {
+    var shortText = plain.length > 80 ? plain.substring(0, 77) + '...' : plain;
+    currentShot.querySelector('.shot-content').textContent = shortText;
+  }
+}
+
+// ── Random Generate ──
+function randomGenerate() {
+  var groups = ['camera', 'angle', 'shot', 'genre', 'lighting', 'color', 'film', 'action', 'env', 'mood'];
+
+  groups.forEach(function(group) {
+    var row = document.querySelector('.tag-row[data-group="' + group + '"]');
+    if (!row) return;
+    var tags = row.querySelectorAll('.tag');
+    if (tags.length === 0) return;
+    // Deselect all
+    row.querySelectorAll('.tag').forEach(function(t) { t.classList.remove('selected'); });
+    // Pick random
+    var idx = Math.floor(Math.random() * tags.length);
+    tags[idx].classList.add('selected');
+    state[group] = tags[idx].dataset.val;
+  });
+
+  generate();
+}
+
+// ── History ──
+function addHistory(plain) {
+  var now = new Date();
+  var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+  history.unshift({ text: plain, time: timeStr });
+  if (history.length > 5) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  var list = document.getElementById('historyList');
+  if (history.length === 0) {
+    list.innerHTML = '<div class="history-empty">NO HISTORY YET</div>';
+    return;
+  }
+  var html = '';
+  history.forEach(function(item, i) {
+    var short = item.text.length > 120 ? item.text.substring(0, 117) + '...' : item.text;
+    html += '<div class="history-item" onclick="restoreHistory(' + i + ')">';
+    html += '<span class="h-time">' + item.time + '</span>';
+    html += short;
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function restoreHistory(idx) {
+  // Just copy text to clipboard for easy paste
+  if (history[idx]) {
+    navigator.clipboard.writeText(history[idx].text).then(function() {
+      var el = document.getElementById('promptOutput');
+      el.innerHTML = '<div class="prompt-placeholder"><span>📋</span>COPIED TO CLIPBOARD<br>已复制到剪贴板</div>';
+      var wcBar = document.getElementById('wordCountBar');
+      wcBar.style.display = 'none';
+    });
+  }
+}
+
+// ── Copy ──
+function copyPrompt() {
+  var el = document.getElementById('promptOutput');
+  var text = el.dataset.plain || el.textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.querySelector('.script-actions .script-btn');
+    btn.textContent = 'COPIED!';
+    setTimeout(function() { btn.textContent = 'COPY'; }, 1500);
+  });
+}
+
+// ── Clear ──
+function clearAll() {
+  document.querySelectorAll('.tag').forEach(function(t) { t.classList.remove('selected'); });
+  document.querySelectorAll('.platform-tag').forEach(function(t) { t.classList.remove('selected'); });
+  document.querySelector('.platform-tag[data-val="generic"]').classList.add('selected');
+  document.getElementById('subjectDesc').value = '';
+  document.getElementById('extraDetails').value = '';
+  Object.keys(state).forEach(function(k) { state[k] = k === 'platform' ? 'generic' : null; });
+  document.getElementById('promptOutput').innerHTML = '<div class="prompt-placeholder"><span>◇</span>SELECT PARAMETERS &sol; CLICK GENERATE<br>选择参数后点击生成</div>';
+  document.getElementById('promptOutput').dataset.plain = '';
+  document.getElementById('wordCountBar').style.display = 'none';
+  if (typingTimer) { clearInterval(typingTimer); typingTimer = null; }
+}
+
+// ── Add Shot ──
+function addShot() {
+  shotCount++;
+  var list = document.getElementById('shotList');
+  var card = document.createElement('div');
+  card.className = 'shot-card';
+  card.dataset.shot = shotCount;
+  var num = String(shotCount).padStart(2, '0');
+  var numDiv = document.createElement('div');
+  numDiv.className = 'shot-num';
+  numDiv.textContent = 'S' + num;
+  var contentDiv = document.createElement('div');
+  contentDiv.className = 'shot-content';
+  contentDiv.textContent = 'AWAITING NEXT GENERATION...';
+  var removeDiv = document.createElement('div');
+  removeDiv.className = 'shot-remove';
+  removeDiv.textContent = '\u2715';
+  removeDiv.onclick = function() { this.parentElement.remove(); };
+  card.appendChild(numDiv);
+  card.appendChild(contentDiv);
+  card.appendChild(removeDiv);
+  list.appendChild(card);
+}
+</script>
 </body>
 </html>
