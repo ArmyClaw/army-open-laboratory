@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>开源实验室 — army-yorozuya.art</title>
@@ -391,6 +392,96 @@ a{color:inherit;text-decoration:none}
 }
 
 
+/* ══════════════════════════════════════════════
+   Project 8: Particle Universe — 深空/星云风格
+   ══════════════════════════════════════════════ */
+.proj-8{
+  background:linear-gradient(170deg, #050510 0%, #0a0a20 100%);
+  color:#c0c8e8;
+  border:1px solid rgba(100,140,255,.12);
+}
+.proj-8 .proj-nr{color:#4a6fff}
+.proj-8 .proj-tag{color:#4a6fff}
+.proj-8 .proj-name em{color:#6a8aff}
+.proj-8 .proj-desc{color:rgba(192,200,232,.4)}
+.proj-8 .proj-enter{color:#4a6fff;border-color:rgba(74,111,255,.3)}
+.proj-8::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 180px 100px at 30% 70%, rgba(100,80,200,.1), transparent),
+    radial-gradient(ellipse 140px 80px at 75% 25%, rgba(60,100,255,.08), transparent),
+    radial-gradient(circle 3px at 20% 40%, rgba(255,255,255,.4), transparent 4px),
+    radial-gradient(circle 2px at 60% 20%, rgba(255,255,255,.3), transparent 3px),
+    radial-gradient(circle 2px at 80% 60%, rgba(255,255,255,.25), transparent 3px);
+  animation:nebula-drift 8s ease-in-out infinite alternate;
+}
+@keyframes nebula-drift{0%{opacity:.6}100%{opacity:1}}
+.proj-8::after{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(circle at 50% 50%, transparent 40%, rgba(5,5,16,.4) 100%);
+}
+.proj-8:hover{border-color:rgba(74,111,255,.25);box-shadow:0 16px 48px rgba(74,111,255,.12)}
+
+/* ══════════════════════════════════════════════
+   Project 9: Pixel Pets — 复古像素/温暖风格
+   ══════════════════════════════════════════════ */
+.proj-9{
+  background:#1e1a2e;
+  color:#f0e0d0;
+  border:1px solid rgba(255,180,100,.15);
+}
+.proj-9 .proj-nr{color:#ff9f43}
+.proj-9 .proj-tag{color:#ff9f43}
+.proj-9 .proj-name em{color:#feca57}
+.proj-9 .proj-desc{color:rgba(240,224,208,.45)}
+.proj-9 .proj-enter{color:#ff9f43;border-color:rgba(255,159,67,.3)}
+.proj-9::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,180,100,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,180,100,.03) 1px, transparent 1px);
+  background-size:8px 8px;
+}
+.proj-9::after{
+  content:'';position:absolute;
+  top:12px;right:16px;z-index:1;pointer-events:none;
+  width:16px;height:14px;
+  background:#ff6b6b;
+  clip-path:polygon(50% 100%,0% 35%,15% 0%,50% 18%,85% 0%,100% 35%);
+  opacity:.15;transition:opacity .3s;
+}
+.proj-9:hover::after{opacity:.35}
+.proj-9:hover{border-color:rgba(255,159,67,.25);box-shadow:0 16px 48px rgba(255,159,67,.1)}
+
+
+
+
+/* ══════════════════════════════════════════════
+   Project 10: Persona Forge — 电影片场/打字机风格
+   ══════════════════════════════════════════════ */
+.proj-10{
+  background:#2a2218;
+  color:#e8dcc8;
+  border:1px solid rgba(200,170,120,.15);
+}
+.proj-10 .proj-nr{color:#d4a857}
+.proj-10 .proj-tag{color:#d4a857}
+.proj-10 .proj-name em{color:#e8c36a}
+.proj-10 .proj-desc{color:rgba(232,220,200,.45)}
+.proj-10 .proj-enter{color:#d4a857;border-color:rgba(212,168,87,.3)}
+.proj-10::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 300px 150px at 50% 20%, rgba(255,220,120,.06), transparent),
+    linear-gradient(180deg, rgba(255,220,120,.02) 0%, transparent 30%);
+}
+.proj-10::after{
+  content:'🎞';position:absolute;
+  top:14px;right:18px;
+  font-size:1.2em;color:rgba(212,168,87,.2);
+  z-index:0;
+}
+.proj-10:hover{border-color:rgba(212,168,87,.25);box-shadow:0 16px 48px rgba(212,168,87,.1)}
 
 /* ── Footer ── */
 .footer{
@@ -451,12 +542,12 @@ a{color:inherit;text-decoration:none}
     <span class="line2">Laboratory</span>
   </h1>
   <p class="hero-desc">
-    七条技术路线：文明模拟、音乐进化、视频提示词、后量子密码、智能配色、混沌理论、电子花园。逐步推进，宁可不推也不要推烂。
+    十条技术路线：文明模拟、音乐进化、视频提示词、后量子密码、智能配色、混沌理论、电子花园、粒子宇宙、像素宠物进化、角色人设生成。逐步推进，宁可不推也不要推烂。
   </p>
 </section>
 
 <div class="stats-strip">
-  <div class="stat-item"><div class="stat-num">7</div><div class="stat-lbl">Projects</div></div>
+  <div class="stat-item"><div class="stat-num">10</div><div class="stat-lbl">Projects</div></div>
   <div class="stat-item"><div class="stat-num" id="sDays">0</div><div class="stat-lbl">Days</div></div>
   <div class="stat-item"><div class="stat-num" id="sCommits">4</div><div class="stat-lbl">Commits</div></div>
   <div class="stat-item"><div class="stat-num">93</div><div class="stat-lbl">Tasks</div></div>
@@ -531,7 +622,37 @@ a{color:inherit;text-decoration:none}
       <div class="proj-inner">
         <div class="proj-tag">🌿 Digital Garden</div>
         <div class="proj-name">Digital <em>Garden</em></div>
-        <div class="proj-desc">程序化生成300+种花卉的交互式电子花园。SVG绘制、晨昏主题切换、花语图鉴、点击种下更多花。</div>
+        <div class="proj-desc">程序化生成405种花卉的交互式电子花园。SVG绘制、晨昏主题切换、花语图鉴、点击种下更多花。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-8" data-proj="particle-universe" href="/study/particle-universe/">
+      <div class="proj-nr">08</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🌌 Particle Universe</div>
+        <div class="proj-name">Particle <em>Universe</em></div>
+        <div class="proj-desc">N-body万有引力模拟。大爆炸→星系形成→黑洞吸积→超新星爆发，鼠标创造粒子与黑洞。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-9" data-proj="pixel-pets" href="/study/pixel-pets/">
+      <div class="proj-nr">09</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🧬 Pixel Pets</div>
+        <div class="proj-name">Pixel <em>Pets</em></div>
+        <div class="proj-desc">DNA驱动的像素生物。投喂、玩耍、进化、繁殖，每只都不一样，跨session存活。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-10" data-proj="persona-forge" href="/study/persona-forge/">
+      <div class="proj-nr">10</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🎭 Persona Forge</div>
+        <div class="proj-name">Persona <em>Forge</em></div>
+        <div class="proj-desc">影视角色/名人AGENTS.md人设生成器。语言特征、行为准则、标志性口号、比喻素材库，一键导出。</div>
         <div class="proj-enter">Enter <span class="arr">→</span></div>
       </div>
     </a>
