@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <link rel="icon" type="image/svg+xml" href="../icons/favicon.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evo Music — 自进化音乐引擎</title>
-<meta property="og:title" content="Evo Music — 自进化音乐引擎">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧬</text></svg>">
+<title>Evo Music — 在线音乐播放器</title>
+<meta property="og:title" content="Evo Music — 在线音乐播放器">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
@@ -26,10 +25,8 @@
   --groove: rgba(124,58,237,0.04);
   --border: rgba(124,58,237,0.1);
 }
-
 * { margin:0; padding:0; box-sizing:border-box }
 html { scroll-behavior: smooth }
-
 body {
   background: var(--bg);
   color: var(--text);
@@ -39,8 +36,6 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
 }
-
-/* ── Vinyl groove background pattern ── */
 body::before {
   content: '';
   position: fixed;
@@ -52,8 +47,6 @@ body::before {
   z-index: 0;
   pointer-events: none;
 }
-
-/* Ambient glows */
 .ambient-glow {
   position: fixed;
   border-radius: 50%;
@@ -64,11 +57,10 @@ body::before {
 .ambient-glow.g1 { top: -15%; left: -10%; width: 600px; height: 600px; background: rgba(124,58,237,0.08); }
 .ambient-glow.g2 { bottom: -10%; right: -8%; width: 500px; height: 500px; background: rgba(236,72,153,0.05); }
 .ambient-glow.g3 { top: 30%; right: -15%; width: 350px; height: 350px; background: rgba(124,58,237,0.06); }
-
 a { color: var(--indigo); text-decoration: none; transition: color 0.2s; }
 a:hover { color: var(--pink); }
 
-/* ── NAV ── */
+/* NAV */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   padding: 0 24px; height: 56px;
@@ -83,10 +75,7 @@ a:hover { color: var(--pink); }
   font-size: 1rem; color: var(--text);
   letter-spacing: 0.02em;
 }
-.nav-brand em {
-  font-style: normal;
-  color: var(--indigo);
-}
+.nav-brand em { font-style: normal; color: var(--indigo); }
 .nav-vinyl {
   width: 28px; height: 28px;
   border: 2px solid var(--indigo);
@@ -111,7 +100,6 @@ a:hover { color: var(--pink); }
   box-shadow: 0 0 6px var(--pink);
 }
 @keyframes spin { to { transform: rotate(360deg) } }
-
 .nav-links {
   display: flex; gap: 20px;
   font-family: 'DM Mono', monospace;
@@ -123,27 +111,27 @@ a:hover { color: var(--pink); }
 .nav-links a { color: var(--text-dim); }
 .nav-links a:hover { color: var(--text); }
 
-/* ── HERO ── */
+/* HERO */
 .hero {
   position: relative; z-index: 1;
-  padding: 100px 20px 20px;
+  padding: 80px 20px 10px;
   display: flex; flex-direction: column; align-items: center;
   max-width: 640px; margin: 0 auto;
 }
-
-/* Giant vinyl record */
 .vinyl-container {
   position: relative;
-  width: clamp(240px, 55vw, 360px);
-  height: clamp(240px, 55vw, 360px);
-  margin-bottom: -60px;
+  width: clamp(180px, 40vw, 280px);
+  height: clamp(180px, 40vw, 280px);
+  margin-bottom: -40px;
   z-index: 2;
+  cursor: pointer;
+  transition: filter 0.3s;
 }
+.vinyl-container:hover { filter: brightness(1.1); }
 .vinyl-record {
   width: 100%; height: 100%;
   border-radius: 50%;
   background:
-    radial-gradient(circle, var(--bg) 12%, transparent 12.5%),
     radial-gradient(circle, var(--bg) 12%, transparent 12.5%),
     conic-gradient(from 0deg, #1a1724, #201c2e, #1a1724, #221e30, #1a1724, #201c2e, #1a1724),
     radial-gradient(circle, transparent 22%, rgba(124,58,237,0.06) 22.5%, transparent 23%),
@@ -166,7 +154,10 @@ a:hover { color: var(--pink); }
     inset 0 0 30px rgba(0,0,0,0.5);
   animation: spin 8s linear infinite;
   position: relative;
+  transition: animation-duration 0.5s;
 }
+.vinyl-record.playing { animation-duration: 2s; }
+.vinyl-record.stopped { animation-play-state: paused; }
 .vinyl-label {
   position: absolute;
   top: 50%; left: 50%;
@@ -179,7 +170,7 @@ a:hover { color: var(--pink); }
 }
 .vinyl-label-text {
   font-family: 'Archivo Black', sans-serif;
-  font-size: clamp(0.55rem, 2vw, 0.85rem);
+  font-size: clamp(0.5rem, 2vw, 0.75rem);
   color: rgba(255,255,255,0.9);
   text-align: center;
   line-height: 1.2;
@@ -204,256 +195,230 @@ a:hover { color: var(--pink); }
   z-index: 3;
   box-shadow: 0 0 0 2px rgba(236,72,153,0.4);
 }
-
-/* Hero text */
 .hero-freq {
   font-family: 'DM Mono', monospace;
   font-size: 0.65rem;
   letter-spacing: 0.35em;
   color: var(--text-dim);
   text-transform: uppercase;
-  margin-top: 80px;
-  margin-bottom: 16px;
+  margin-top: 60px;
+  margin-bottom: 8px;
   text-align: center;
 }
 .hero h1 {
   font-family: 'Archivo Black', sans-serif;
-  font-size: clamp(2.2rem, 7vw, 3.6rem);
+  font-size: clamp(1.8rem, 6vw, 2.8rem);
   color: var(--text);
   line-height: 1.1;
   letter-spacing: -0.01em;
   text-align: center;
 }
-.hero h1 .accent {
-  color: var(--indigo);
-}
-.hero h1 .hot {
-  color: var(--pink);
-}
-.hero-sub {
-  font-size: 0.9rem;
-  color: var(--text-dim);
-  max-width: 360px;
-  margin: 16px auto 0;
-  text-align: center;
-  line-height: 1.8;
-}
-
-/* ── STATS ── */
-.stats-row {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin: 36px auto 0;
-  max-width: 480px;
-  padding: 0 20px;
-  position: relative; z-index: 1;
-}
-.stat-badge {
-  width: 120px; height: 120px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  background: var(--bg-card);
-  position: relative;
-  overflow: hidden;
-}
-.stat-badge::before {
-  content: '';
-  position: absolute; inset: 3px;
-  border-radius: 50%;
-  border: 1px solid rgba(124,58,237,0.06);
-}
-.stat-val {
-  font-family: 'Archivo Black', sans-serif;
-  font-size: 1.6rem;
-  line-height: 1;
-}
-.stat-badge:nth-child(1) .stat-val { color: var(--indigo); }
-.stat-badge:nth-child(2) .stat-val { color: var(--pink); }
-.stat-badge:nth-child(3) .stat-val {
-  background: linear-gradient(135deg, var(--indigo), var(--pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.stat-label {
+.hero h1 .accent { color: var(--indigo); }
+.hero h1 .hot { color: var(--pink); }
+#nowPlaying {
   font-family: 'DM Mono', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--indigo);
+  text-align: center;
+  margin-top: 8px;
+  min-height: 1.2em;
 }
 
-/* ── MAIN ── */
+/* MAIN */
 .main {
-  max-width: 640px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 48px 20px 60px;
+  padding: 20px 16px 60px;
   position: relative; z-index: 1;
 }
-
 .section-label {
   font-family: 'DM Mono', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--text-dim);
-  margin-bottom: 24px;
-  padding-bottom: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--border);
 }
 
-/* ── TRACKLIST ── */
-.track {
-  margin-bottom: 36px;
-  position: relative;
+/* TRACK LIST */
+.track-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 30px;
 }
-.track-inner {
-  border-left: 2px solid var(--border);
-  padding-left: 24px;
-  margin-left: 16px;
-  padding-bottom: 8px;
-}
-
-.track-hdr {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 0 0 12px 0;
-  cursor: default;
-  position: relative;
-}
-.track-num-circle {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Archivo Black', sans-serif;
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  flex-shrink: 0;
-  position: absolute;
-  left: -43px;
-  top: -4px;
-  background: var(--bg);
-}
-.track-inner:first-child .track-num-circle,
-.track.active .track-num-circle {
-  border-color: var(--indigo);
-  color: var(--indigo);
-  box-shadow: 0 0 12px var(--indigo-dim);
-}
-.track-title {
-  font-family: 'Archivo Black', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.01em;
-  flex: 1;
-  color: var(--text);
-}
-.track-eq {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 18px;
-}
-.eq-bar {
-  width: 3px;
-  border-radius: 2px;
-  background: var(--indigo);
-  animation: eq var(--d, 0.8s) ease-in-out infinite alternate;
-}
-@keyframes eq {
-  0% { height: 3px; opacity: 0.4; }
-  100% { height: var(--h, 16px); opacity: 1; }
-}
-.track.active .eq-bar { background: var(--pink); }
-
-.track-desc {
-  font-size: 0.82rem;
-  color: var(--text-dim);
-  margin-bottom: 14px;
-  line-height: 1.8;
-  padding-left: 46px;
-}
-
-/* Sub tracks */
-.sub-track {
+.track-card {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 16px;
+  padding: 12px 16px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  margin-bottom: 6px;
+  border-radius: 12px;
+  cursor: pointer;
   transition: all 0.25s;
 }
-.sub-track:last-child { margin-bottom: 0; }
-.sub-track:hover {
+.track-card:hover {
   background: var(--bg-card-hover);
   border-color: var(--indigo-glow);
+  transform: translateY(-1px);
 }
-.sub-track.active {
+.track-card.active {
   border-color: var(--indigo);
   background: var(--indigo-dim);
   box-shadow: 0 0 20px var(--indigo-dim);
 }
-
-.st-dot {
-  width: 8px; height: 8px;
+.track-play-btn {
+  width: 36px; height: 36px;
   border-radius: 50%;
-  border: 2px solid var(--text-dim);
+  border: 2px solid var(--indigo);
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  transition: all 0.25s;
+  transition: all 0.2s;
+  color: var(--indigo);
 }
-.st-dot.active {
-  background: var(--pink);
-  border-color: var(--pink);
-  box-shadow: 0 0 8px rgba(236,72,153,0.4);
+.track-card.active .track-play-btn {
+  background: var(--indigo);
+  color: #fff;
 }
-.st-text {
-  font-size: 0.82rem;
-  color: var(--text-mid);
-  flex: 1;
-  min-width: 0;
-}
-.sub-track.active .st-text {
+.track-play-btn svg { width: 14px; height: 14px; fill: currentColor; }
+.track-info { flex: 1; min-width: 0; }
+.track-name {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 0.85rem;
   color: var(--text);
-  font-weight: 500;
+  line-height: 1.2;
 }
-.st-tag {
+.track-card.active .track-name { color: var(--pink); }
+.track-artist {
   font-family: 'DM Mono', monospace;
-  font-size: 0.55rem;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+/* CONTROLS */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.ctrl-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ctrl-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-dim);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  flex-shrink: 0;
-  padding: 3px 10px;
-  border-radius: 20px;
+  white-space: nowrap;
 }
-.st-tag.active {
-  color: var(--pink);
-  border: 1px solid rgba(236,72,153,0.3);
-  background: var(--pink-dim);
+.ctrl-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--indigo);
+  min-width: 32px;
+  text-align: right;
 }
-.st-tag.todo {
-  color: var(--text-dim);
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--indigo);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--indigo-glow);
+}
+select {
+  background: var(--bg);
+  color: var(--text);
   border: 1px solid var(--border);
-  background: transparent;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  outline: none;
+  cursor: pointer;
 }
+select:focus { border-color: var(--indigo); }
+.btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--indigo); background: var(--indigo-dim); }
+.btn.active { border-color: var(--indigo); background: var(--indigo); color: #fff; }
+.btn.pink { border-color: var(--pink); color: var(--pink); }
+.btn.pink:hover { background: var(--pink-dim); }
+.btn.danger { border-color: #ef4444; color: #ef4444; }
+.btn.danger:hover { background: rgba(239,68,68,0.1); }
 
-/* ── DEMO / VISUALIZER ── */
-.demo {
+/* PIANO ROLL */
+.piano-roll-wrap {
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
   background: var(--bg-card);
-  margin-top: 8px;
+  margin-bottom: 20px;
 }
-.demo-hdr {
-  padding: 12px 18px;
+.piano-roll-hdr {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.piano-roll-canvas-wrap {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #0d0b12;
+}
+.piano-roll-canvas-wrap canvas {
+  display: block;
+  cursor: crosshair;
+}
+
+/* SPECTRUM */
+.spectrum-wrap {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+.spectrum-hdr {
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border);
   font-family: 'DM Mono', monospace;
   font-size: 0.6rem;
@@ -462,61 +427,27 @@ a:hover { color: var(--pink); }
   text-transform: uppercase;
   display: flex; align-items: center; gap: 10px;
 }
-.demo-play {
-  width: 18px; height: 18px;
-  border: 1.5px solid var(--indigo);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-}
-.demo-play::after {
-  content: '';
-  width: 0; height: 0;
-  border-left: 5px solid var(--indigo);
-  border-top: 3px solid transparent;
-  border-bottom: 3px solid transparent;
-  margin-left: 2px;
-}
-.demo-body {
-  padding: 40px 20px;
-  display: flex; align-items: center; justify-content: center;
-  min-height: 140px;
-  position: relative;
-}
-.demo-viz {
+.spectrum-body {
+  padding: 20px 16px;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
+  height: 100px;
   gap: 2px;
-  height: 70px;
 }
-.viz-bar {
-  width: 3px;
+.spectrum-bar {
+  width: 4px;
+  min-height: 2px;
   border-radius: 2px;
-  background: linear-gradient(0deg, var(--indigo), rgba(124,58,237,0.08));
-  animation: bounce var(--d, 1s) ease-in-out infinite alternate;
-}
-@keyframes bounce {
-  0% { height: var(--min, 3px); }
-  100% { height: var(--max, 30px); }
-}
-.demo-ph {
-  text-align: center;
-  color: var(--text-dim);
-  position: absolute;
-  font-size: 0.85rem;
-  font-family: 'DM Sans', sans-serif;
-}
-.demo-ph span {
-  display: block;
-  font-size: 1.8em;
-  margin-bottom: 8px;
-  opacity: 0.5;
+  background: linear-gradient(0deg, var(--indigo), var(--pink));
+  transition: height 0.05s linear;
 }
 
-/* ── FOOTER ── */
+/* FOOTER */
 .footer {
   position: relative; z-index: 1;
   text-align: center;
-  padding: 48px 20px;
+  padding: 36px 20px;
   font-family: 'DM Mono', monospace;
   font-size: 0.65rem;
   letter-spacing: 0.25em;
@@ -526,28 +457,21 @@ a:hover { color: var(--pink); }
 }
 .footer .pink { color: var(--pink); }
 
-/* ── MOBILE ── */
+/* MOBILE */
 @media (max-width: 768px) {
   .nav { padding: 0 14px; height: 50px; }
   .nav-links { gap: 14px; font-size: 0.6rem; }
-  .hero { padding-top: 80px; }
-  .vinyl-container { width: clamp(200px, 60vw, 280px); height: clamp(200px, 60vw, 280px); margin-bottom: -50px; }
-  .hero-freq { margin-top: 60px; }
-  .stats-row { gap: 10px; flex-wrap: wrap; justify-content: center; }
-  .stat-badge { width: 100px; height: 100px; }
-  .stat-val { font-size: 1.3rem; }
-  .st-tag { display: none; }
-  .track-desc { padding-left: 0; }
-  .track-num-circle { position: static; flex-shrink: 0; }
-  .track-hdr { padding-left: 0; }
-  .track-inner { margin-left: 0; padding-left: 0; border-left: none; }
+  .hero { padding-top: 70px; }
+  .vinyl-container { width: clamp(150px, 45vw, 200px); height: clamp(150px, 45vw, 200px); margin-bottom: -30px; }
+  .hero-freq { margin-top: 50px; }
+  .track-list { grid-template-columns: 1fr; }
+  .controls { gap: 8px; padding: 10px 12px; }
+  input[type="range"] { width: 70px; }
 }
 @media (max-width: 400px) {
   body { font-size: 14px; }
-  .hero h1 { font-size: 1.8rem; }
-  .vinyl-container { width: 180px; height: 180px; margin-bottom: -40px; }
-  .stats-row { padding: 0 10px; }
-  .stat-badge { width: 90px; height: 90px; }
+  .hero h1 { font-size: 1.5rem; }
+  .controls { flex-direction: column; align-items: flex-start; }
 }
 </style>
 </head>
@@ -570,160 +494,792 @@ a:hover { color: var(--pink); }
 </nav>
 
 <section class="hero">
-  <!-- Giant Vinyl -->
-  <div class="vinyl-container">
-    <div class="vinyl-record">
+  <div class="vinyl-container" id="vinylContainer" title="点击播放/暂停">
+    <div class="vinyl-record" id="vinylRecord">
       <div class="vinyl-label">
         <div class="vinyl-label-text">
-          evo<span class="hot" style="color:var(--pink)">•</span>music
-          <small>self-evolving</small>
+          evo<span class="hot" style="color:var(--pink)">&#8226;</span>music
+          <small>player</small>
         </div>
       </div>
       <div class="vinyl-spindle"></div>
     </div>
   </div>
-
-  <div class="hero-freq">project // 003</div>
-  <h1>让音乐<br><span class="accent">自己进化</span></h1>
-  <p class="hero-sub">从乐理基础到自主创作<br>马尔可夫链 + 遗传算法</p>
+  <div class="hero-freq">online music player</div>
+  <h1>Web Audio <span class="accent">合成器</span></h1>
+  <div id="nowPlaying"></div>
 </section>
 
-<!-- Circular stats -->
-<div class="stats-row">
-  <div class="stat-badge">
-    <div class="stat-val" id="devDay">0</div>
-    <div class="stat-label">Days</div>
-  </div>
-  <div class="stat-badge">
-    <div class="stat-val">5</div>
-    <div class="stat-label">Tracks</div>
-  </div>
-  <div class="stat-badge">
-    <div class="stat-val">∞</div>
-    <div class="stat-label">Generations</div>
-  </div>
-</div>
-
 <div class="main">
-  <div class="section-label">// Development Tracklist</div>
+  <div class="section-label">// 曲库 Presets</div>
+  <div class="track-list" id="trackList"></div>
 
-  <div id="roadmap"></div>
+  <div class="section-label">// 控制面板</div>
+  <div class="controls">
+    <button class="btn" id="btnPlay" onclick="togglePlay()">&#9654; Play</button>
+    <button class="btn" id="btnStop" onclick="stopPlay()">&#9632; Stop</button>
+    <button class="btn danger" onclick="clearNotes()">Clear</button>
+    <div class="ctrl-group">
+      <span class="ctrl-label">BPM</span>
+      <input type="range" id="bpmSlider" min="60" max="200" value="120" oninput="updateBPM(this.value)">
+      <span class="ctrl-val" id="bpmVal">120</span>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Wave</span>
+      <select id="waveSelect" onchange="currentWave=this.value">
+        <option value="sine">Sine</option>
+        <option value="square">Square</option>
+        <option value="sawtooth">Sawtooth</option>
+        <option value="triangle">Triangle</option>
+      </select>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Scale</span>
+      <select id="scaleSelect" onchange="currentScale=this.value;drawPianoRoll()">
+        <option value="major">C Major</option>
+        <option value="minor">A Minor</option>
+        <option value="pentatonic">Pentatonic</option>
+      </select>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Vol</span>
+      <input type="range" id="volSlider" min="0" max="100" value="50" oninput="updateVolume(this.value)">
+      <span class="ctrl-val" id="volVal">50</span>
+    </div>
+  </div>
 
-  <!-- Audio visualizer -->
-  <div class="demo">
-    <div class="demo-hdr">
-      <div class="demo-play"></div>
-      audio output
+  <div class="section-label">// 钢琴卷帘 Piano Roll</div>
+  <div class="piano-roll-wrap">
+    <div class="piano-roll-hdr">
+      <span>piano roll editor</span>
+      <span style="color:var(--text-dim);font-size:0.5rem">click to add/remove notes</span>
     </div>
-    <div class="demo-body">
-      <div class="demo-viz" id="visualizer"></div>
-      <div class="demo-ph">
-        <span>🎵</span>
-        音频引擎即将上线
-      </div>
+    <div class="piano-roll-canvas-wrap" id="pianoRollWrap">
+      <canvas id="pianoRollCanvas"></canvas>
     </div>
+  </div>
+
+  <div class="section-label">// 实时频谱 Spectrum</div>
+  <div class="spectrum-wrap">
+    <div class="spectrum-hdr">
+      <span>&#9835;</span> real-time frequency spectrum
+    </div>
+    <div class="spectrum-body" id="spectrumBody"></div>
   </div>
 </div>
 
 <footer class="footer">
-  evo-music · by <span class="pink">阿呆</span>
+  evo-music &middot; by <span class="pink">阿呆</span> &middot; web audio api
 </footer>
 
 <script>
-// Dev days counter
-document.getElementById('devDay').textContent = Math.max(0, Math.floor((Date.now() - new Date('2026-06-17')) / 86400000));
+/* ═══════════════════════════════════════
+   CONSTANTS & STATE
+   ═══════════════════════════════════════ */
+var audioCtx = null;
+var analyser = null;
+var masterGain = null;
+var currentWave = 'sine';
+var currentScale = 'major';
+var bpm = 120;
+var volume = 0.5;
+var isPlaying = false;
+var playTimeouts = [];
+var currentSongIndex = -1;
+var activeSongNotes = [];
 
-// Audio visualizer bars
-const viz = document.getElementById('visualizer');
-if (viz) {
-  for (let i = 0; i < 48; i++) {
-    const b = document.createElement('div');
-    b.className = 'viz-bar';
-    b.style.setProperty('--d', (0.6 + Math.random() * 1.4) + 's');
-    b.style.setProperty('--min', (2 + Math.random() * 4) + 'px');
-    b.style.setProperty('--max', (8 + Math.random() * 28) + 'px');
-    b.style.animationDelay = (Math.random() * 2) + 's';
-    viz.appendChild(b);
+/* Scale definitions: MIDI note offsets from C4(60) */
+var scales = {
+  major: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23],
+  minor: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15, 17, 19, 20, 22],
+  pentatonic: [0, 2, 4, 7, 9, 12, 14, 16, 19, 21]
+};
+
+/* Piano roll grid dimensions */
+var ROWS = 16;
+var COLS = 32;
+var CELL_W = 28;
+var CELL_H = 22;
+var LABEL_W = 36;
+
+/* Note grid for piano roll editing */
+var noteGrid = [];
+for (var r = 0; r < ROWS; r++) {
+  noteGrid[r] = [];
+  for (var c = 0; c < COLS; c++) {
+    noteGrid[r][c] = false;
   }
 }
-(async()=>{
-  const projKey='evo-music';
-  try{
-    const r=await fetch('/data/lab-progress.json');
-    const d=await r.json();
-    const p=d.projects.find(x=>x.name===projKey);if(!p)return;
-    const pct=Math.round(p.progress);
-    const done=[];p.phases.forEach(ph=>{ph.tasks.forEach(t=>{if(t.status==='completed')done.push(t.title)})});
-    const recent=done.slice(-3).reverse();
-    // ── Dynamic roadmap ──
-    const roadmap=document.getElementById('roadmap');
-    // update Tracks stat
-    const tracksStat=[...document.querySelectorAll('.stat-val')].find(el=>el.parentElement.querySelector('.stat-label')?.textContent==='Tracks');
-    if(tracksStat)tracksStat.textContent=p.phases.length;
-    if(roadmap){
-      // order phases by logic: 音乐理论 first, then 旋律→编曲→进化
-      const phaseOrder=['乐理基础','旋律生成','编曲引擎','进化机制'];
-      const sorted=[...p.phases].sort((a,b)=>{
-        const ia=phaseOrder.indexOf(a.name),ib=phaseOrder.indexOf(b.name);
-        return (ia===-1?99:ia)-(ib===-1?99:ib);
-      });
-      // find first phase with a pending (not all-done) task → that's "active"
-      let activePhaseIdx=sorted.findIndex(ph=>ph.done<ph.total);
-      if(activePhaseIdx===-1) activePhaseIdx=0;
-      // find first pending task in active phase
-      const activeTasks=[];
-      sorted[activePhaseIdx].tasks.forEach(t=>{if(t.status!=='completed')activeTasks.push(t)});
-      const activeTaskSet=new Set(activeTasks.map(t=>t.title));
-      sorted.forEach((ph,idx)=>{
-        const num=String(idx+1).padStart(2,'0');
-        const isActive=idx===activePhaseIdx;
-        const pct=Math.round(ph.done/ph.total*100);
-        // random EQ bars (more bars for active)
-        const barCount=isActive?5:Math.max(2,Math.round(ph.done/ph.total*5)+1);
-        let eqHTML='<div class="track-eq">';
-        for(let b=0;b<barCount;b++){
-          const d=(0.4+Math.random()*1.3).toFixed(1);
-          const h=Math.round(4+Math.random()*14);
-          eqHTML+='<div class="eq-bar" style="--d:'+d+'s;--h:'+h+'px"></div>';
-        }
-        eqHTML+='</div>';
-        // progress micro bar
-        const microBar='<div style="width:60px;height:3px;background:rgba(124,58,237,0.12);border-radius:2px;overflow:hidden;flex-shrink:0"><div style="height:100%;width:'+pct+'%;background:'+(ph.done>0?'var(--indigo)':'var(--border)')+';border-radius:2px;transition:width 0.5s"></div></div>';
-        let trackHTML='<div class="track'+(isActive?' active':'')+'"><div class="track-inner"><div class="track-hdr"><div class="track-num-circle">'+num+'</div><div class="track-title">'+ph.name+'</div>'+eqHTML+microBar+'<span style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--text-dim)">'+ph.done+'/'+ph.total+'</span></div>';
-        ph.tasks.forEach(task=>{
-          const isCompleted=task.status==='completed';
-          const isCurrent=isActive&&activeTaskSet.has(task.title)&&!isCompleted;
-          let cls='sub-track';
-          if(isCurrent)cls+=' active';
-          let dotCls='st-dot';
-          if(isCompleted)dotCls+=' active';
-          else if(isCurrent)dotCls+=' active';
-          // clean title: remove prefix like "Design: " for display
-          const label=task.title.replace(/^(Design|Spec|Implement|Test)\s*:\s*/,'');
-          const prefix=task.title.match(/^(Design|Spec|Implement|Test)\s*:/)?.[1]||'';
-          let tagHTML='';
-          if(isCompleted) tagHTML='<span class="st-tag active">✓ done</span>';
-          else if(isCurrent) tagHTML='<span class="st-tag active">building</span>';
-          else tagHTML='<span class="st-tag todo">planned</span>';
-          trackHTML+='<div class="'+cls+'"><div class="'+dotCls+'"></div>';
-          if(prefix){
-            trackHTML+='<span style="font-family:DM Mono,monospace;font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:'+(isCompleted?'var(--indigo)':'var(--text-dim)')+';flex-shrink:0;min-width:52px">'+prefix+'</span>';
-          }
-          trackHTML+='<div class="st-text">'+(isCompleted?'<span style="color:var(--indigo)">✓ </span>':'')+label+'</div>'+tagHTML+'</div>';
-        });
-        trackHTML+='</div></div>';
-        roadmap.insertAdjacentHTML('beforeend',trackHTML);
-      });
-    }
-    // ── Banner ──
-    const banner=document.createElement('div');
-    banner.id='lab-progress-bar';
-    banner.style.cssText='position:relative;z-index:50;padding-top:56px;padding:8px 20px 20px;background:rgba(124,58,237,0.1);border-bottom:1px solid rgba(124,58,237,0.15);font-family:DM Mono,monospace;font-size:11px;letter-spacing:0.05em;color:#c4b5fd;display:flex;align-items:center;gap:12px;flex-wrap:wrap';
-    let recentHTML=recent.length?recent.map(t=>'<span style="color:#a78bfa">✓ '+t+'</span>').join(' · '):'';
-    banner.innerHTML='<span style="font-weight:600;color:#a78bfa">'+pct+'%</span><div style="flex:1;min-width:80px;height:3px;background:rgba(124,58,237,0.15);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#7c3aed;border-radius:2px;transition:width 0.6s"></div></div><span>'+p.done+'/'+p.total+'</span>'+(recentHTML?'<span style="margin-left:auto;font-size:10px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+recentHTML+'</span>':'');
-    document.body.prepend(banner);
-  }catch(e){}
+
+/* Playback position */
+var playCol = -1;
+
+/* MIDI to frequency */
+function midiToFreq(n) {
+  return 440 * Math.pow(2, (n - 69) / 12);
+}
+
+/* ═══════════════════════════════════════
+   AUDIO INIT (lazy, on first user gesture)
+   ═══════════════════════════════════════ */
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 256;
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = volume;
+  masterGain.connect(analyser);
+  analyser.connect(audioCtx.destination);
+  startSpectrum();
+}
+
+/* Play a single note */
+function playNote(freq, startTime, duration) {
+  var osc = audioCtx.createOscillator();
+  var gain = audioCtx.createGain();
+  osc.type = currentWave;
+  osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(0.3, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration * 0.9);
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+/* ═══════════════════════════════════════
+   SONGS DATA
+   ═══════════════════════════════════════ */
+var songs = [];
+
+/* Note helper: {n: midi, t: beat (0-based), d: beats duration} */
+function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
+
+/* 1. 小星星 Twinkle Twinkle */
+(function() {
+  var c=60,d=62,e=64,f=65,g=67,a=69;
+  var melody = [
+    N(c,0,1),N(c,1,1),N(g,2,1),N(g,3,1),
+    N(a,4,1),N(a,5,1),N(g,6,2),
+    N(f,8,1),N(f,9,1),N(e,10,1),N(e,11,1),
+    N(d,12,1),N(d,13,1),N(c,14,2),
+    N(g,16,1),N(g,17,1),N(f,18,1),N(f,19,1),
+    N(e,20,1),N(e,21,1),N(d,22,2),
+    N(g,24,1),N(g,25,1),N(f,26,1),N(f,27,1),
+    N(e,28,1),N(e,29,1),N(d,30,2),
+    N(c,32,1),N(c,33,1),N(g,34,1),N(g,35,1),
+    N(a,36,1),N(a,37,1),N(g,38,2),
+    N(f,40,1),N(f,41,1),N(e,42,1),N(e,43,1),
+    N(d,44,1),N(d,45,1),N(c,46,2)
+  ];
+  songs.push({name:'小星星', artist:'Traditional', notes: melody});
 })();
+
+/* 2. 两只老虎 */
+(function() {
+  var c=60,d=62,e=64,f=65,g=67;
+  var m = [
+    N(c,0,1),N(d,1,1),N(e,2,1),N(c,3,1),
+    N(c,4,1),N(d,5,1),N(e,6,1),N(c,7,1),
+    N(e,8,1),N(f,9,1),N(g,10,2),
+    N(e,12,1),N(f,13,1),N(g,14,2),
+    N(g,16,0.5),N(a,16.5,0.5),N(g,17,0.5),N(f,17.5,0.5),
+    N(e,18,1),N(c,19,1),
+    N(g,20,0.5),N(a,20.5,0.5),N(g,21,0.5),N(f,21.5,0.5),
+    N(e,22,1),N(c,23,1),
+    N(c,24,1),N(g,24.5,0.5),N(c,25.5,0.5),
+    N(c,26,1),N(g,26.5,0.5),N(c,27.5,0.5)
+  ];
+  songs.push({name:'两只老虎', artist:'Traditional', notes: m});
+})();
+
+/* 3. 生日快乐 Happy Birthday */
+(function() {
+  var c=60,d=62,e=64,f=65,g=67,a=69;
+  var m = [
+    N(c,0,0.75),N(c,0.75,0.25),N(d,1,1),N(c,2,1),N(f,3,1),N(e,4,2),
+    N(c,6,0.75),N(c,6.75,0.25),N(d,7,1),N(c,8,1),N(g,9,1),N(f,10,2),
+    N(c,12,0.75),N(c,12.75,0.25),N(c,13,1),N(a,14,1),N(f,15,1),N(e,16,1),N(d,17,2),
+    N(a,19,0.75),N(a,19.75,0.25),N(a,20,1),N(f,21,1),N(g,22,1),N(f,23,2)
+  ];
+  songs.push({name:'生日快乐', artist:'Patty Hill', notes: m});
+})();
+
+/* 4. 茉莉花 */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74,e5=76;
+  var m = [
+    /* 好一朵美丽的茉莉花 */
+    N(g4,0,1),N(a4,1,0.5),N(a4,1.5,0.5),N(b4,2,1),N(a4,3,1),N(g4,4,1),
+    /* 好一朵美丽的茉莉花 */
+    N(g4,5,1),N(a4,6,0.5),N(a4,6.5,0.5),N(b4,7,1),N(a4,8,1),N(g4,9,1),
+    /* 芬芳美丽满枝桠 */
+    N(e5,10,1),N(e5,11,0.5),N(d5,11.5,0.5),N(c5,12,1),N(b4,13,1),N(a4,14,1),
+    /* 又香又白人人夸 */
+    N(a4,15,1),N(g4,16,0.5),N(a4,16.5,0.5),N(b4,17,1),N(a4,18,1),N(g4,19,1),
+    /* 让我来将你摘下 */
+    N(e5,20,1),N(e5,21,0.5),N(d5,21.5,0.5),N(c5,22,1),N(b4,23,1),N(a4,24,1),
+    /* 送给别人家 */
+    N(b4,25,1),N(a4,26,1),N(g4,27,2),
+    /* 茉莉花啊茉莉花 */
+    N(g4,29,1),N(a4,30,0.5),N(a4,30.5,0.5),N(b4,31,1),N(a4,32,1),N(g4,33,2)
+  ];
+  songs.push({name:'茉莉花', artist:'Chinese Folk', notes: m});
+})();
+
+/* 5. 天空之城 Castle in the Sky */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74,e5=76,f5=77,g5=79;
+  var m = [
+    N(g4,0,1),N(a4,1,1),N(b4,2,1),N(a4,3,1),
+    N(g4,4,1),N(e4,5,1.5),N(d4,6.5,0.5),N(e4,7,1),
+    N(g4,8,1),N(a4,9,1),N(b4,10,1),N(a4,11,1),
+    N(g4,12,1),N(a4,13,0.5),N(b4,13.5,0.5),N(a4,14,1),N(g4,15,1),
+    N(e4,16,1),N(d4,17,1),N(e4,18,1),N(d4,19,1),
+    N(c4,20,2),N(d4,22,2),
+    N(e4,24,1),N(g4,25,1),N(a4,26,1),N(b4,27,1),
+    N(a4,28,1),N(g4,29,1),N(e4,30,1),N(d4,31,1),
+    N(e4,32,1),N(g4,33,1),N(a4,34,1),N(g4,35,1),
+    N(e4,36,1),N(d4,37,1.5),N(e4,38.5,0.5),N(g4,39,1),
+    N(a4,40,1),N(b4,41,1),N(c5,42,1),N(b4,43,1),
+    N(a4,44,1),N(g4,45,1),N(a4,46,1),N(g4,47,1),
+    N(e4,48,1),N(d4,49,2),N(c4,51,2)
+  ];
+  songs.push({name:'天空之城', artist:'Joe Hisaishi', notes: m});
+})();
+
+/* 6. 卡农 Canon in D */
+(function() {
+  /* D major scale: D4=62, E4=64, F#4=66, G4=67, A4=69, B4=71, C#5=73, D5=74 */
+  var d4=62,e4=64,fs4=66,g4=67,a4=69,b4=71,cs5=73,d5=74;
+  var a3=57,b3=59,fs3=54;
+  var m = [
+    /* Melody over D-A-Bm-F#m-G-D-G-A progression, repeated */
+    /* Phrase 1 */
+    N(fs4,0,2),N(e4,2,2),N(d4,4,2),N(cs5,6,2),
+    N(b4,8,2),N(a4,10,2),N(g4,12,2),N(a4,14,2),
+    N(fs4,16,2),N(e4,18,2),N(d4,20,2),N(cs5,22,2),
+    N(b4,24,2),N(a4,26,2),N(b4,28,2),N(cs5,30,2),
+    /* Phrase 2 variation */
+    N(d5,32,2),N(cs5,34,2),N(b4,36,2),N(a4,38,2),
+    N(g4,40,2),N(fs4,42,2),N(e4,44,2),N(d4,46,2),
+    /* Phrase 1 again */
+    N(fs4,48,2),N(e4,50,2),N(d4,52,2),N(cs5,54,2),
+    N(b4,56,2),N(a4,58,2),N(g4,60,2),N(a4,62,2)
+  ];
+  songs.push({name:'卡农', artist:'Pachelbel', notes: m});
+})();
+
+/* 7. 致爱丽丝 Für Elise (main theme) */
+(function() {
+  var e4=64,d4=62,cs4=61,c4=60,b3=59,a3=57,g3=55,f3=53,e3=52,d3=50;
+  var e5=76,d5=74,cs5=73,b4=71,a4=69,g4=67,f4=65,e4=64,d4=62,cs4=61,c4=60;
+  var m = [
+    /* E5 D#5 E5 D#5 E5 B4 D5 C5 A4... */
+    N(e5,0,0.5),N(cs5,0.5,0.5),N(e5,1,0.5),N(cs5,1.5,0.5),
+    N(e5,2,0.5),N(b4,2.5,0.5),N(d5,3,0.5),N(c5,3.5,0.5),
+    N(a4,4,1),N(c4,5,0.5),N(e4,5.5,0.5),N(a4,6,0.5),N(b4,6.5,0.5),
+    N(e4,7,0.5),N(gs4,7.5,0.5),N(b4,8,0.5),N(c5,8.5,0.5),
+    N(e4,9,0.5),N(e5,9.5,0.5),N(cs5,10,0.5),N(e5,10.5,0.5),
+    N(cs5,11,0.5),N(e5,11.5,0.5),N(b4,12,0.5),N(d5,12.5,0.5),
+    N(c5,13,0.5),N(a4,13.5,0.5),N(c4,14,0.5),N(e4,14.5,0.5),
+    N(a4,15,0.5),N(b4,15.5,0.5),N(e4,16,0.5),N(cs5,16.5,0.5),
+    N(b4,17,1),N(a4,18,1),
+    /* Repeat main theme */
+    N(e5,20,0.5),N(cs5,20.5,0.5),N(e5,21,0.5),N(cs5,21.5,0.5),
+    N(e5,22,0.5),N(b4,22.5,0.5),N(d5,23,0.5),N(c5,23.5,0.5),
+    N(a4,24,1),N(c4,25,0.5),N(e4,25.5,0.5),N(a4,26,0.5),N(b4,26.5,0.5),
+    N(e4,27,0.5),N(gs4,27.5,0.5),N(b4,28,0.5),N(c5,28.5,0.5),
+    N(e4,29,0.5),N(e5,29.5,0.5),N(cs5,30,0.5),N(e5,30.5,0.5),
+    N(cs5,31,0.5),N(e5,31.5,0.5),N(b4,32,0.5),N(d5,32.5,0.5),
+    N(c5,33,0.5),N(a4,33.5,0.5),
+    N(c4,34,0.5),N(e4,34.5,0.5),N(a4,35,0.5),N(b4,35.5,0.5),
+    N(e4,36,0.5),N(d5,36.5,0.5),N(c5,37,0.5),N(b4,37.5,0.5),
+    N(a4,38,1)
+  ];
+  songs.push({name:'致爱丽丝', artist:'Beethoven', notes: m});
+})();
+
+/* 8. 梦中的婚礼 Mariage d'Amour */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74,e5=76,f5=77,g5=79,a5=81;
+  var m = [
+    N(b4,0,1),N(c5,1,1),N(d5,2,1),N(e5,3,1),
+    N(b4,4,1),N(c5,5,1),N(d5,6,1),N(e5,7,1),
+    N(c5,8,1),N(d5,9,1),N(e5,10,2),
+    N(d5,12,1),N(e5,13,1),N(d5,14,2),
+    N(c5,16,1),N(d5,17,1),N(e5,18,2),
+    N(d5,20,1),N(c5,21,1),N(b4,22,2),
+    N(a4,24,1),N(b4,25,1),N(c5,26,2),
+    N(b4,28,1),N(a4,29,1),N(g4,30,2),
+    N(a4,32,1),N(b4,33,1),N(c5,34,1),N(d5,35,1),
+    N(e5,36,1),N(d5,37,1),N(c5,38,1),N(b4,39,1),
+    N(c5,40,1),N(d5,41,1),N(e5,42,2),
+    N(d5,44,2),N(c5,46,2),
+    N(b4,48,2),N(a4,50,2),
+    N(g4,52,1),N(a4,53,1),N(b4,54,1),N(c5,55,1),
+    N(d5,56,1),N(e5,57,1),N(d5,58,1),N(c5,59,1),
+    N(b4,60,1),N(a4,61,1),N(g4,62,2)
+  ];
+  songs.push({name:'梦中的婚礼', artist:'Richard Clayderman', notes: m});
+})();
+
+/* 9. 沧海一声笑 */
+(function() {
+  /* Pentatonic: A C D E G — A3=57, C4=60, D4=62, E4=64, G4=67, A4=69, C5=72, D5=74, E5=76 */
+  var a3=57,c4=60,d4=62,e4=64,g4=67,a4=69,c5=72,d5=74,e5=76;
+  var m = [
+    N(a3,0,2),N(c4,2,2),N(d4,4,2),N(e4,6,2),
+    N(d4,8,2),N(c4,10,2),N(a3,12,2),
+    N(c4,14,2),N(d4,16,2),N(e4,18,2),N(g4,20,2),
+    N(e4,22,2),N(d4,24,2),N(c4,26,2),
+    N(d4,28,2),N(e4,30,2),N(g4,32,2),N(a4,34,2),
+    N(g4,36,2),N(e4,38,2),N(d4,40,2),
+    N(a3,42,2),N(c4,44,2),N(d4,46,2),N(e4,48,2),
+    N(d4,50,2),N(c4,52,2),N(a3,54,2),
+    N(e4,56,1),N(d4,57,1),N(c4,58,1),N(a3,59,1),
+    N(c4,60,1),N(d4,61,1),N(e4,62,2),
+    N(d4,64,1),N(c4,65,1),N(a3,66,2)
+  ];
+  songs.push({name:'沧海一声笑', artist:'黄霑', notes: m});
+})();
+
+/* 10. 夜曲 Nocturne Op.9 No.2 (simplified) */
+(function() {
+  var eb4=63,f4=65,g4=67,ab4=68,bb4=70,c5=72,db5=73,eb5=75,f5=77,db4=61;
+  var m = [
+    N(eb5,0,1),N(db5,1,1),N(eb5,2,1),N(f5,3,1),
+    N(eb5,4,1),N(db5,5,1),N(c5,6,1),N(bb4,7,1),
+    N(ab4,8,1),N(bb4,9,1),N(c5,10,2),
+    N(bb4,12,1),N(c5,13,1),N(db5,14,1),N(eb5,15,1),
+    N(db5,16,1),N(c5,17,1),N(bb4,18,2),
+    N(ab4,20,1),N(g4,21,1),N(ab4,22,1),N(bb4,23,1),
+    N(c5,24,1),N(db5,25,1),N(c5,26,1),N(bb4,27,1),
+    N(ab4,28,1),N(g4,29,1),N(f4,30,2),
+    N(eb4,32,1),N(f4,33,1),N(g4,34,1),N(ab4,35,1),
+    N(ab4,28,1),N(g4,29,1),N(f4,30,2),
+    N(eb4,32,1),N(f4,33,1),N(g4,34,1),N(ab4,35,1),
+    N(bb4,36,1),N(c5,37,1),N(bb4,38,1),N(ab4,39,1),
+    N(g4,40,1),N(f4,41,1),N(eb4,42,2),
+    N(f4,44,1),N(g4,45,1),N(ab4,46,1),N(bb4,47,1),
+    N(c5,48,1),N(bb4,49,1),N(ab4,50,1),N(g4,51,1),
+    N(f4,52,1),N(eb4,53,1),N(db4,54,2)
+  ];
+  songs.push({name:'夜曲', artist:'Chopin', notes: m});
+})();
+
+/* ═══════════════════════════════════════
+   TRACK LIST UI
+   ═══════════════════════════════════════ */
+function renderTrackList() {
+  var container = document.getElementById('trackList');
+  var html = '';
+  for (var i = 0; i < songs.length; i++) {
+    var s = songs[i];
+    var activeClass = (i === currentSongIndex) ? ' active' : '';
+    html += '<div class="track-card' + activeClass + '" onclick="loadSong(' + i + ')" data-idx="' + i + '">';
+    html += '<div class="track-play-btn"><svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg></div>';
+    html += '<div class="track-info"><div class="track-name">' + s.name + '</div>';
+    html += '<div class="track-artist">' + s.artist + '</div></div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════
+   LOAD SONG TO PIANO ROLL + PLAY
+   ═══════════════════════════════════════ */
+function loadSong(idx) {
+  initAudio();
+  stopPlay();
+  currentSongIndex = idx;
+  activeSongNotes = songs[idx].notes.slice();
+
+  /* Clear grid and place notes */
+  clearGrid();
+  var scaleNotes = scales[currentScale];
+  for (var i = 0; i < activeSongNotes.length; i++) {
+    var note = activeSongNotes[i];
+    /* Find row: map midi to row index (highest note = row 0) */
+    var row = midiToRow(note.n);
+    if (row >= 0 && row < ROWS) {
+      var col = Math.floor(note.t);
+      if (col >= 0 && col < COLS) {
+        noteGrid[row][col] = true;
+      }
+    }
+  }
+
+  renderTrackList();
+  drawPianoRoll();
+  document.getElementById('nowPlaying').innerHTML = '&#9835; ' + songs[idx].name + ' — ' + songs[idx].artist;
+  togglePlay();
+}
+
+/* Map MIDI note to piano roll row */
+function midiToRow(midi) {
+  var scaleNotes = scales[currentScale];
+  /* Row 0 = highest note in scale range */
+  var baseMidi = 60; /* C4 */
+  for (var r = ROWS - 1; r >= 0; r--) {
+    var noteMidi = baseMidi + scaleNotes[r % scaleNotes.length] + Math.floor(r / scaleNotes.length) * 12;
+    /* Simpler: just invert */
+  }
+  /* Simple approach: row 0 = top = highest pitch */
+  /* Map midi 48-83 (C3 to B5) to rows 15-0 */
+  return ROWS - 1 - Math.max(0, Math.min(ROWS - 1, midi - 48));
+}
+
+function rowToMidi(row) {
+  return 48 + (ROWS - 1 - row);
+}
+
+/* ═══════════════════════════════════════
+   PIANO ROLL DRAWING (Canvas)
+   ═══════════════════════════════════════ */
+var pianoCanvas, pianoCtx;
+
+/* roundRect polyfill */
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (typeof r === 'number') r = [r,r,r,r];
+    this.moveTo(x + r[0], y);
+    this.lineTo(x + w - r[1], y);
+    this.quadraticCurveTo(x + w, y, x + w, y + r[1]);
+    this.lineTo(x + w, y + h - r[2]);
+    this.quadraticCurveTo(x + w, y + h, x + w - r[2], y + h);
+    this.lineTo(x + r[3], y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - r[3]);
+    this.lineTo(x, y + r[0]);
+    this.quadraticCurveTo(x, y, x + r[0], y);
+    this.closePath();
+    return this;
+  };
+}
+
+function initPianoRoll() {
+  pianoCanvas = document.getElementById('pianoRollCanvas');
+  pianoCtx = pianoCanvas.getContext('2d');
+  resizePianoRoll();
+  drawPianoRoll();
+  pianoCanvas.addEventListener('click', onPianoRollClick);
+  window.addEventListener('resize', function() {
+    resizePianoRoll();
+    drawPianoRoll();
+  });
+}
+
+function resizePianoRoll() {
+  var wrap = document.getElementById('pianoRollWrap');
+  var wrapW = wrap.clientWidth;
+  var totalW = LABEL_W + COLS * CELL_W;
+  pianoCanvas.width = Math.max(totalW, wrapW);
+  pianoCanvas.height = ROWS * CELL_H;
+  pianoCanvas.style.width = Math.max(totalW, wrapW) + 'px';
+  pianoCanvas.style.height = (ROWS * CELL_H) + 'px';
+}
+
+function drawPianoRoll() {
+  if (!pianoCtx) return;
+  var ctx = pianoCtx;
+  var w = pianoCanvas.width;
+  var h = pianoCanvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  /* Draw grid lines */
+  ctx.strokeStyle = 'rgba(124,58,237,0.08)';
+  ctx.lineWidth = 1;
+  for (var c = 0; c <= COLS; c++) {
+    var x = LABEL_W + c * CELL_W;
+    ctx.beginPath();
+    ctx.moveTo(x + 0.5, 0);
+    ctx.lineTo(x + 0.5, h);
+    ctx.stroke();
+  }
+  for (var r = 0; r <= ROWS; r++) {
+    var y = r * CELL_H;
+    ctx.beginPath();
+    ctx.moveTo(LABEL_W, y + 0.5);
+    ctx.lineTo(w, y + 0.5);
+    ctx.stroke();
+  }
+
+  /* Draw note labels on left */
+  ctx.font = '9px DM Mono, monospace';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  var noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  for (var r = 0; r < ROWS; r++) {
+    var midi = rowToMidi(r);
+    var name = noteNames[midi % 12] + Math.floor(midi / 12 - 1);
+    /* Highlight black keys row */
+    var isBlack = [1,3,6,8,10].indexOf(midi % 12) >= 0;
+    if (isBlack) {
+      ctx.fillStyle = 'rgba(124,58,237,0.06)';
+      ctx.fillRect(0, r * CELL_H, LABEL_W, CELL_H);
+      ctx.fillRect(LABEL_W, r * CELL_H, w - LABEL_W, CELL_H);
+    }
+    ctx.fillStyle = isBlack ? '#6b5f80' : '#8b7fa8';
+    ctx.fillText(name, LABEL_W - 4, r * CELL_H + CELL_H / 2);
+  }
+
+  /* Draw separator line */
+  ctx.strokeStyle = 'rgba(124,58,237,0.2)';
+  ctx.beginPath();
+  ctx.moveTo(LABEL_W + 0.5, 0);
+  ctx.lineTo(LABEL_W + 0.5, h);
+  ctx.stroke();
+
+  /* Draw notes */
+  for (var r = 0; r < ROWS; r++) {
+    for (var c = 0; c < COLS; c++) {
+      if (noteGrid[r][c]) {
+        var x = LABEL_W + c * CELL_W + 1;
+        var y = r * CELL_H + 1;
+        var nw = CELL_W - 2;
+        var nh = CELL_H - 2;
+
+        /* Gradient based on column position */
+        var hue = 260 + (c / COLS) * 60; /* indigo to pink */
+        ctx.fillStyle = 'hsla(' + hue + ', 80%, 60%, 0.85)';
+        ctx.beginPath();
+        ctx.roundRect(x, y, nw, nh, 3);
+        ctx.fill();
+
+        /* Glow */
+        ctx.shadowColor = 'hsla(' + hue + ', 80%, 60%, 0.4)';
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+  }
+
+  /* Draw playhead */
+  if (playCol >= 0 && playCol < COLS) {
+    var px = LABEL_W + playCol * CELL_W;
+    ctx.fillStyle = 'rgba(236,72,153,0.15)';
+    ctx.fillRect(px, 0, CELL_W, h);
+    ctx.strokeStyle = 'rgba(236,72,153,0.8)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(px, 0);
+    ctx.lineTo(px, h);
+    ctx.stroke();
+  }
+}
+
+/* Handle click on piano roll */
+function onPianoRollClick(e) {
+  var rect = pianoCanvas.getBoundingClientRect();
+  var scaleX = pianoCanvas.width / rect.width;
+  var scaleY = pianoCanvas.height / rect.height;
+  var mx = (e.clientX - rect.left) * scaleX;
+  var my = (e.clientY - rect.top) * scaleY;
+
+  var col = Math.floor((mx - LABEL_W) / CELL_W);
+  var row = Math.floor(my / CELL_H);
+
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
+
+  noteGrid[row][col] = !noteGrid[row][col];
+
+  /* If user edits, clear active song association */
+  if (noteGrid[row][col]) {
+    activeSongNotes.push({n: rowToMidi(row), t: col, d: 1});
+  } else {
+    for (var i = activeSongNotes.length - 1; i >= 0; i--) {
+      if (activeSongNotes[i].n === rowToMidi(row) && Math.floor(activeSongNotes[i].t) === col) {
+        activeSongNotes.splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  drawPianoRoll();
+}
+
+/* ═══════════════════════════════════════
+   PLAYBACK ENGINE
+   ═══════════════════════════════════════ */
+function togglePlay() {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  if (isPlaying) {
+    pausePlay();
+    return;
+  }
+
+  if (activeSongNotes.length === 0) return;
+
+  isPlaying = true;
+  document.getElementById('btnPlay').innerHTML = '&#10074;&#10074; Pause';
+  document.getElementById('vinylRecord').classList.add('playing');
+  document.getElementById('vinylRecord').classList.remove('stopped');
+
+  /* Find max beat to know total length */
+  var maxBeat = 0;
+  for (var i = 0; i < activeSongNotes.length; i++) {
+    var endBeat = activeSongNotes[i].t + activeSongNotes[i].d;
+    if (endBeat > maxBeat) maxBeat = endBeat;
+  }
+  var totalBeats = Math.ceil(maxBeat) + 1;
+
+  /* Schedule all notes using Web Audio scheduling */
+  var beatDur = 60 / bpm;
+  var startTime = audioCtx.currentTime + 0.05;
+
+  for (var i = 0; i < activeSongNotes.length; i++) {
+    var note = activeSongNotes[i];
+    var t = startTime + note.t * beatDur;
+    var d = Math.max(0.1, note.d * beatDur);
+    playNote(midiToFreq(note.n), t, d);
+  }
+
+  /* Animate playhead */
+  var startT = performance.now();
+  var totalDurMs = totalBeats * beatDur * 1000;
+
+  function animate() {
+    if (!isPlaying) return;
+    var elapsed = performance.now() - startT;
+    var currentBeat = elapsed / (beatDur * 1000);
+    playCol = Math.floor(currentBeat);
+    drawPianoRoll();
+    if (playCol < COLS && elapsed < totalDurMs) {
+      requestAnimationFrame(animate);
+    } else {
+      stopPlay();
+    }
+  }
+  requestAnimationFrame(animate);
+
+  /* Auto-stop after song ends */
+  var autoStop = setTimeout(function() {
+    if (isPlaying) stopPlay();
+  }, totalDurMs + 200);
+  playTimeouts.push(autoStop);
+}
+
+function pausePlay() {
+  isPlaying = false;
+  playCol = -1;
+  document.getElementById('btnPlay').innerHTML = '&#9654; Play';
+  document.getElementById('vinylRecord').classList.remove('playing');
+  document.getElementById('vinylRecord').classList.add('stopped');
+  clearTimeouts();
+  drawPianoRoll();
+}
+
+function stopPlay() {
+  isPlaying = false;
+  playCol = -1;
+  currentSongIndex = -1;
+  activeSongNotes = [];
+  clearGrid();
+  document.getElementById('btnPlay').innerHTML = '&#9654; Play';
+  document.getElementById('vinylRecord').classList.remove('playing');
+  document.getElementById('vinylRecord').classList.remove('stopped');
+  document.getElementById('nowPlaying').innerHTML = '';
+  clearTimeouts();
+  renderTrackList();
+  drawPianoRoll();
+}
+
+function clearNotes() {
+  stopPlay();
+  clearGrid();
+  drawPianoRoll();
+}
+
+function clearGrid() {
+  for (var r = 0; r < ROWS; r++) {
+    for (var c = 0; c < COLS; c++) {
+      noteGrid[r][c] = false;
+    }
+  }
+}
+
+function clearTimeouts() {
+  for (var i = 0; i < playTimeouts.length; i++) {
+    clearTimeout(playTimeouts[i]);
+  }
+  playTimeouts = [];
+}
+
+/* ═══════════════════════════════════════
+   CONTROLS
+   ═══════════════════════════════════════ */
+function updateBPM(val) {
+  bpm = parseInt(val, 10);
+  document.getElementById('bpmVal').textContent = val;
+}
+
+function updateVolume(val) {
+  volume = parseInt(val, 10) / 100;
+  document.getElementById('volVal').textContent = val;
+  if (masterGain) masterGain.gain.value = volume;
+}
+
+/* Vinyl click to toggle play */
+document.getElementById('vinylContainer').addEventListener('click', function() {
+  if (isPlaying) {
+    pausePlay();
+  } else if (activeSongNotes.length > 0) {
+    togglePlay();
+  } else if (songs.length > 0) {
+    loadSong(0);
+  }
+});
+
+/* ═══════════════════════════════════════
+   SPECTRUM VISUALIZER
+   ═══════════════════════════════════════ */
+var spectrumBars = [];
+var spectrumRunning = false;
+
+function initSpectrum() {
+  var container = document.getElementById('spectrumBody');
+  for (var i = 0; i < 48; i++) {
+    var bar = document.createElement('div');
+    bar.className = 'spectrum-bar';
+    bar.style.height = '2px';
+    container.appendChild(bar);
+    spectrumBars.push(bar);
+  }
+}
+
+function startSpectrum() {
+  if (spectrumRunning) return;
+  spectrumRunning = true;
+  var bufLen = analyser.frequencyBinCount;
+  var dataArr = new Uint8Array(bufLen);
+
+  function update() {
+    if (!analyser) return;
+    analyser.getByteFrequencyData(dataArr);
+    var step = Math.floor(bufLen / spectrumBars.length);
+    for (var i = 0; i < spectrumBars.length; i++) {
+      var val = dataArr[i * step] || 0;
+      var h = Math.max(2, (val / 255) * 80);
+      spectrumBars[i].style.height = h + 'px';
+    }
+    requestAnimationFrame(update);
+  }
+  update();
+}
+
+/* ═══════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════ */
+renderTrackList();
+initPianoRoll();
+initSpectrum();
 </script>
 </body>
 </html>
