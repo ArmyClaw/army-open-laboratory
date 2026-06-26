@@ -400,24 +400,69 @@ select {
 }
 select:focus { border-color: var(--indigo); }
 .btn {
-  padding: 8px 14px;
+  padding: 12px 20px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--bg-card);
   color: var(--text);
   font-family: 'DM Mono', monospace;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
 }
-.btn:hover { border-color: var(--indigo); background: var(--indigo-dim); }
-.btn.active { border-color: var(--indigo); background: var(--indigo); color: #fff; }
+.btn:hover { border-color: var(--indigo); background: var(--indigo-dim); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn.active { border-color: var(--indigo); background: var(--indigo); color: #fff; box-shadow: 0 0 20px var(--indigo-glow); }
 .btn.pink { border-color: var(--pink); color: var(--pink); }
 .btn.pink:hover { background: var(--pink-dim); }
 .btn.danger { border-color: #ef4444; color: #ef4444; }
-.btn.danger:hover { background: rgba(239,68,68,0.1); }
+.btn.danger:hover { background: rgba(239,68,68,0.15); }
+
+.btn-play {
+  background: linear-gradient(135deg, var(--indigo) 0%, #6d28d9 100%);
+  border-color: var(--indigo);
+  color: #fff;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 20px var(--indigo-glow);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.btn-play:hover { background: linear-gradient(135deg, #8b5cf6 0%, var(--indigo) 100%); box-shadow: 0 6px 30px rgba(124,58,237,0.4); }
+.btn-play .icon { font-size: 1.1em; }
+
+.btn-stop {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.15);
+  color: var(--text);
+  padding: 14px 24px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+}
+.btn-stop:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
+
+.btn-clear {
+  background: rgba(239,68,68,0.08);
+  border-color: rgba(239,68,68,0.3);
+  color: #f87171;
+  padding: 14px 24px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+}
+.btn-clear:hover { background: rgba(239,68,68,0.15); border-color: #ef4444; }
+
+.main-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
 
 /* PIANO ROLL */
 .piano-roll-wrap {
@@ -578,7 +623,9 @@ select:focus { border-color: var(--indigo); }
   .controls { gap: 6px; padding: 10px 10px; }
   input[type="range"] { width: 60px; }
   .ctrl-label { font-size: 0.5rem; }
-  .btn { padding: 6px 10px; font-size: 0.55rem; }
+  .main-actions { gap: 8px; width: 100%; }
+  .btn-play { padding: 12px 20px; font-size: 0.75rem; }
+  .btn-stop, .btn-clear { padding: 12px 16px; font-size: 0.7rem; }
   .piano-roll-canvas-wrap { max-height: 300px; }
   .spectrum-body { height: 110px; padding: 14px 10px; }
   .spectrum-bars-container, .spectrum-reflection { left: 10px; right: 10px; }
@@ -589,7 +636,10 @@ select:focus { border-color: var(--indigo); }
 @media (max-width: 400px) {
   body { font-size: 14px; }
   .hero h1 { font-size: 1.2rem; }
-  .controls { flex-direction: column; align-items: flex-start; }
+  .controls { flex-direction: column; align-items: stretch; }
+  .main-actions { justify-content: center; flex-wrap: wrap; }
+  .btn-play { flex: 1; max-width: 180px; justify-content: center; }
+  .btn-stop, .btn-clear { flex: 1; max-width: 140px; justify-content: center; }
   .track-card { width: 135px; }
 }
 </style>
@@ -636,9 +686,11 @@ select:focus { border-color: var(--indigo); }
 
   <div class="section-label">// 控制面板</div>
   <div class="controls">
-    <button class="btn" id="btnPlay" onclick="togglePlay()">&#9654; Play</button>
-    <button class="btn" id="btnStop" onclick="stopPlay()">&#9632; Stop</button>
-    <button class="btn danger" onclick="clearNotes()">Clear</button>
+    <div class="main-actions">
+      <button class="btn btn-play" id="btnPlay" onclick="togglePlay()"><span class="icon">&#9654;</span> Play</button>
+      <button class="btn btn-stop" id="btnStop" onclick="stopPlay()"><span class="icon">&#9632;</span> Stop</button>
+      <button class="btn btn-clear" onclick="clearNotes()"><span class="icon">&#10005;</span> Clear</button>
+    </div>
     <div class="ctrl-group">
       <span class="ctrl-label">BPM</span>
       <input type="range" id="bpmSlider" min="60" max="200" value="120" oninput="updateBPM(this.value)">
