@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Persona Forge — 角色人设生成器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════ Reset & Base ═══════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Crimson Pro', Georgia, serif;
+      background: #1a1410;
+      color: #e8dcc8;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    code, .mono { font-family: 'Space Mono', monospace; }
+
+    /* ═══════ Background ═══════ */
+    body::before {
+      content: '';
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent, transparent 120px,
+          rgba(139,109,70,0.04) 120px, rgba(139,109,70,0.04) 121px
+        ),
+        repeating-linear-gradient(
+          0deg,
+          transparent, transparent 80px,
+          rgba(139,109,70,0.03) 80px, rgba(139,109,70,0.03) 81px
+        ),
+        linear-gradient(180deg, #1a1410 0%, #231c14 50%, #1a1410 100%);
+      z-index: -2;
+    }
+
+    /* Spotlight */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20vh; left: 30%; right: 30%; height: 60vh;
+      background: radial-gradient(ellipse at center, rgba(255,200,100,0.08) 0%, transparent 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ═══════ Header ═══════ */
+    .header {
+      text-align: center;
+      padding: 2.5rem 1rem 1.5rem;
+      position: relative;
+    }
+    .header h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #f0c96e;
+      text-transform: uppercase;
+      text-shadow: 0 0 40px rgba(240,201,110,0.3);
+    }
+    .header .subtitle {
+      font-size: 1rem;
+      color: #a89878;
+      margin-top: 0.4rem;
+      letter-spacing: 0.1em;
+    }
+    .header .clapboard {
+      display: inline-block;
+      margin-bottom: 0.8rem;
+      font-size: 2rem;
+      filter: grayscale(0.2);
+    }
+
+    /* ═══════ Main Layout ═══════ */
+    .main {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 0 1.5rem 2rem;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 860px) {
+      .main { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════ Left Panel ═══════ */
+    .left-panel {
+      position: sticky;
+      top: 1rem;
+      max-height: calc(100vh - 3rem);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #5a4830 transparent;
+    }
+    .left-panel::-webkit-scrollbar { width: 5px; }
+    .left-panel::-webkit-scrollbar-thumb { background: #5a4830; border-radius: 3px; }
+
+    /* Search */
+    .search-box {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 0.65rem 1rem 0.65rem 2.5rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #e8dcc8;
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box input::placeholder { color: #7a6a52; }
+    .search-box input:focus { border-color: #f0c96e; }
+    .search-box .search-icon {
+      position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%);
+      color: #7a6a52; font-size: 0.9rem;
+    }
+
+    /* Category Tabs */
+    .category-tabs {
+      display: flex; flex-wrap: wrap; gap: 0.3rem;
+      margin-bottom: 1rem;
+    }
+    .cat-tab {
+      padding: 0.35rem 0.7rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      color: #a89878;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Space Mono', monospace;
+      white-space: nowrap;
+    }
+    .cat-tab:hover { background: rgba(255,255,255,0.1); color: #e8dcc8; }
+    .cat-tab.active {
+      background: rgba(240,201,110,0.15);
+      border-color: rgba(240,201,110,0.4);
+      color: #f0c96e;
+    }
+
+    /* Character Cards */
+    .persona-list {
+      display: flex; flex-direction: column; gap: 0.4rem;
+    }
+    .persona-card {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .persona-card::before {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: transparent;
+      transition: background 0.3s;
+    }
+    .persona-card:hover {
+      background: rgba(255,255,255,0.07);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .persona-card:hover::before {
+      background: linear-gradient(90deg, transparent, rgba(240,201,110,0.5), transparent);
+    }
+    .persona-card.selected {
+      background: rgba(240,201,110,0.1);
+      border-color: rgba(240,201,110,0.35);
+      box-shadow: 0 0 25px rgba(240,201,110,0.1);
+    }
+    .persona-card.selected::before {
+      background: #f0c96e;
+      animation: typing-underline 1s ease forwards;
+    }
+    @keyframes typing-underline {
+      from { left: -100%; right: 100%; }
+      to { left: 0; right: 0; }
+    }
+    .persona-card .avatar {
+      font-size: 1.6rem;
+      min-width: 2rem;
+      text-align: center;
+    }
+    .persona-card .info { flex: 1; min-width: 0; }
+    .persona-card .info .name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #e8dcc8;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .persona-card .info .tagline {
+      font-size: 0.73rem;
+      color: #8a7a62;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .persona-card.selected .info .name { color: #f0c96e; }
+
+    /* Merge indicator */
+    .merge-mode .persona-card.merge-selected {
+      border-color: rgba(100,200,255,0.5);
+      background: rgba(100,200,255,0.1);
+    }
+    .merge-badge {
+      display: none;
+      padding: 0.2rem 0.5rem;
+      background: rgba(100,200,255,0.15);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: #8ad4ff;
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 0.5rem;
+    }
+    .merge-mode .merge-badge { display: block; }
+
+    /* ═══════ Right Panel ═══════ */
+    .right-panel {
+      min-height: 400px;
+    }
+
+    /* Placeholder */
+    .placeholder {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 500px;
+      text-align: center;
+      color: #5a4a32;
+    }
+    .placeholder .icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+    .placeholder p { font-size: 1.1rem; max-width: 300px; line-height: 1.6; }
+
+    /* Paper */
+    .paper {
+      background:
+        linear-gradient(135deg, #f5edd8 0%, #ebe2c8 40%, #f2e8d0 100%);
+      color: #2a2218;
+      border-radius: 4px;
+      padding: 3rem 2.5rem 2.5rem;
+      position: relative;
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.3),
+        0 8px 30px rgba(0,0,0,0.25),
+        inset 0 0 60px rgba(139,109,70,0.1);
+      transform: perspective(800px) rotateX(0.3deg);
+      transition: transform 0.3s;
+      line-height: 1.75;
+      font-size: 1rem;
+    }
+    .paper::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #d4c4a0, #c8b890, #d4c4a0);
+      border-radius: 4px 4px 0 0;
+    }
+    /* Paper corner fold */
+    .paper::after {
+      content: '';
+      position: absolute; bottom: 0; right: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 0 0 25px 25px;
+      border-color: transparent transparent #ddd0b8 transparent;
+      filter: drop-shadow(-2px -2px 3px rgba(0,0,0,0.1));
+    }
+
+    .paper:hover { transform: perspective(800px) rotateX(0deg); }
+
+    /* Paper header */
+    .paper-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid rgba(139,109,70,0.2);
+    }
+    .paper-header .big-avatar { font-size: 3.5rem; }
+    .paper-header h2 {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1410;
+      margin-top: 0.3rem;
+    }
+    .paper-header .subtitle {
+      font-size: 0.85rem;
+      color: #7a6a52;
+      margin-top: 0.3rem;
+      font-style: italic;
+    }
+
+    /* Section toggle */
+    .section {
+      margin-bottom: 1.5rem;
+      border-left: 3px solid rgba(139,109,70,0.15);
+      padding-left: 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .section:hover { border-left-color: rgba(139,109,70,0.4); }
+    .section-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #3a2e1e;
+      margin-bottom: 0.5rem;
+      user-select: none;
+    }
+    .section-header .toggle {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: #a89878;
+      transition: transform 0.3s;
+    }
+    .section.collapsed .toggle { transform: rotate(-90deg); }
+    .section-body {
+      font-size: 0.95rem;
+      color: #3a3020;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+    .section.collapsed .section-body {
+      max-height: 0 !important;
+      opacity: 0;
+    }
+    .section-body p { margin-bottom: 0.5rem; }
+    .section-body ul { padding-left: 1.2rem; margin-bottom: 0.5rem; }
+    .section-body li { margin-bottom: 0.3rem; }
+    .section-body blockquote {
+      border-left: 3px solid #c8b890;
+      padding: 0.3rem 1rem;
+      margin: 0.5rem 0;
+      background: rgba(139,109,70,0.06);
+      border-radius: 0 4px 4px 0;
+      font-style: italic;
+      color: #5a4a32;
+    }
+    .section-body strong { color: #2a1e0e; }
+
+    /* Typewriter cursor */
+    .typewriter-cursor {
+      display: inline-block;
+      width: 2px; height: 1.1em;
+      background: #3a2e1e;
+      margin-left: 2px;
+      animation: blink 0.8s infinite;
+      vertical-align: text-bottom;
+    }
+    @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+    /* ═══════ Action Buttons ═══════ */
+    .actions {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(139,109,70,0.2);
+      justify-content: center;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(139,109,70,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.5);
+      color: #4a3a20;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: rgba(255,255,255,0.8);
+      border-color: rgba(139,109,70,0.5);
+      transform: translateY(-1px);
+    }
+    .btn:active { transform: translateY(0); }
+    .btn.primary {
+      background: rgba(240,201,110,0.2);
+      border-color: rgba(240,201,110,0.4);
+      color: #6a5020;
+    }
+    .btn.primary:hover {
+      background: rgba(240,201,110,0.35);
+    }
+    .btn.merge {
+      background: rgba(100,200,255,0.15);
+      border-color: rgba(100,200,255,0.4);
+      color: #206080;
+    }
+
+    /* ═══════ Marquee ═══════ */
+    .marquee-container {
+      margin-top: 3rem;
+      overflow: hidden;
+      padding: 1rem 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .marquee-track {
+      display: flex; gap: 4rem;
+      animation: marquee 40s linear infinite;
+      width: max-content;
+    }
+    .marquee-track:hover { animation-play-state: paused; }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .marquee-item {
+      white-space: nowrap;
+      color: #5a4a32;
+      font-size: 0.85rem;
+      font-style: italic;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .marquee-item:hover { opacity: 1; }
+    .marquee-item .author { color: #8a7a52; }
+
+    /* ═══════ Clapboard animation ═══════ */
+    @keyframes clapboard-slam {
+      0% { transform: rotate(0deg); }
+      30% { transform: rotate(-8deg); }
+      60% { transform: rotate(3deg); }
+      100% { transform: rotate(0deg); }
+    }
+    .slam { animation: clapboard-slam 0.4s ease; }
+
+    /* ═══════ Toast ═══════ */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      padding: 0.7rem 1.2rem;
+      background: #2a2218;
+      color: #f0c96e;
+      border: 1px solid rgba(240,201,110,0.3);
+      border-radius: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ═══════ Responsive ═══════ */
+    @media (max-width: 860px) {
+      .header h1 { font-size: 1.6rem; }
+      .paper { padding: 2rem 1.5rem 1.5rem; }
+      .main { padding: 0 1rem 2rem; }
+      .left-panel { position: static; max-height: none; }
+    }
+
+    /* ═══════ Markdown rendered content ═══════ */
+    .md-content h2 { /* handled by section-header */ }
+    .md-content p { margin-bottom: 0.5rem; }
+    .md-content ul { padding-left: 1.2rem; margin-bottom: 0.5rem; }
+    .md-content li { margin-bottom: 0.3rem; }
+    .md-content blockquote {
+      border-left: 3px solid #c8b890;
+      padding: 0.3rem 1rem;
+      margin: 0.5rem 0;
+      background: rgba(139,109,70,0.06);
+      border-radius: 0 4px 4px 0;
+      font-style: italic;
+      color: #5a4a32;
+    }
+    .md-content hr {
+      border: none;
+      border-top: 1px solid rgba(139,109,70,0.2);
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="clapboard">🎬</div>
+    <h1>Persona Forge</h1>
+    <div class="subtitle">角色人设生成器 — 选择角色，生成 AGENTS.md</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Left Panel -->
+    <div class="left-panel">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="搜索角色名或关键词..." />
+      </div>
+
+      <div class="category-tabs" id="categoryTabs"></div>
+
+      <div class="merge-badge">🔀 混合模式：选择两个角色</div>
+
+      <div class="persona-list" id="personaList"></div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel" id="rightPanel">
+      <div class="placeholder">
+        <div class="icon">🎭</div>
+        <p>选择一个角色，开始生成人设文档<br><small style="color:#4a3a22">或者试试「混合角色」功能</small></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Marquee -->
+  <div class="marquee-container">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Scripts -->
+  <script src="persona-data.js"></script>
+  <script src="generator.js"></script>
+  <script>
+    // ═══════ State ═══════
+    let selectedPersona = null;
+    let mergeMode = false;
+    let mergeSelection = []; // max 2
+    let currentMarkdown = '';
+    let typewriterTimer = null;
+
+    // ═══════ Init ═══════
+    function init() {
+      renderCategoryTabs();
+      renderPersonaList();
+      renderMarquee();
+
+      document.getElementById('searchInput').addEventListener('input', () => {
+        renderPersonaList();
+      });
+    }
+
+    // ═══════ Category Tabs ═══════
+    function renderCategoryTabs() {
+      const container = document.getElementById('categoryTabs');
+      let html = `<div class="cat-tab active" data-cat="all">🌟 全部</div>`;
+      CATEGORIES.forEach(c => {
+        html += `<div class="cat-tab" data-cat="${c.id}">${c.name}</div>`;
+      });
+      container.innerHTML = html;
+
+      container.querySelectorAll('.cat-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          container.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          renderPersonaList();
+        });
+      });
+    }
+
+    // ═══════ Persona List ═══════
+    function getFilteredPersonas() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const activeCat = document.querySelector('.cat-tab.active')?.dataset.cat || 'all';
+
+      return PERSONAS.filter(p => {
+        const matchCat = activeCat === 'all' || p.category === activeCat;
+        const matchQuery = !query ||
+          p.name.toLowerCase().includes(query) ||
+          p.title.toLowerCase().includes(query) ||
+          p.brief.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query);
+        return matchCat && matchQuery;
+      });
+    }
+
+    function renderPersonaList() {
+      const container = document.getElementById('personaList');
+      const filtered = getFilteredPersonas();
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center;color:#5a4a32;padding:2rem;font-size:0.9rem;">没有找到匹配的角色 🤔</div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(p => {
+        const isSelected = selectedPersona && selectedPersona.id === p.id;
+        const isMergeSelected = mergeSelection.find(ms => ms.id === p.id);
+        let cls = 'persona-card';
+        if (isSelected) cls += ' selected';
+        if (isMergeSelected) cls += ' merge-selected';
+        html += `
+          <div class="${cls}" data-id="${p.id}">
+            <span class="avatar">${p.avatar}</span>
+            <div class="info">
+              <div class="name">${p.name}</div>
+              <div class="tagline">${p.brief}</div>
+            </div>
+          </div>`;
+      });
+      container.innerHTML = html;
+
+      container.querySelectorAll('.persona-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.dataset.id;
+          const persona = PERSONAS.find(p => p.id === id);
+          if (!persona) return;
+
+          // Animate clapboard
+          document.querySelector('.clapboard').classList.remove('slam');
+          void document.querySelector('.clapboard').offsetWidth;
+          document.querySelector('.clapboard').classList.add('slam');
+
+          if (mergeMode) {
+            handleMergeClick(persona);
+          } else {
+            selectedPersona = persona;
+            renderPersonaList();
+            generateAndDisplay(persona);
+          }
+        });
+      });
+    }
+
+    // ═══════ Generate & Display ═══════
+    function generateAndDisplay(persona) {
+      if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+      mergeSelection = [];
+
+      const data = generatePersona(persona);
+      currentMarkdown = personaToMarkdown(data);
+
+      const panel = document.getElementById('rightPanel');
+      let html = `
+        <div class="paper">
+          <div class="paper-header">
+            <div class="big-avatar">${data.avatar}</div>
+            <h2>${data.name} 的 AGENTS.md</h2>
+            <div class="subtitle">${data.brief}</div>
+          </div>
+          <div id="contentArea"></div>
+          <div class="actions">
+            <button class="btn primary" onclick="copyMarkdown()">📋 复制 Markdown</button>
+            <button class="btn" onclick="downloadMarkdown()">⬇️ 下载 .md</button>
+            <button class="btn" onclick="regenerate()">🎲 换一个角度</button>
+            <button class="btn merge" onclick="toggleMergeMode()">🔀 混合角色</button>
+          </div>
+        </div>`;
+      panel.innerHTML = html;
+
+      // Typewriter effect
+      typewriterRender(data);
+    }
+
+    function typewriterRender(data) {
+      const container = document.getElementById('contentArea');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let sectionIdx = 0;
+      let charIdx = 0;
+      let currentSectionEl = null;
+      let currentText = '';
+      let allSectionsText = [];
+
+      // Pre-build section HTML
+      data.sections.forEach((s, i) => {
+        allSectionsText.push({
+          header: s.icon + ' ' + s.title,
+          body: renderMarkdown(s.content)
+        });
+      });
+
+      function renderNextSection() {
+        if (sectionIdx >= allSectionsText.length) {
+          // Done — remove cursor, show collapse buttons
+          const cursor = container.querySelector('.typewriter-cursor');
+          if (cursor) cursor.remove();
+          return;
+        }
+
+        const s = allSectionsText[sectionIdx];
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'section';
+        sectionDiv.innerHTML = `
+          <div class="section-header">
+            <span>${s.header}</span>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="section-body" style="max-height:9999px;opacity:1;"></div>`;
+
+        sectionDiv.querySelector('.section-header').addEventListener('click', () => {
+          sectionDiv.classList.toggle('collapsed');
+          const body = sectionDiv.querySelector('.section-body');
+          if (sectionDiv.classList.contains('collapsed')) {
+            body.style.maxHeight = '0';
+          } else {
+            body.style.maxHeight = body.scrollHeight + 'px';
+          }
+        });
+
+        container.appendChild(sectionDiv);
+        currentSectionEl = sectionDiv.querySelector('.section-body');
+        currentText = s.body;
+        charIdx = 0;
+
+        // Add cursor
+        if (container.querySelector('.typewriter-cursor')) {
+          container.querySelector('.typewriter-cursor').remove();
+        }
+        const cursor = document.createElement('span');
+        cursor.className = 'typewriter-cursor';
+        currentSectionEl.appendChild(cursor);
+
+        // Typewrite body
+        typewriterTimer = setInterval(() => {
+          if (charIdx < currentText.length) {
+            const chunk = currentText.substring(0, charIdx + 1);
+            // Insert before cursor
+            const cursorEl = currentSectionEl.querySelector('.typewriter-cursor');
+            const textNode = document.createTextNode(currentText[charIdx]);
+            currentSectionEl.insertBefore(textNode, cursorEl);
+            charIdx++;
+
+            // Auto-scroll
+            currentSectionEl.scrollTop = currentSectionEl.scrollHeight;
+          } else {
+            clearInterval(typewriterTimer);
+            typewriterTimer = null;
+            sectionIdx++;
+            setTimeout(renderNextSection, 150);
+          }
+        }, 5); // Fast typing
+      }
+
+      renderNextSection();
+    }
+
+    // Simple markdown to HTML (inline)
+    function renderMarkdown(text) {
+      return text
+        .replace(/^>\s*(.+)/gm, '<blockquote>$1</blockquote>')
+        .replace(/^(\*\*[^*]+\*\*)\s*[:：]?(.*)/gm, '<strong>$1</strong>$2')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/^- (.+)$/gm, '• $1')
+        .replace(/\n{2,}/g, '\n');
+    }
+
+    // ═══════ Merge Mode ═══════
+    function toggleMergeMode() {
+      mergeMode = !mergeMode;
+      mergeSelection = [];
+      const leftPanel = document.querySelector('.left-panel');
+      leftPanel.classList.toggle('merge-mode', mergeMode);
+      if (mergeMode) {
+        showToast('🔀 混合模式：选择两个角色进行融合');
+      }
+      renderPersonaList();
+    }
+
+    function handleMergeClick(persona) {
+      const existingIdx = mergeSelection.findIndex(p => p.id === persona.id);
+      if (existingIdx >= 0) {
+        mergeSelection.splice(existingIdx, 1);
+      } else if (mergeSelection.length < 2) {
+        mergeSelection.push(persona);
+      }
+
+      renderPersonaList();
+
+      if (mergeSelection.length === 2) {
+        mergeMode = false;
+        const [a, b] = mergeSelection;
+        const mergedData = generateMergedPersona(a, b);
+        currentMarkdown = personaToMarkdown(mergedData);
+
+        const panel = document.getElementById('rightPanel');
+        panel.innerHTML = `
+          <div class="paper">
+            <div class="paper-header">
+              <div class="big-avatar">${a.avatar} × ${b.avatar}</div>
+              <h2>${a.name} × ${b.name} 的 AGENTS.md</h2>
+              <div class="subtitle">${mergedData.brief}</div>
+            </div>
+            <div id="contentArea"></div>
+            <div class="actions">
+              <button class="btn primary" onclick="copyMarkdown()">📋 复制 Markdown</button>
+              <button class="btn" onclick="downloadMarkdown()">⬇️ 下载 .md</button>
+              <button class="btn" onclick="generateAndDisplay(PERSONAS.find(p=>p.id==='${a.id}'))">🔄 ${a.name}</button>
+              <button class="btn" onclick="generateAndDisplay(PERSONAS.find(p=>p.id==='${b.id}'))">🔄 ${b.name}</button>
+            </div>
+          </div>`;
+        typewriterRender(mergedData);
+        showToast(`${a.avatar}${a.name} + ${b.avatar}${b.name} = 💥 融合完成！`);
+      }
+    }
+
+    // ═══════ Regenerate ═══════
+    function regenerate() {
+      if (!selectedPersona) return;
+      // Re-shuffle some internal state by re-rendering
+      generateAndDisplay(selectedPersona);
+      showToast('🎲 重新生成了！换了一个表达角度');
+    }
+
+    // ═══════ Copy / Download ═══════
+    function copyMarkdown() {
+      navigator.clipboard.writeText(currentMarkdown).then(() => {
+        showToast('✅ 已复制到剪贴板');
+      }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = currentMarkdown;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('✅ 已复制到剪贴板');
+      });
+    }
+
+    function downloadMarkdown() {
+      const filename = (selectedPersona ? selectedPersona.id : 'persona') + '-agents.md';
+      const blob = new Blob([currentMarkdown], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast('⬇️ 下载完成：' + filename);
+    }
+
+    // ═══════ Toast ═══════
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // ═══════ Marquee ═══════
+    function renderMarquee() {
+      const track = document.getElementById('marqueeTrack');
+      // Duplicate for seamless loop
+      const items = [...FAMOUS_QUOTES, ...FAMOUS_QUOTES];
+      track.innerHTML = items.map(q =>
+        `<span class="marquee-item">"${q.text}" —— ${q.author}</span>`
+      ).join('');
+    }
+
+    // ═══════ Boot ═══════
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>像素宠物进化</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1520;
+  color: #e8e0f0;
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+h1, h2, h3, .pixel-font { font-family: 'Press Start 2P', cursive; }
+
+.app { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+/* 标题 */
+.header {
+  text-align: center;
+  padding: 30px 0 20px;
+}
+.header h1 {
+  font-size: 18px;
+  color: #f0c0ff;
+  text-shadow: 0 0 20px rgba(200, 100, 255, 0.5);
+  margin-bottom: 8px;
+}
+.header p { font-size: 12px; color: #888; }
+
+/* 主布局 */
+.main-layout {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* 左侧面板 */
+.info-panel {
+  flex: 0 0 200px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px;
+}
+.pet-name {
+  font-size: 14px;
+  color: #f0c0ff;
+  cursor: pointer;
+  padding: 4px 8px;
+  border: 1px dashed transparent;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.pet-name:hover { border-color: #f0c0ff; }
+.stat-group { margin-top: 16px; }
+.stat-item { margin-bottom: 12px; }
+.stat-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 8px;
+  color: #aaa;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+.stat-bar {
+  height: 10px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.stat-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}
+.fill-hunger { background: linear-gradient(90deg, #ff6b6b, #ffa06b); }
+.fill-happy { background: linear-gradient(90deg, #ff69b4, #ff85c8); }
+.fill-exp { background: linear-gradient(90deg, #69d2ff, #69ffcc); }
+
+.dna-summary {
+  margin-top: 16px;
+  font-size: 10px;
+  color: #777;
+  line-height: 1.6;
+  word-break: break-all;
+}
+.dna-summary strong { color: #b0a0c0; }
+.rare-traits { margin-top: 8px; }
+.rare-badge {
+  display: inline-block;
+  font-size: 8px;
+  padding: 2px 6px;
+  margin: 2px;
+  border-radius: 4px;
+  background: rgba(200, 100, 255, 0.2);
+  border: 1px solid rgba(200, 100, 255, 0.3);
+  color: #d0a0ff;
+}
+
+/* 中间展示区 */
+.display-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  position: relative;
+  cursor: pointer;
+}
+.display-area canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.pet-level {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  color: #ffd700;
+  margin-top: 12px;
+}
+
+/* 右侧操作面板 */
+.action-panel {
+  flex: 0 0 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.action-btn {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  padding: 12px 8px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  color: #e8e0f0;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.action-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.3);
+  transform: translateY(-1px);
+}
+.action-btn:active { transform: translateY(1px); }
+.action-btn.feed { border-color: rgba(255, 160, 100, 0.4); color: #ffa06b; }
+.action-btn.play { border-color: rgba(255, 105, 180, 0.4); color: #ff69b4; }
+.action-btn.evolve { border-color: rgba(255, 215, 0, 0.4); color: #ffd700; }
+.action-btn.breed { border-color: rgba(105, 210, 255, 0.4); color: #69d2ff; }
+.action-btn.mutate { border-color: rgba(160, 255, 160, 0.4); color: #a0ffa0; }
+.action-btn.dna-toggle { border-color: rgba(200, 100, 255, 0.4); color: #d0a0ff; font-size: 8px; }
+
+/* 收藏栏 */
+.collection {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.collection h3 {
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 12px;
+}
+.pet-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pet-card {
+  width: 80px;
+  padding: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pet-card:hover { background: rgba(255,255,255,0.08); }
+.pet-card.active { border-color: #f0c0ff; background: rgba(240, 192, 255, 0.08); }
+.pet-card canvas { image-rendering: pixelated; margin: 0 auto 4px; display: block; }
+.pet-card .card-name { font-size: 8px; color: #ccc; }
+.pet-card .card-level { font-size: 7px; color: #888; }
+
+/* DNA浏览器 */
+.dna-browser {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 16px;
+  display: none;
+}
+.dna-browser.open { display: block; }
+.dna-browser h3 { font-size: 10px; color: #d0a0ff; margin-bottom: 12px; }
+.dna-section { margin-bottom: 16px; }
+.dna-section h4 { font-size: 9px; color: #aaa; margin-bottom: 8px; }
+.dna-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.dna-row label {
+  font-size: 10px;
+  color: #999;
+  width: 80px;
+  flex-shrink: 0;
+}
+.dna-row input[type="range"] {
+  flex: 1;
+  accent-color: #d0a0ff;
+  height: 4px;
+}
+.dna-row .dna-value {
+  font-size: 10px;
+  color: #ccc;
+  width: 40px;
+  text-align: right;
+}
+.dna-row select {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #ddd;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* 提示消息 */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-60px);
+  background: rgba(40, 30, 50, 0.95);
+  border: 1px solid rgba(240, 192, 255, 0.3);
+  color: #f0c0ff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-family: 'Press Start 2P', cursive;
+  transition: transform 0.3s ease;
+  z-index: 100;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* 改名输入框 */
+.rename-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #f0c0ff;
+  color: #f0c0ff;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  width: 150px;
+  outline: none;
+  padding: 4px;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>像素宠物进化</h1>
+    <p>程序化生成 · DNA系统 · 突变与进化</p>
+  </div>
+
+  <div class="main-layout">
+    <!-- 左侧信息 -->
+    <div class="info-panel">
+      <div class="pet-name" id="petName" title="点击改名"></div>
+      <div class="stat-group">
+        <div class="stat-item">
+          <div class="stat-label"><span>饱食度</span><span id="hungerVal">0</span></div>
+          <div class="stat-bar"><div class="stat-fill fill-hunger" id="hungerBar"></div></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label"><span>快乐度</span><span id="happyVal">0</span></div>
+          <div class="stat-bar"><div class="stat-fill fill-happy" id="happyBar"></div></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label"><span>经验值</span><span id="expVal">0</span></div>
+          <div class="stat-bar"><div class="stat-fill fill-exp" id="expBar"></div></div>
+        </div>
+      </div>
+      <div class="dna-summary" id="dnaSummary"></div>
+      <div class="rare-traits" id="rareTraits"></div>
+    </div>
+
+    <!-- 中间展示 -->
+    <div class="display-area" id="displayArea">
+      <canvas id="petCanvas"></canvas>
+      <div class="pet-level" id="petLevel"></div>
+    </div>
+
+    <!-- 右侧操作 -->
+    <div class="action-panel">
+      <button class="action-btn feed" onclick="Pet.feed(); showToast('投喂成功!')">🍖 投喂</button>
+      <button class="action-btn play" onclick="Pet.play(); showToast('玩耍中!')">🎾 玩耍</button>
+      <button class="action-btn evolve" onclick="doEvolve()">⬆ 进化</button>
+      <button class="action-btn breed" onclick="doBreed()">🐣 繁殖</button>
+      <button class="action-btn mutate" onclick="Pet.randomMutate(); showToast('随机突变!')">🎲 随机突变</button>
+      <button class="action-btn dna-toggle" onclick="toggleDnaBrowser()">🧬 DNA浏览器</button>
+    </div>
+  </div>
+
+  <!-- 收藏栏 -->
+  <div class="collection">
+    <h3>🐾 我的宠物 (<span id="petCount">0</span>/20)</h3>
+    <div class="pet-grid" id="petGrid"></div>
+  </div>
+
+  <!-- DNA浏览器 -->
+  <div class="dna-browser" id="dnaBrowser">
+    <h3>🧬 DNA 浏览器</h3>
+    <div id="dnaControls"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="dna.js"></script>
+<script src="storage.js"></script>
+<script src="renderer.js"></script>
+<script src="pet.js"></script>
+<script>
+// UI控制器
+const UI = {
+  update() {
+    const pet = Pet.active;
+    if (!pet) return;
+
+    // 名字
+    const nameEl = document.getElementById('petName');
+    nameEl.textContent = pet.name;
+    nameEl.onclick = () => startRename();
+
+    // 状态条
+    document.getElementById('hungerVal').textContent = Math.round(pet.hunger);
+    document.getElementById('hungerBar').style.width = pet.hunger + '%';
+    document.getElementById('happyVal').textContent = Math.round(pet.happiness);
+    document.getElementById('happyBar').style.width = pet.happiness + '%';
+
+    const expNeeded = pet.level * 50;
+    document.getElementById('expVal').textContent = `${Math.round(pet.exp)}/${expNeeded}`;
+    document.getElementById('expBar').style.width = (pet.exp / expNeeded * 100) + '%';
+
+    // 等级
+    document.getElementById('petLevel').textContent = `Lv.${pet.level}`;
+
+    // DNA摘要
+    document.getElementById('dnaSummary').innerHTML =
+      `<strong>DNA</strong> ${DNA.getSummary(pet.dna)}<br>` +
+      `<strong>性格</strong> 活:${pet.dna.activity.toFixed(1)} 友:${pet.dna.friendliness.toFixed(1)} 好奇:${pet.dna.curiosity.toFixed(1)}`;
+
+    // 稀有基因
+    const rares = [];
+    if (pet.dna.glowing) rares.push('✨发光');
+    if (pet.dna.rainbow) rares.push('🌈彩虹');
+    if (pet.dna.transparent) rares.push('👻透明');
+    if (pet.dna.shapeshifting) rares.push('🌀变形');
+    document.getElementById('rareTraits').innerHTML = rares.map(r => `<span class="rare-badge">${r}</span>`).join('');
+
+    // 收藏栏
+    this.updateCollection();
+  },
+
+  updateCollection() {
+    const grid = document.getElementById('petGrid');
+    grid.innerHTML = '';
+    document.getElementById('petCount').textContent = Pet.all.length;
+
+    Pet.all.forEach((pet, i) => {
+      const card = document.createElement('div');
+      card.className = 'pet-card' + (i === Pet._activeIndex ? ' active' : '');
+      const canvas = document.createElement('canvas');
+      canvas.width = 60;
+      canvas.height = 60;
+      Renderer.renderThumbnail(pet.dna, canvas);
+      card.appendChild(canvas);
+
+      const name = document.createElement('div');
+      name.className = 'card-name';
+      name.textContent = pet.name;
+      card.appendChild(name);
+
+      const level = document.createElement('div');
+      level.className = 'card-level';
+      level.textContent = `Lv.${pet.level}`;
+      card.appendChild(level);
+
+      card.onclick = () => { Pet.setActive(i); };
+      card.oncontextmenu = (e) => {
+        e.preventDefault();
+        if (Pet.all.length > 1 && confirm(`删除 ${pet.name}?`)) {
+          Pet.remove(i);
+        }
+      };
+      grid.appendChild(card);
+    });
+  }
+};
+
+// DNA浏览器
+const DNA_FIELDS = [
+  { group: '体型', fields: [
+    { key: 'width', label: '宽度', min: 3, max: 10, step: 1 },
+    { key: 'height', label: '高度', min: 3, max: 10, step: 1 },
+  ]},
+  { group: '主色 RGB', fields: [
+    { key: 'primaryColor.0', label: 'R', min: 0, max: 255, step: 1 },
+    { key: 'primaryColor.1', label: 'G', min: 0, max: 255, step: 1 },
+    { key: 'primaryColor.2', label: 'B', min: 0, max: 255, step: 1 },
+  ]},
+  { group: '辅色 RGB', fields: [
+    { key: 'secondaryColor.0', label: 'R', min: 0, max: 255, step: 1 },
+    { key: 'secondaryColor.1', label: 'G', min: 0, max: 255, step: 1 },
+    { key: 'secondaryColor.2', label: 'B', min: 0, max: 255, step: 1 },
+  ]},
+  { group: '花纹色 RGB', fields: [
+    { key: 'patternColor.0', label: 'R', min: 0, max: 255, step: 1 },
+    { key: 'patternColor.1', label: 'G', min: 0, max: 255, step: 1 },
+    { key: 'patternColor.2', label: 'B', min: 0, max: 255, step: 1 },
+  ]},
+  { group: '特征', fields: [
+    { key: 'pattern', label: '花纹', type: 'select', options: ['solid','stripes','spots','checker','gradient','noise'], labels: ['纯色','条纹','斑点','棋盘','渐变','噪点'] },
+    { key: 'bodyShape', label: '形状', type: 'select', options: ['round','spiky','wavy'], labels: ['圆角','尖角','波浪'] },
+    { key: 'mouth', label: '嘴巴', type: 'select', options: ['smile','flat','o','zigzag'], labels: ['微笑','平嘴','O嘴','锯齿'] },
+    { key: 'limbs', label: '四肢', type: 'select', options: ['legs','wings','tail','antennae','none'], labels: ['腿','翅膀','尾巴','触角','无'] },
+  ]},
+  { group: '眼睛', fields: [
+    { key: 'eyeCount', label: '数量', min: 0, max: 4, step: 1 },
+    { key: 'eyeSize', label: '大小', min: 1, max: 3, step: 1 },
+  ]},
+  { group: '性格', fields: [
+    { key: 'activity', label: '活跃度', min: 0, max: 1, step: 0.1 },
+    { key: 'friendliness', label: '友好度', min: 0, max: 1, step: 0.1 },
+    { key: 'curiosity', label: '好奇心', min: 0, max: 1, step: 0.1 },
+  ]},
+];
+
+function buildDnaBrowser() {
+  const container = document.getElementById('dnaControls');
+  container.innerHTML = '';
+
+  DNA_FIELDS.forEach(group => {
+    const section = document.createElement('div');
+    section.className = 'dna-section';
+    section.innerHTML = `<h4>${group.group}</h4>`;
+
+    group.fields.forEach(field => {
+      const row = document.createElement('div');
+      row.className = 'dna-row';
+      row.innerHTML = `<label>${field.label}</label>`;
+
+      if (field.type === 'select') {
+        const sel = document.createElement('select');
+        field.options.forEach((opt, i) => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = field.labels[i];
+          sel.appendChild(option);
+        });
+        sel.value = getDnaValue(field.key);
+        sel.onchange = () => { Pet.setDNA(field.key, sel.value); updateDnaValues(); };
+        row.appendChild(sel);
+        row.dataset.key = field.key;
+      } else {
+        const val = getDnaValue(field.key);
+        const range = document.createElement('input');
+        range.type = 'range';
+        range.min = field.min;
+        range.max = field.max;
+        range.step = field.step;
+        range.value = val;
+        range.oninput = () => {
+          Pet.setDNA(field.key, parseFloat(range.value));
+          row.querySelector('.dna-value').textContent = parseFloat(range.value).toFixed(field.step < 1 ? 1 : 0);
+        };
+        row.appendChild(range);
+        const valSpan = document.createElement('span');
+        valSpan.className = 'dna-value';
+        valSpan.textContent = parseFloat(val).toFixed(field.step < 1 ? 1 : 0);
+        row.appendChild(valSpan);
+        row.dataset.key = field.key;
+      }
+      section.appendChild(row);
+    });
+    container.appendChild(section);
+  });
+}
+
+function getDnaValue(key) {
+  const pet = Pet.active;
+  if (!pet) return 0;
+  if (key.includes('.')) {
+    const parts = key.split('.');
+    return pet.dna[parts[0]][parseInt(parts[1])];
+  }
+  return pet.dna[key];
+}
+
+function updateDnaValues() {
+  const browser = document.getElementById('dnaBrowser');
+  if (!browser.classList.contains('open')) return;
+  buildDnaBrowser();
+}
+
+function toggleDnaBrowser() {
+  const browser = document.getElementById('dnaBrowser');
+  browser.classList.toggle('open');
+  if (browser.classList.contains('open')) {
+    buildDnaBrowser();
+  }
+}
+
+// 操作函数
+function doEvolve() {
+  if (Pet.evolve()) {
+    showToast(`进化成功! Lv.${Pet.active.level}`);
+    updateDnaValues();
+  } else {
+    showToast('经验不足，无法进化!');
+  }
+}
+
+function doBreed() {
+  if (Pet.all.length >= 20) {
+    showToast('宠物已满(20只)!');
+    return;
+  }
+  const child = Pet.breed(null);
+  if (child) {
+    Pet.setActive(Pet.all.length - 1);
+    showToast(`新宠物 ${child.name} 诞生!`);
+    updateDnaValues();
+  }
+}
+
+// 改名
+let isRenaming = false;
+function startRename() {
+  if (isRenaming) return;
+  isRenaming = true;
+  const nameEl = document.getElementById('petName');
+  const oldName = Pet.active.name;
+  nameEl.innerHTML = `<input class="rename-input" type="text" value="${oldName}" maxlength="10">`;
+  const input = nameEl.querySelector('input');
+  input.focus();
+  input.select();
+  const finish = () => {
+    Pet.rename(input.value || oldName);
+    isRenaming = false;
+  };
+  input.onblur = finish;
+  input.onkeydown = (e) => { if (e.key === 'Enter') finish(); };
+}
+
+// Toast
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// 鼠标互动
+document.getElementById('displayArea').addEventListener('mousemove', (e) => {
+  Pet.updateMouse(e.clientX, e.clientY);
+});
+document.getElementById('displayArea').addEventListener('click', (e) => {
+  // 抚摸
+  const canvas = document.getElementById('petCanvas');
+  const rect = canvas.getBoundingClientRect();
+  if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+    Pet.pet();
+  }
+});
+document.getElementById('displayArea').addEventListener('mouseleave', () => {
+  Pet.updateMouse(null, null);
+});
+
+// 初始化
+window.addEventListener('DOMContentLoaded', () => {
+  Renderer.init('petCanvas');
+  Pet.init();
+});
+</script>
+</body>
+</html>
