@@ -35,6 +35,7 @@ body {
   line-height: 1.7;
   overflow-x: hidden;
   min-height: 100vh;
+  max-width: 100vw;
 }
 body::before {
   content: '';
@@ -100,6 +101,14 @@ a:hover { color: var(--pink); }
   box-shadow: 0 0 6px var(--pink);
 }
 @keyframes spin { to { transform: rotate(360deg) } }
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(124,58,237,0.3), 0 0 60px rgba(124,58,237,0.15); }
+  50% { box-shadow: 0 0 40px rgba(124,58,237,0.6), 0 0 100px rgba(124,58,237,0.3), 0 0 150px rgba(236,72,153,0.15); }
+}
+@keyframes particleRise {
+  0% { opacity:1; transform: translateY(0) scale(1); }
+  100% { opacity:0; transform: translateY(-30px) scale(0.3); }
+}
 .nav-links {
   display: flex; gap: 20px;
   font-family: 'DM Mono', monospace;
@@ -120,8 +129,8 @@ a:hover { color: var(--pink); }
 }
 .vinyl-container {
   position: relative;
-  width: clamp(180px, 40vw, 280px);
-  height: clamp(180px, 40vw, 280px);
+  width: clamp(160px, 35vw, 260px);
+  height: clamp(160px, 35vw, 260px);
   margin-bottom: -40px;
   z-index: 2;
   cursor: pointer;
@@ -154,9 +163,21 @@ a:hover { color: var(--pink); }
     inset 0 0 30px rgba(0,0,0,0.5);
   animation: spin 8s linear infinite;
   position: relative;
-  transition: animation-duration 0.5s;
+  transition: animation-duration 0.5s, box-shadow 0.5s;
 }
-.vinyl-record.playing { animation-duration: 2s; }
+.vinyl-record.playing {
+  animation-duration: 1.5s;
+  animation-name: spin;
+  box-shadow:
+    0 0 0 3px rgba(124,58,237,0.3),
+    0 0 40px rgba(124,58,237,0.3),
+    0 0 80px rgba(124,58,237,0.15),
+    0 0 120px rgba(124,58,237,0.08),
+    inset 0 0 30px rgba(0,0,0,0.5);
+}
+.vinyl-record.glow-pulse {
+  animation: spin 1.5s linear infinite, pulseGlow 1.5s ease-in-out infinite;
+}
 .vinyl-record.stopped { animation-play-state: paused; }
 .vinyl-label {
   position: absolute;
@@ -170,7 +191,7 @@ a:hover { color: var(--pink); }
 }
 .vinyl-label-text {
   font-family: 'Archivo Black', sans-serif;
-  font-size: clamp(0.5rem, 2vw, 0.75rem);
+  font-size: clamp(0.45rem, 1.8vw, 0.7rem);
   color: rgba(255,255,255,0.9);
   text-align: center;
   line-height: 1.2;
@@ -207,7 +228,7 @@ a:hover { color: var(--pink); }
 }
 .hero h1 {
   font-family: 'Archivo Black', sans-serif;
-  font-size: clamp(1.8rem, 6vw, 2.8rem);
+  font-size: clamp(1.6rem, 5vw, 2.5rem);
   color: var(--text);
   line-height: 1.1;
   letter-spacing: -0.01em;
@@ -217,7 +238,7 @@ a:hover { color: var(--pink); }
 .hero h1 .hot { color: var(--pink); }
 #nowPlaying {
   font-family: 'DM Mono', monospace;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--indigo);
   text-align: center;
   margin-top: 8px;
@@ -242,28 +263,38 @@ a:hover { color: var(--pink); }
   border-bottom: 1px solid var(--border);
 }
 
-/* TRACK LIST */
+/* TRACK LIST — horizontal scroll */
 .track-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 10px;
-  margin-bottom: 30px;
-}
-.track-card {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: 30px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--indigo-dim) transparent;
+}
+.track-list::-webkit-scrollbar { height: 6px; }
+.track-list::-webkit-scrollbar-track { background: transparent; }
+.track-list::-webkit-scrollbar-thumb { background: var(--indigo-dim); border-radius: 3px; }
+.track-card {
+  flex-shrink: 0;
+  width: 180px;
+  padding: 14px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.25s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 .track-card:hover {
   background: var(--bg-card-hover);
   border-color: var(--indigo-glow);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 .track-card.active {
   border-color: var(--indigo);
@@ -271,7 +302,7 @@ a:hover { color: var(--pink); }
   box-shadow: 0 0 20px var(--indigo-dim);
 }
 .track-play-btn {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   border: 2px solid var(--indigo);
   background: transparent;
@@ -283,28 +314,35 @@ a:hover { color: var(--pink); }
 .track-card.active .track-play-btn {
   background: var(--indigo);
   color: #fff;
+  box-shadow: 0 0 12px var(--indigo-glow);
 }
 .track-play-btn svg { width: 14px; height: 14px; fill: currentColor; }
-.track-info { flex: 1; min-width: 0; }
+.track-info { text-align: center; width: 100%; }
 .track-name {
   font-family: 'Archivo Black', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text);
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .track-card.active .track-name { color: var(--pink); }
 .track-artist {
   font-family: 'DM Mono', monospace;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   color: var(--text-dim);
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* CONTROLS */
 .controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   margin-bottom: 16px;
   padding: 14px 18px;
@@ -335,7 +373,7 @@ a:hover { color: var(--pink); }
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  width: 100px;
+  width: 80px;
   height: 4px;
   background: var(--border);
   border-radius: 2px;
@@ -362,7 +400,7 @@ select {
 }
 select:focus { border-color: var(--indigo); }
 .btn {
-  padding: 8px 16px;
+  padding: 8px 14px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--bg-card);
@@ -402,7 +440,8 @@ select:focus { border-color: var(--indigo); }
 .piano-roll-canvas-wrap {
   position: relative;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
+  max-height: 380px;
   background: #0d0b12;
 }
 .piano-roll-canvas-wrap canvas {
@@ -428,19 +467,76 @@ select:focus { border-color: var(--indigo); }
   display: flex; align-items: center; gap: 10px;
 }
 .spectrum-body {
+  position: relative;
   padding: 20px 16px;
+  height: 140px;
+  width: 100%;
+  overflow: hidden;
+}
+.spectrum-bars-container {
+  position: absolute;
+  bottom: 20px;
+  left: 16px;
+  right: 16px;
+  height: 80px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  height: 100px;
   gap: 2px;
+}
+.spectrum-reflection {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  right: 16px;
+  height: 40px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  transform: scaleY(-1);
+  opacity: 0.2;
+  filter: blur(2px);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
+  pointer-events: none;
 }
 .spectrum-bar {
   width: 4px;
   min-height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(0deg, var(--indigo), var(--pink));
+  border-radius: 2px 2px 0 0;
   transition: height 0.05s linear;
+  box-shadow: 0 0 4px rgba(124,58,237,0.3);
+}
+.spectrum-bar.reflect {
+  border-radius: 0 0 2px 2px;
+  box-shadow: none;
+}
+#waveformCanvas {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  right: 16px;
+  bottom: 10px;
+  width: calc(100% - 32px);
+  height: calc(100% - 20px);
+  pointer-events: none;
+}
+
+/* PARTICLES */
+.particle-container {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+.particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleRise 0.8s ease-out forwards;
 }
 
 /* FOOTER */
@@ -457,21 +553,44 @@ select:focus { border-color: var(--indigo); }
 }
 .footer .pink { color: var(--pink); }
 
+/* FADE TRANSITION */
+.fade-overlay {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.fade-overlay.active { opacity: 0.6; }
+
 /* MOBILE */
 @media (max-width: 768px) {
-  .nav { padding: 0 14px; height: 50px; }
-  .nav-links { gap: 14px; font-size: 0.6rem; }
-  .hero { padding-top: 70px; }
-  .vinyl-container { width: clamp(150px, 45vw, 200px); height: clamp(150px, 45vw, 200px); margin-bottom: -30px; }
-  .hero-freq { margin-top: 50px; }
-  .track-list { grid-template-columns: 1fr; }
-  .controls { gap: 8px; padding: 10px 12px; }
-  input[type="range"] { width: 70px; }
+  .nav { padding: 0 12px; height: 46px; }
+  .nav-links { gap: 10px; font-size: 0.55rem; }
+  .hero { padding-top: 60px; }
+  .vinyl-container { width: clamp(130px, 38vw, 180px); height: clamp(130px, 38vw, 180px); margin-bottom: -30px; }
+  .hero-freq { margin-top: 45px; font-size: 0.55rem; }
+  .hero h1 { font-size: clamp(1.3rem, 5vw, 1.8rem); }
+  .track-card { width: 150px; padding: 10px; }
+  .track-name { font-size: 0.7rem; }
+  .track-play-btn { width: 34px; height: 34px; }
+  .controls { gap: 6px; padding: 10px 10px; }
+  input[type="range"] { width: 60px; }
+  .ctrl-label { font-size: 0.5rem; }
+  .btn { padding: 6px 10px; font-size: 0.55rem; }
+  .piano-roll-canvas-wrap { max-height: 300px; }
+  .spectrum-body { height: 110px; padding: 14px 10px; }
+  .spectrum-bars-container, .spectrum-reflection { left: 10px; right: 10px; }
+  #waveformCanvas { left: 10px; width: calc(100% - 20px); }
+  .section-label { font-size: 0.5rem; }
+  .main { padding: 14px 10px 40px; }
 }
 @media (max-width: 400px) {
   body { font-size: 14px; }
-  .hero h1 { font-size: 1.5rem; }
+  .hero h1 { font-size: 1.2rem; }
   .controls { flex-direction: column; align-items: flex-start; }
+  .track-card { width: 135px; }
 }
 </style>
 </head>
@@ -480,6 +599,7 @@ select:focus { border-color: var(--indigo); }
 <div class="ambient-glow g1"></div>
 <div class="ambient-glow g2"></div>
 <div class="ambient-glow g3"></div>
+<div class="fade-overlay" id="fadeOverlay"></div>
 
 <nav class="nav">
   <div class="nav-brand">
@@ -556,6 +676,7 @@ select:focus { border-color: var(--indigo); }
     </div>
     <div class="piano-roll-canvas-wrap" id="pianoRollWrap">
       <canvas id="pianoRollCanvas"></canvas>
+      <div class="particle-container" id="particleContainer"></div>
     </div>
   </div>
 
@@ -564,7 +685,11 @@ select:focus { border-color: var(--indigo); }
     <div class="spectrum-hdr">
       <span>&#9835;</span> real-time frequency spectrum
     </div>
-    <div class="spectrum-body" id="spectrumBody"></div>
+    <div class="spectrum-body" id="spectrumBody">
+      <canvas id="waveformCanvas"></canvas>
+      <div class="spectrum-bars-container" id="spectrumBarsContainer"></div>
+      <div class="spectrum-reflection" id="spectrumReflection"></div>
+    </div>
   </div>
 </div>
 
@@ -587,22 +712,21 @@ var isPlaying = false;
 var playTimeouts = [];
 var currentSongIndex = -1;
 var activeSongNotes = [];
+var scheduledOscs = [];
+var glowActiveNotes = {};
 
-/* Scale definitions: MIDI note offsets from C4(60) */
 var scales = {
   major: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23],
   minor: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15, 17, 19, 20, 22],
   pentatonic: [0, 2, 4, 7, 9, 12, 14, 16, 19, 21]
 };
 
-/* Piano roll grid dimensions */
 var ROWS = 16;
 var COLS = 32;
 var CELL_W = 28;
 var CELL_H = 22;
 var LABEL_W = 36;
 
-/* Note grid for piano roll editing */
 var noteGrid = [];
 for (var r = 0; r < ROWS; r++) {
   noteGrid[r] = [];
@@ -610,23 +734,19 @@ for (var r = 0; r < ROWS; r++) {
     noteGrid[r][c] = false;
   }
 }
-
-/* Playback position */
 var playCol = -1;
 
-/* MIDI to frequency */
-function midiToFreq(n) {
-  return 440 * Math.pow(2, (n - 69) / 12);
-}
+function midiToFreq(n) { return 440 * Math.pow(2, (n - 69) / 12); }
 
 /* ═══════════════════════════════════════
-   AUDIO INIT (lazy, on first user gesture)
+   AUDIO INIT
    ═══════════════════════════════════════ */
 function initAudio() {
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 256;
+  analyser.fftSize = 512;
+  analyser.smoothingTimeConstant = 0.8;
   masterGain = audioCtx.createGain();
   masterGain.gain.value = volume;
   masterGain.connect(analyser);
@@ -634,18 +754,31 @@ function initAudio() {
   startSpectrum();
 }
 
-/* Play a single note */
-function playNote(freq, startTime, duration) {
+function playNote(freq, startTime, duration, midiNote) {
   var osc = audioCtx.createOscillator();
   var gain = audioCtx.createGain();
   osc.type = currentWave;
   osc.frequency.setValueAtTime(freq, startTime);
-  gain.gain.setValueAtTime(0.3, startTime);
+  gain.gain.setValueAtTime(0.25, startTime);
   gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration * 0.9);
   osc.connect(gain);
   gain.connect(masterGain);
   osc.start(startTime);
   osc.stop(startTime + duration);
+  scheduledOscs.push(osc);
+
+  /* Schedule glow highlight */
+  if (midiNote !== undefined) {
+    var delayMs = Math.max(0, (startTime - audioCtx.currentTime) * 1000);
+    var durMs = duration * 1000;
+    (function(mn, d) {
+      setTimeout(function() {
+        glowActiveNotes[mn] = Date.now() + d * 0.8;
+        spawnParticle(mn);
+        drawPianoRoll();
+      }, delayMs);
+    })(midiNote, duration);
+  }
 }
 
 /* ═══════════════════════════════════════
@@ -653,7 +786,6 @@ function playNote(freq, startTime, duration) {
    ═══════════════════════════════════════ */
 var songs = [];
 
-/* Note helper: {n: midi, t: beat (0-based), d: beats duration} */
 function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
 
 /* 1. 小星星 Twinkle Twinkle */
@@ -711,25 +843,18 @@ function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
   var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
   var c5=72,d5=74,e5=76;
   var m = [
-    /* 好一朵美丽的茉莉花 */
     N(g4,0,1),N(a4,1,0.5),N(a4,1.5,0.5),N(b4,2,1),N(a4,3,1),N(g4,4,1),
-    /* 好一朵美丽的茉莉花 */
     N(g4,5,1),N(a4,6,0.5),N(a4,6.5,0.5),N(b4,7,1),N(a4,8,1),N(g4,9,1),
-    /* 芬芳美丽满枝桠 */
     N(e5,10,1),N(e5,11,0.5),N(d5,11.5,0.5),N(c5,12,1),N(b4,13,1),N(a4,14,1),
-    /* 又香又白人人夸 */
     N(a4,15,1),N(g4,16,0.5),N(a4,16.5,0.5),N(b4,17,1),N(a4,18,1),N(g4,19,1),
-    /* 让我来将你摘下 */
     N(e5,20,1),N(e5,21,0.5),N(d5,21.5,0.5),N(c5,22,1),N(b4,23,1),N(a4,24,1),
-    /* 送给别人家 */
     N(b4,25,1),N(a4,26,1),N(g4,27,2),
-    /* 茉莉花啊茉莉花 */
     N(g4,29,1),N(a4,30,0.5),N(a4,30.5,0.5),N(b4,31,1),N(a4,32,1),N(g4,33,2)
   ];
   songs.push({name:'茉莉花', artist:'Chinese Folk', notes: m});
 })();
 
-/* 5. 天空之城 Castle in the Sky */
+/* 5. 天空之城 */
 (function() {
   var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
   var c5=72,d5=74,e5=76,f5=77,g5=79;
@@ -751,34 +876,26 @@ function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
   songs.push({name:'天空之城', artist:'Joe Hisaishi', notes: m});
 })();
 
-/* 6. 卡农 Canon in D */
+/* 6. 卡农 */
 (function() {
-  /* D major scale: D4=62, E4=64, F#4=66, G4=67, A4=69, B4=71, C#5=73, D5=74 */
   var d4=62,e4=64,fs4=66,g4=67,a4=69,b4=71,cs5=73,d5=74;
-  var a3=57,b3=59,fs3=54;
   var m = [
-    /* Melody over D-A-Bm-F#m-G-D-G-A progression, repeated */
-    /* Phrase 1 */
     N(fs4,0,2),N(e4,2,2),N(d4,4,2),N(cs5,6,2),
     N(b4,8,2),N(a4,10,2),N(g4,12,2),N(a4,14,2),
     N(fs4,16,2),N(e4,18,2),N(d4,20,2),N(cs5,22,2),
     N(b4,24,2),N(a4,26,2),N(b4,28,2),N(cs5,30,2),
-    /* Phrase 2 variation */
     N(d5,32,2),N(cs5,34,2),N(b4,36,2),N(a4,38,2),
     N(g4,40,2),N(fs4,42,2),N(e4,44,2),N(d4,46,2),
-    /* Phrase 1 again */
     N(fs4,48,2),N(e4,50,2),N(d4,52,2),N(cs5,54,2),
     N(b4,56,2),N(a4,58,2),N(g4,60,2),N(a4,62,2)
   ];
   songs.push({name:'卡农', artist:'Pachelbel', notes: m});
 })();
 
-/* 7. 致爱丽丝 Für Elise (main theme) */
+/* 7. 致爱丽丝 */
 (function() {
-  var e4=64,d4=62,cs4=61,c4=60,b3=59,a3=57,g3=55,f3=53,e3=52,d3=50;
-  var e5=76,d5=74,cs5=73,c5=72,b4=71,a4=69,gs4=68,g4=67,f4=65,e4=64,d4=62,cs4=61,c4=60;
+  var e5=76,cs5=73,b4=71,d5=74,c5=72,a4=69,gs4=68,e4=64,c4=60;
   var m = [
-    /* E5 D#5 E5 D#5 E5 B4 D5 C5 A4... */
     N(e5,0,0.5),N(cs5,0.5,0.5),N(e5,1,0.5),N(cs5,1.5,0.5),
     N(e5,2,0.5),N(b4,2.5,0.5),N(d5,3,0.5),N(c5,3.5,0.5),
     N(a4,4,1),N(c4,5,0.5),N(e4,5.5,0.5),N(a4,6,0.5),N(b4,6.5,0.5),
@@ -788,7 +905,6 @@ function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
     N(c5,13,0.5),N(a4,13.5,0.5),N(c4,14,0.5),N(e4,14.5,0.5),
     N(a4,15,0.5),N(b4,15.5,0.5),N(e4,16,0.5),N(cs5,16.5,0.5),
     N(b4,17,1),N(a4,18,1),
-    /* Repeat main theme */
     N(e5,20,0.5),N(cs5,20.5,0.5),N(e5,21,0.5),N(cs5,21.5,0.5),
     N(e5,22,0.5),N(b4,22.5,0.5),N(d5,23,0.5),N(c5,23.5,0.5),
     N(a4,24,1),N(c4,25,0.5),N(e4,25.5,0.5),N(a4,26,0.5),N(b4,26.5,0.5),
@@ -803,7 +919,7 @@ function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
   songs.push({name:'致爱丽丝', artist:'Beethoven', notes: m});
 })();
 
-/* 8. 梦中的婚礼 Mariage d'Amour */
+/* 8. 梦中的婚礼 */
 (function() {
   var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
   var c5=72,d5=74,e5=76,f5=77,g5=79,a5=81;
@@ -830,7 +946,6 @@ function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
 
 /* 9. 沧海一声笑 */
 (function() {
-  /* Pentatonic: A C D E G — A3=57, C4=60, D4=62, E4=64, G4=67, A4=69, C5=72, D5=74, E5=76 */
   var a3=57,c4=60,d4=62,e4=64,g4=67,a4=69,c5=72,d5=74,e5=76;
   var m = [
     N(a3,0,2),N(c4,2,2),N(d4,4,2),N(e4,6,2),
@@ -848,7 +963,7 @@ function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
   songs.push({name:'沧海一声笑', artist:'黄霑', notes: m});
 })();
 
-/* 10. 夜曲 Nocturne Op.9 No.2 (simplified) */
+/* 10. 夜曲 Nocturne Op.9 No.2 */
 (function() {
   var eb4=63,f4=65,g4=67,ab4=68,bb4=70,c5=72,db5=73,eb5=75,f5=77,db4=61;
   var m = [
@@ -861,8 +976,6 @@ function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
     N(c5,24,1),N(db5,25,1),N(c5,26,1),N(bb4,27,1),
     N(ab4,28,1),N(g4,29,1),N(f4,30,2),
     N(eb4,32,1),N(f4,33,1),N(g4,34,1),N(ab4,35,1),
-    N(ab4,28,1),N(g4,29,1),N(f4,30,2),
-    N(eb4,32,1),N(f4,33,1),N(g4,34,1),N(ab4,35,1),
     N(bb4,36,1),N(c5,37,1),N(bb4,38,1),N(ab4,39,1),
     N(g4,40,1),N(f4,41,1),N(eb4,42,2),
     N(f4,44,1),N(g4,45,1),N(ab4,46,1),N(bb4,47,1),
@@ -872,8 +985,238 @@ function N(midi, beat, dur) { return {n: midi, t: beat, d: dur}; }
   songs.push({name:'夜曲', artist:'Chopin', notes: m});
 })();
 
+/* ═══════ 11-20 NEW SONGS ═══════ */
+
+/* 11. 梁祝 — Butterfly Lovers (main theme) */
+(function() {
+  var g4=67,a4=69,b4=71,c5=72,d5=74,e5=76,f5=77,g5=79,a5=81;
+  var e4=64,f4=65,d4=62;
+  var m = [
+    /* 主旋律 - 化蝶片段 */
+    N(g4,0,1),N(a4,1,0.5),N(b4,1.5,0.5),N(c5,2,1),N(b4,3,0.5),N(a4,3.5,0.5),
+    N(g4,4,1),N(e4,5,0.5),N(g4,5.5,0.5),N(a4,6,1),N(g4,7,1),
+    N(a4,8,1),N(b4,9,0.5),N(c5,9.5,0.5),N(d5,10,1),N(c5,11,0.5),N(b4,11.5,0.5),
+    N(a4,12,1),N(g4,13,0.5),N(a4,13.5,0.5),N(b4,14,1),N(a4,15,1),
+    N(c5,16,1),N(d5,17,0.5),N(e5,17.5,0.5),N(d5,18,1),N(c5,19,0.5),N(b4,19.5,0.5),
+    N(c5,20,1),N(a4,21,0.5),N(b4,21.5,0.5),N(c5,22,1),N(a4,23,1),
+    N(g4,24,1),N(a4,25,0.5),N(b4,25.5,0.5),N(c5,26,1.5),N(b4,27.5,0.5),
+    N(a4,28,1),N(g4,29,1),N(a4,30,2),
+    /* 第二段 */
+    N(e5,32,1),N(d5,33,0.5),N(c5,33.5,0.5),N(d5,34,1),N(e5,35,1),
+    N(d5,36,1),N(c5,37,0.5),N(b4,37.5,0.5),N(a4,38,1),N(g4,39,1),
+    N(a4,40,1),N(b4,41,1),N(c5,42,0.5),N(b4,42.5,0.5),N(a4,43,1),
+    N(g4,44,1),N(e4,45,1),N(d4,46,1),N(e4,47,1),
+    N(g4,48,1.5),N(a4,49.5,0.5),N(g4,50,2)
+  ];
+  songs.push({name:'梁祝', artist:'Chinese Classic', notes: m});
+})();
+
+/* 12. 彩云追月 */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74,e5=76,g5=79;
+  var m = [
+    N(a4,0,1),N(g4,1,0.5),N(a4,1.5,0.5),N(c5,2,1),N(a4,3,0.5),N(g4,3.5,0.5),
+    N(e4,4,1),N(d4,5,0.5),N(e4,5.5,0.5),N(g4,6,1),N(e4,7,1),
+    N(d4,8,1),N(e4,9,0.5),N(g4,9.5,0.5),N(a4,10,1),N(c5,11,1),
+    N(d5,12,1),N(c5,13,0.5),N(a4,13.5,0.5),N(g4,14,1),N(a4,15,1),
+    N(c5,16,1),N(d5,17,0.5),N(e5,17.5,0.5),N(d5,18,1),N(c5,19,0.5),N(a4,19.5,0.5),
+    N(g4,20,1),N(a4,21,0.5),N(c5,21.5,0.5),N(a4,22,1),N(g4,23,1),
+    N(e4,24,1),N(d4,25,0.5),N(e4,25.5,0.5),N(g4,26,1),N(a4,27,1),
+    N(c5,28,1.5),N(a4,29.5,0.5),N(g4,30,1),N(e4,31,1),
+    N(d4,32,1.5),N(c4,33.5,0.5),N(d4,34,2)
+  ];
+  songs.push({name:'彩云追月', artist:'Chinese Classic', notes: m});
+})();
+
+/* 13. 月亮代表我的心 — The Moon Represents My Heart */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74,e5=76;
+  var m = [
+    /* 你问我爱你有多深 */
+    N(c5,0,1),N(b4,1,1),N(a4,2,1),N(g4,3,1),
+    /* 我爱你有几分 */
+    N(a4,4,1),N(g4,5,1),N(e4,6,1),N(d4,7,1),
+    /* 我的情也真 */
+    N(e4,8,1),N(g4,9,1),N(a4,10,1),N(g4,11,0.5),N(e4,11.5,0.5),
+    /* 我的爱也真 */
+    N(d4,12,1),N(e4,13,1),N(g4,14,1),N(a4,15,1),
+    /* 月亮代表我的心 */
+    N(c5,16,1),N(b4,17,0.5),N(a4,17.5,0.5),N(g4,18,1),N(a4,19,1),
+    N(c5,20,1),N(d5,21,1),N(c5,22,1),N(b4,23,1),
+    N(a4,24,1),N(g4,25,1),N(a4,26,1),N(c5,27,1),
+    N(b4,28,1),N(a4,29,1),N(g4,30,2),
+    /* Repeat variation */
+    N(a4,32,1),N(b4,33,1),N(c5,34,1),N(d5,35,1),
+    N(c5,36,1),N(b4,37,1),N(a4,38,1),N(g4,39,1),
+    N(e4,40,1),N(g4,41,1),N(a4,42,1),N(c5,43,1),
+    N(d5,44,1),N(c5,45,1),N(b4,46,1),N(a4,47,1),
+    N(g4,48,2),N(c4,50,2)
+  ];
+  songs.push({name:'月亮代表我的心', artist:'邓丽君', notes: m});
+})();
+
+/* 14. 一闪一闪亮晶晶 — Sparkling Stars (alt version, arpeggiated) */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,c5=72,g3=55;
+  var m = [
+    N(c4,0,0.5),N(e4,0.5,0.5),N(g4,1,1),
+    N(c5,2,0.5),N(g4,2.5,0.5),N(e4,3,0.5),N(g4,3.5,0.5),
+    N(a4,4,0.5),N(g4,4.5,0.5),N(f4,5,0.5),N(e4,5.5,0.5),
+    N(d4,6,0.5),N(e4,6.5,0.5),N(c4,7,1),
+    N(g3,8,0.5),N(c4,8.5,0.5),N(e4,9,1),
+    N(g4,10,0.5),N(c5,10.5,0.5),N(g4,11,0.5),N(e4,11.5,0.5),
+    N(a4,12,0.5),N(g4,12.5,0.5),N(f4,13,0.5),N(d4,13.5,0.5),
+    N(e4,14,0.5),N(d4,14.5,0.5),N(c4,15,1),
+    N(c5,16,0.5),N(a4,16.5,0.5),N(g4,17,0.5),N(f4,17.5,0.5),
+    N(e4,18,0.5),N(g4,18.5,0.5),N(a4,19,0.5),N(c5,19.5,0.5),
+    N(a4,20,0.5),N(g4,20.5,0.5),N(e4,21,0.5),N(f4,21.5,0.5),
+    N(d4,22,0.5),N(e4,22.5,0.5),N(c4,23,1),
+    N(c5,24,1),N(a4,25,0.5),N(g4,25.5,0.5),N(e4,26,0.5),N(d4,26.5,0.5),
+    N(c4,27,1.5),N(d4,28.5,0.5),N(c4,29,2)
+  ];
+  songs.push({name:'一闪一闪亮晶晶', artist:'Arr. Version', notes: m});
+})();
+
+/* 15. 欢乐颂 Ode to Joy */
+(function() {
+  var e4=64,f4=65,g4=67,a4=69,b4=71,c5=72,d5=74;
+  var m = [
+    N(e4,0,1),N(e4,1,1),N(f4,2,1),N(g4,3,1),
+    N(g4,4,1),N(f4,5,1),N(e4,6,1),N(d4=62,7,1),
+    N(c4=60,8,1),N(c4,9,1),N(d4,10,1),N(e4,11,1),
+    N(e4,12,1.5),N(d4,13.5,0.5),N(d4,14,2),
+    N(e4,16,1),N(e4,17,1),N(f4,18,1),N(g4,19,1),
+    N(g4,20,1),N(f4,21,1),N(e4,22,1),N(d4,23,1),
+    N(c4,24,1),N(c4,25,1),N(d4,26,1),N(e4,27,1),
+    N(d4,28,1.5),N(c4,29.5,0.5),N(c4,30,2)
+  ];
+  songs.push({name:'欢乐颂', artist:'Beethoven', notes: m});
+})();
+
+/* 16. 匈牙利舞曲第五号 Hungarian Dance No.5 (simplified) */
+(function() {
+  var g3=55,a3=57,b3=59,c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74,e5=76,f5=77;
+  var fs4=66,gs4=68,as4=70;
+  var m = [
+    /* Main theme */
+    N(a3,0,0.5),N(a3,0.5,0.5),N(a3,1,0.5),N(a3,1.5,0.5),
+    N(c4,2,0.5),N(c4,2.5,0.5),N(c4,3,0.5),N(c4,3.5,0.5),
+    N(d4,4,1),N(e4,5,1),N(f4,6,0.5),N(e4,6.5,0.5),
+    N(d4,7,0.5),N(c4,7.5,0.5),
+    N(b3,8,1),N(c4,9,1),N(d4,10,1),N(e4,11,1),
+    N(f4,12,0.5),N(g4,12.5,0.5),N(a4,13,0.5),N(g4,13.5,0.5),
+    N(f4,14,0.5),N(e4,14.5,0.5),N(d4,15,1),
+    N(c4,16,0.5),N(d4,16.5,0.5),N(e4,17,0.5),N(f4,17.5,0.5),
+    N(e4,18,0.5),N(d4,18.5,0.5),N(c4,19,0.5),N(b3,19.5,0.5),
+    N(a3,20,1),N(b3,21,1),N(c4,22,1),N(d4,23,1),
+    N(e4,24,0.5),N(f4,24.5,0.5),N(g4,25,0.5),N(a4,25.5,0.5),
+    N(g4,26,1),N(f4,27,1),N(e4,28,1),N(d4,29,1),
+    N(c4,30,2)
+  ];
+  songs.push({name:'匈牙利舞曲第五号', artist:'Brahms', notes: m});
+})();
+
+/* 17. 水边的阿狄丽娜 Ballade pour Adeline */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74,e5=76,f5=77,g5=79;
+  var m = [
+    N(e4,0,0.5),N(g4,0.5,0.5),N(c5,1,0.5),N(b4,1.5,0.5),N(a4,2,0.5),N(g4,2.5,0.5),
+    N(f4,3,0.5),N(a4,3.5,0.5),N(c5,4,1),N(e5,5,1),
+    N(d5,6,0.5),N(c5,6.5,0.5),N(b4,7,0.5),N(a4,7.5,0.5),
+    N(g4,8,0.5),N(a4,8.5,0.5),N(b4,9,1),N(c5,10,1),
+    N(d5,11,0.5),N(e5,11.5,0.5),N(c5,12,1),N(a4,13,1),
+    N(g4,14,0.5),N(a4,14.5,0.5),N(b4,15,1),N(c5,16,1),
+    N(a4,17,0.5),N(b4,17.5,0.5),N(c5,18,1),N(d5,19,1),
+    N(e5,20,1),N(d5,21,1),N(c5,22,1),N(b4,23,1),
+    N(c5,24,0.5),N(b4,24.5,0.5),N(a4,25,0.5),N(g4,25.5,0.5),
+    N(a4,26,1),N(c5,27,1),N(e5,28,1),N(d5,29,1),
+    N(c5,30,0.5),N(b4,30.5,0.5),N(a4,31,0.5),N(g4,31.5,0.5),
+    N(a4,32,1),N(c5,33,1),N(a4,34,1),N(g4,35,1),
+    N(e4,36,2),N(g4,38,2)
+  ];
+  songs.push({name:'水边的阿狄丽娜', artist:'Richard Clayderman', notes: m});
+})();
+
+/* 18. 雪之梦 Snowdreams */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74,e5=76,g5=79;
+  var m = [
+    N(e4,0,1),N(g4,1,1),N(a4,2,0.5),N(c5,2.5,0.5),
+    N(b4,3,0.5),N(a4,3.5,0.5),N(g4,4,1),
+    N(e4,5,0.5),N(f4,5.5,0.5),N(g4,6,1),N(a4,7,1),
+    N(c5,8,1),N(b4,9,0.5),N(a4,9.5,0.5),
+    N(g4,10,1),N(e4,11,1),N(d4,12,1),N(e4,13,1),
+    N(f4,14,0.5),N(g4,14.5,0.5),N(a4,15,1),
+    N(g4,16,0.5),N(a4,16.5,0.5),N(b4,17,0.5),N(c5,17.5,0.5),
+    N(d5,18,1),N(c5,19,0.5),N(a4,19.5,0.5),
+    N(g4,20,1),N(a4,21,1),N(c5,22,1),N(d5,23,1),
+    N(e5,24,1),N(d5,25,0.5),N(c5,25.5,0.5),N(b4,26,1),
+    N(a4,27,1),N(g4,28,1),N(a4,29,1),
+    N(c5,30,1.5),N(a4,31.5,0.5),N(g4,32,1.5),N(e4,33.5,0.5),
+    N(d4,34,2),N(c4,36,2)
+  ];
+  songs.push({name:'雪之梦', artist:'Bandari', notes: m});
+})();
+
+/* 19. 送别 — Farewell (李叔同) */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74;
+  var m = [
+    /* 长亭外 古道边 */
+    N(c5,0,1),N(a4,1,1),N(b4,2,1),N(c5,3,1),
+    /* 芳草碧连天 */
+    N(d5,4,1),N(c5,5,1),N(a4,6,1),N(g4,7,1),
+    /* 晚风拂柳笛声残 */
+    N(a4,8,1),N(c5,9,1),N(d5,10,1),N(c5,11,1),
+    /* 夕阳山外山 */
+    N(a4,12,1),N(g4,13,1),N(a4,14,2),
+    /* 天之涯 地之角 */
+    N(a4,16,1),N(c5,17,1),N(d5,18,1),N(c5,19,1),
+    /* 知交半零落 */
+    N(b4,20,1),N(a4,21,1),N(g4,22,1),N(e4,23,1),
+    /* 一壶浊酒尽余欢 */
+    N(d4,24,1),N(e4,25,1),N(g4,26,1),N(a4,27,1),
+    /* 今宵别梦寒 */
+    N(c5,28,1),N(b4,29,1),N(a4,30,2),
+    /* Repeat */
+    N(c5,32,1),N(a4,33,1),N(b4,34,1),N(c5,35,1),
+    N(d5,36,1),N(c5,37,1),N(a4,38,1),N(g4,39,1),
+    N(a4,40,1),N(g4,41,2)
+  ];
+  songs.push({name:'送别', artist:'李叔同', notes: m});
+})();
+
+/* 20. 哆啦A梦主题曲 — Doraemon Theme */
+(function() {
+  var c4=60,d4=62,e4=64,f4=65,g4=67,a4=69,b4=71;
+  var c5=72,d5=74,e5=76;
+  var m = [
+    /* こんなにいいことがあるなんて */
+    N(e5,0,0.5),N(e5,0.5,0.5),N(d5,1,0.5),N(e5,1.5,0.5),
+    N(c5,2,0.5),N(d5,2.5,0.5),N(e5,3,0.5),N(c5,3.5,0.5),
+    N(d5,4,1),N(c5,5,0.5),N(a4,5.5,0.5),
+    N(g4,6,0.5),N(a4,6.5,0.5),N(c5,7,1),
+    N(d5,8,0.5),N(c5,8.5,0.5),N(a4,9,0.5),N(g4,9.5,0.5),
+    N(a4,10,1),N(g4,11,0.5),N(e4,11.5,0.5),
+    N(d4,12,0.5),N(e4,12.5,0.5),N(g4,13,0.5),N(a4,13.5,0.5),
+    N(c5,14,1),N(d5,15,1),
+    N(e5,16,0.5),N(d5,16.5,0.5),N(c5,17,0.5),N(d5,17.5,0.5),
+    N(e5,18,1),N(c5,19,0.5),N(a4,19.5,0.5),
+    N(g4,20,0.5),N(a4,20.5,0.5),N(b4,21,0.5),N(c5,21.5,0.5),
+    N(d5,22,0.5),N(c5,22.5,0.5),N(a4,23,0.5),N(g4,23.5,0.5),
+    N(a4,24,1.5),N(c5,25.5,0.5),N(a4,26,2)
+  ];
+  songs.push({name:'哆啦A梦', artist:'Theme Song', notes: m});
+})();
+
 /* ═══════════════════════════════════════
-   TRACK LIST UI
+   TRACK LIST UI (horizontal cards)
    ═══════════════════════════════════════ */
 function renderTrackList() {
   var container = document.getElementById('trackList');
@@ -891,59 +1234,56 @@ function renderTrackList() {
 }
 
 /* ═══════════════════════════════════════
-   LOAD SONG TO PIANO ROLL + PLAY
+   FADE TRANSITION
    ═══════════════════════════════════════ */
-function loadSong(idx) {
-  initAudio();
-  stopPlay();
-  currentSongIndex = idx;
-  activeSongNotes = songs[idx].notes.slice();
-
-  /* Clear grid and place notes */
-  clearGrid();
-  var scaleNotes = scales[currentScale];
-  for (var i = 0; i < activeSongNotes.length; i++) {
-    var note = activeSongNotes[i];
-    /* Find row: map midi to row index (highest note = row 0) */
-    var row = midiToRow(note.n);
-    if (row >= 0 && row < ROWS) {
-      var col = Math.floor(note.t);
-      if (col >= 0 && col < COLS) {
-        noteGrid[row][col] = true;
-      }
-    }
-  }
-
-  renderTrackList();
-  drawPianoRoll();
-  document.getElementById('nowPlaying').innerHTML = '&#9835; ' + songs[idx].name + ' — ' + songs[idx].artist;
-  togglePlay();
-}
-
-/* Map MIDI note to piano roll row */
-function midiToRow(midi) {
-  var scaleNotes = scales[currentScale];
-  /* Row 0 = highest note in scale range */
-  var baseMidi = 60; /* C4 */
-  for (var r = ROWS - 1; r >= 0; r--) {
-    var noteMidi = baseMidi + scaleNotes[r % scaleNotes.length] + Math.floor(r / scaleNotes.length) * 12;
-    /* Simpler: just invert */
-  }
-  /* Simple approach: row 0 = top = highest pitch */
-  /* Map midi 48-83 (C3 to B5) to rows 15-0 */
-  return ROWS - 1 - Math.max(0, Math.min(ROWS - 1, midi - 48));
-}
-
-function rowToMidi(row) {
-  return 48 + (ROWS - 1 - row);
+function fadeTransition(callback) {
+  var overlay = document.getElementById('fadeOverlay');
+  overlay.classList.add('active');
+  setTimeout(function() {
+    callback();
+    setTimeout(function() {
+      overlay.classList.remove('active');
+    }, 100);
+  }, 300);
 }
 
 /* ═══════════════════════════════════════
-   PIANO ROLL DRAWING (Canvas)
+   LOAD SONG
+   ═══════════════════════════════════════ */
+function loadSong(idx) {
+  initAudio();
+  fadeTransition(function() {
+    stopPlay();
+    currentSongIndex = idx;
+    activeSongNotes = songs[idx].notes.slice();
+    clearGrid();
+    for (var i = 0; i < activeSongNotes.length; i++) {
+      var note = activeSongNotes[i];
+      var row = midiToRow(note.n);
+      if (row >= 0 && row < ROWS) {
+        var col = Math.floor(note.t);
+        if (col >= 0 && col < COLS) {
+          noteGrid[row][col] = true;
+        }
+      }
+    }
+    renderTrackList();
+    drawPianoRoll();
+    document.getElementById('nowPlaying').innerHTML = '&#9835; ' + songs[idx].name + ' — ' + songs[idx].artist;
+    togglePlay();
+  });
+}
+
+function midiToRow(midi) {
+  return ROWS - 1 - Math.max(0, Math.min(ROWS - 1, midi - 48));
+}
+function rowToMidi(row) { return 48 + (ROWS - 1 - row); }
+
+/* ═══════════════════════════════════════
+   PIANO ROLL
    ═══════════════════════════════════════ */
 var pianoCanvas, pianoCtx;
 
-/* roundRect polyfill */
 if (!CanvasRenderingContext2D.prototype.roundRect) {
   CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
     if (typeof r === 'number') r = [r,r,r,r];
@@ -967,10 +1307,7 @@ function initPianoRoll() {
   resizePianoRoll();
   drawPianoRoll();
   pianoCanvas.addEventListener('click', onPianoRollClick);
-  window.addEventListener('resize', function() {
-    resizePianoRoll();
-    drawPianoRoll();
-  });
+  window.addEventListener('resize', function() { resizePianoRoll(); drawPianoRoll(); });
 }
 
 function resizePianoRoll() {
@@ -990,25 +1327,19 @@ function drawPianoRoll() {
   var h = pianoCanvas.height;
   ctx.clearRect(0, 0, w, h);
 
-  /* Draw grid lines */
+  /* Grid */
   ctx.strokeStyle = 'rgba(124,58,237,0.08)';
   ctx.lineWidth = 1;
   for (var c = 0; c <= COLS; c++) {
     var x = LABEL_W + c * CELL_W;
-    ctx.beginPath();
-    ctx.moveTo(x + 0.5, 0);
-    ctx.lineTo(x + 0.5, h);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, h); ctx.stroke();
   }
   for (var r = 0; r <= ROWS; r++) {
     var y = r * CELL_H;
-    ctx.beginPath();
-    ctx.moveTo(LABEL_W, y + 0.5);
-    ctx.lineTo(w, y + 0.5);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(LABEL_W, y + 0.5); ctx.lineTo(w, y + 0.5); ctx.stroke();
   }
 
-  /* Draw note labels on left */
+  /* Labels */
   ctx.font = '9px DM Mono, monospace';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
@@ -1016,7 +1347,6 @@ function drawPianoRoll() {
   for (var r = 0; r < ROWS; r++) {
     var midi = rowToMidi(r);
     var name = noteNames[midi % 12] + Math.floor(midi / 12 - 1);
-    /* Highlight black keys row */
     var isBlack = [1,3,6,8,10].indexOf(midi % 12) >= 0;
     if (isBlack) {
       ctx.fillStyle = 'rgba(124,58,237,0.06)';
@@ -1027,14 +1357,12 @@ function drawPianoRoll() {
     ctx.fillText(name, LABEL_W - 4, r * CELL_H + CELL_H / 2);
   }
 
-  /* Draw separator line */
+  /* Separator */
   ctx.strokeStyle = 'rgba(124,58,237,0.2)';
-  ctx.beginPath();
-  ctx.moveTo(LABEL_W + 0.5, 0);
-  ctx.lineTo(LABEL_W + 0.5, h);
-  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(LABEL_W + 0.5, 0); ctx.lineTo(LABEL_W + 0.5, h); ctx.stroke();
 
-  /* Draw notes */
+  /* Notes + glow trails */
+  var now = Date.now();
   for (var r = 0; r < ROWS; r++) {
     for (var c = 0; c < COLS; c++) {
       if (noteGrid[r][c]) {
@@ -1042,95 +1370,133 @@ function drawPianoRoll() {
         var y = r * CELL_H + 1;
         var nw = CELL_W - 2;
         var nh = CELL_H - 2;
+        var hue = 260 + (c / COLS) * 60;
+        var isActive = (playCol === c);
+        var midi = rowToMidi(r);
+        var glowEnd = glowActiveNotes[midi];
+        var isGlowing = glowEnd && now < glowEnd;
 
-        /* Gradient based on column position */
-        var hue = 260 + (c / COLS) * 60; /* indigo to pink */
-        ctx.fillStyle = 'hsla(' + hue + ', 80%, 60%, 0.85)';
+        if (isActive) {
+          ctx.shadowColor = 'rgba(236,72,153,0.8)';
+          ctx.shadowBlur = 15;
+          ctx.fillStyle = 'rgba(236,72,153,0.95)';
+        } else if (isGlowing) {
+          ctx.shadowColor = 'rgba(124,58,237,0.7)';
+          ctx.shadowBlur = 12;
+          ctx.fillStyle = 'hsla(' + hue + ', 90%, 70%, 0.95)';
+        } else {
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = 'hsla(' + hue + ', 80%, 60%, 0.85)';
+        }
         ctx.beginPath();
         ctx.roundRect(x, y, nw, nh, 3);
-        ctx.fill();
-
-        /* Glow */
-        ctx.shadowColor = 'hsla(' + hue + ', 80%, 60%, 0.4)';
-        ctx.shadowBlur = 6;
         ctx.fill();
         ctx.shadowBlur = 0;
       }
     }
   }
 
-  /* Draw playhead */
+  /* Playhead */
   if (playCol >= 0 && playCol < COLS) {
     var px = LABEL_W + playCol * CELL_W;
-    ctx.fillStyle = 'rgba(236,72,153,0.15)';
+    ctx.fillStyle = 'rgba(236,72,153,0.12)';
     ctx.fillRect(px, 0, CELL_W, h);
-    ctx.strokeStyle = 'rgba(236,72,153,0.8)';
+    ctx.strokeStyle = 'rgba(236,72,153,0.7)';
     ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(px, 0);
-    ctx.lineTo(px, h);
-    ctx.stroke();
+    ctx.shadowColor = 'rgba(236,72,153,0.5)';
+    ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, h); ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  /* Clean expired glows */
+  for (var k in glowActiveNotes) {
+    if (now >= glowActiveNotes[k]) {
+      delete glowActiveNotes[k];
+    }
   }
 }
 
-/* Handle click on piano roll */
 function onPianoRollClick(e) {
   var rect = pianoCanvas.getBoundingClientRect();
   var scaleX = pianoCanvas.width / rect.width;
   var scaleY = pianoCanvas.height / rect.height;
   var mx = (e.clientX - rect.left) * scaleX;
   var my = (e.clientY - rect.top) * scaleY;
-
   var col = Math.floor((mx - LABEL_W) / CELL_W);
   var row = Math.floor(my / CELL_H);
-
   if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
-
   noteGrid[row][col] = !noteGrid[row][col];
-
-  /* If user edits, clear active song association */
   if (noteGrid[row][col]) {
     activeSongNotes.push({n: rowToMidi(row), t: col, d: 1});
   } else {
     for (var i = activeSongNotes.length - 1; i >= 0; i--) {
       if (activeSongNotes[i].n === rowToMidi(row) && Math.floor(activeSongNotes[i].t) === col) {
-        activeSongNotes.splice(i, 1);
-        break;
+        activeSongNotes.splice(i, 1); break;
       }
     }
   }
-
   drawPianoRoll();
 }
 
 /* ═══════════════════════════════════════
-   PLAYBACK ENGINE
+   PARTICLES
+   ═══════════════════════════════════════ */
+function spawnParticle(midiNote) {
+  var container = document.getElementById('particleContainer');
+  var row = midiToRow(midiNote);
+  if (row < 0 || row >= ROWS) return;
+  /* Find which column is currently playing */
+  if (playCol < 0) return;
+  var x = LABEL_W + playCol * CELL_W + CELL_W / 2;
+  var y = row * CELL_H + CELL_H / 2;
+
+  /* Get canvas scale */
+  var rect = pianoCanvas.getBoundingClientRect();
+  var scaleX = rect.width / pianoCanvas.width;
+  var scaleY = rect.height / pianoCanvas.height;
+  x = x * scaleX;
+  y = y * scaleY;
+
+  for (var i = 0; i < 3; i++) {
+    var p = document.createElement('div');
+    p.className = 'particle';
+    var hue = 260 + Math.random() * 60;
+    p.style.left = (x + (Math.random() - 0.5) * 12) + 'px';
+    p.style.top = y + 'px';
+    p.style.background = 'hsla(' + hue + ', 80%, 70%, 0.8)';
+    p.style.boxShadow = '0 0 4px hsla(' + hue + ', 80%, 70%, 0.6)';
+    p.style.width = (3 + Math.random() * 3) + 'px';
+    p.style.height = p.style.width;
+    p.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
+    container.appendChild(p);
+    (function(el) {
+      setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 1000);
+    })(p);
+  }
+}
+
+/* ═══════════════════════════════════════
+   PLAYBACK
    ═══════════════════════════════════════ */
 function togglePlay() {
   initAudio();
   if (audioCtx.state === 'suspended') audioCtx.resume();
-
-  if (isPlaying) {
-    pausePlay();
-    return;
-  }
-
+  if (isPlaying) { pausePlay(); return; }
   if (activeSongNotes.length === 0) return;
 
   isPlaying = true;
   document.getElementById('btnPlay').innerHTML = '&#10074;&#10074; Pause';
   document.getElementById('vinylRecord').classList.add('playing');
+  document.getElementById('vinylRecord').classList.add('glow-pulse');
   document.getElementById('vinylRecord').classList.remove('stopped');
 
-  /* Find max beat to know total length */
   var maxBeat = 0;
   for (var i = 0; i < activeSongNotes.length; i++) {
     var endBeat = activeSongNotes[i].t + activeSongNotes[i].d;
     if (endBeat > maxBeat) maxBeat = endBeat;
   }
   var totalBeats = Math.ceil(maxBeat) + 1;
-
-  /* Schedule all notes using Web Audio scheduling */
   var beatDur = 60 / bpm;
   var startTime = audioCtx.currentTime + 0.05;
 
@@ -1138,12 +1504,12 @@ function togglePlay() {
     var note = activeSongNotes[i];
     var t = startTime + note.t * beatDur;
     var d = Math.max(0.1, note.d * beatDur);
-    playNote(midiToFreq(note.n), t, d);
+    playNote(midiToFreq(note.n), t, d, note.n);
   }
 
-  /* Animate playhead */
   var startT = performance.now();
   var totalDurMs = totalBeats * beatDur * 1000;
+  glowActiveNotes = {};
 
   function animate() {
     if (!isPlaying) return;
@@ -1159,10 +1525,7 @@ function togglePlay() {
   }
   requestAnimationFrame(animate);
 
-  /* Auto-stop after song ends */
-  var autoStop = setTimeout(function() {
-    if (isPlaying) stopPlay();
-  }, totalDurMs + 200);
+  var autoStop = setTimeout(function() { if (isPlaying) stopPlay(); }, totalDurMs + 200);
   playTimeouts.push(autoStop);
 }
 
@@ -1171,104 +1534,159 @@ function pausePlay() {
   playCol = -1;
   document.getElementById('btnPlay').innerHTML = '&#9654; Play';
   document.getElementById('vinylRecord').classList.remove('playing');
+  document.getElementById('vinylRecord').classList.remove('glow-pulse');
   document.getElementById('vinylRecord').classList.add('stopped');
   clearTimeouts();
+  stopScheduledOscs();
   drawPianoRoll();
 }
 
 function stopPlay() {
   isPlaying = false;
   playCol = -1;
-  currentSongIndex = -1;
-  activeSongNotes = [];
-  clearGrid();
+  glowActiveNotes = {};
   document.getElementById('btnPlay').innerHTML = '&#9654; Play';
   document.getElementById('vinylRecord').classList.remove('playing');
+  document.getElementById('vinylRecord').classList.remove('glow-pulse');
   document.getElementById('vinylRecord').classList.remove('stopped');
-  document.getElementById('nowPlaying').innerHTML = '';
   clearTimeouts();
-  renderTrackList();
+  stopScheduledOscs();
+  /* Clear particles */
+  var pc = document.getElementById('particleContainer');
+  pc.innerHTML = '';
   drawPianoRoll();
+}
+
+function stopScheduledOscs() {
+  for (var i = 0; i < scheduledOscs.length; i++) {
+    try { scheduledOscs[i].stop(0); } catch(e) {}
+  }
+  scheduledOscs = [];
 }
 
 function clearNotes() {
   stopPlay();
+  currentSongIndex = -1;
+  activeSongNotes = [];
   clearGrid();
+  document.getElementById('nowPlaying').innerHTML = '';
+  renderTrackList();
   drawPianoRoll();
 }
 
 function clearGrid() {
   for (var r = 0; r < ROWS; r++) {
-    for (var c = 0; c < COLS; c++) {
-      noteGrid[r][c] = false;
-    }
+    for (var c = 0; c < COLS; c++) { noteGrid[r][c] = false; }
   }
 }
 
 function clearTimeouts() {
-  for (var i = 0; i < playTimeouts.length; i++) {
-    clearTimeout(playTimeouts[i]);
-  }
+  for (var i = 0; i < playTimeouts.length; i++) { clearTimeout(playTimeouts[i]); }
   playTimeouts = [];
 }
 
 /* ═══════════════════════════════════════
    CONTROLS
    ═══════════════════════════════════════ */
-function updateBPM(val) {
-  bpm = parseInt(val, 10);
-  document.getElementById('bpmVal').textContent = val;
-}
-
+function updateBPM(val) { bpm = parseInt(val, 10); document.getElementById('bpmVal').textContent = val; }
 function updateVolume(val) {
   volume = parseInt(val, 10) / 100;
   document.getElementById('volVal').textContent = val;
   if (masterGain) masterGain.gain.value = volume;
 }
 
-/* Vinyl click to toggle play */
 document.getElementById('vinylContainer').addEventListener('click', function() {
-  if (isPlaying) {
-    pausePlay();
-  } else if (activeSongNotes.length > 0) {
-    togglePlay();
-  } else if (songs.length > 0) {
-    loadSong(0);
-  }
+  if (isPlaying) { pausePlay(); }
+  else if (activeSongNotes.length > 0) { togglePlay(); }
+  else if (songs.length > 0) { loadSong(0); }
 });
 
 /* ═══════════════════════════════════════
-   SPECTRUM VISUALIZER
+   SPECTRUM + WAVEFORM VISUALIZER
    ═══════════════════════════════════════ */
 var spectrumBars = [];
+var reflectionBars = [];
 var spectrumRunning = false;
+var waveformCanvas, waveformCtx;
 
 function initSpectrum() {
-  var container = document.getElementById('spectrumBody');
-  for (var i = 0; i < 48; i++) {
+  var barsContainer = document.getElementById('spectrumBarsContainer');
+  var reflContainer = document.getElementById('spectrumReflection');
+  var numBars = 48;
+  for (var i = 0; i < numBars; i++) {
     var bar = document.createElement('div');
     bar.className = 'spectrum-bar';
     bar.style.height = '2px';
-    container.appendChild(bar);
+    var hue = 260 + (i / numBars) * 60;
+    bar.style.background = 'linear-gradient(0deg, hsla(' + hue + ',80%,60%,1), hsla(' + (hue + 40) + ',80%,65%,1))';
+    barsContainer.appendChild(bar);
     spectrumBars.push(bar);
+
+    var rbar = document.createElement('div');
+    rbar.className = 'spectrum-bar reflect';
+    rbar.style.height = '2px';
+    rbar.style.background = 'linear-gradient(0deg, hsla(' + hue + ',80%,60%,0.6), hsla(' + (hue + 40) + ',80%,65%,0.6))';
+    reflContainer.appendChild(rbar);
+    reflectionBars.push(rbar);
   }
+
+  /* Waveform canvas */
+  waveformCanvas = document.getElementById('waveformCanvas');
+  waveformCtx = waveformCanvas.getContext('2d');
+  resizeWaveform();
+  window.addEventListener('resize', resizeWaveform);
+}
+
+function resizeWaveform() {
+  if (!waveformCanvas) return;
+  var parent = waveformCanvas.parentElement;
+  waveformCanvas.width = parent.clientWidth - 32;
+  waveformCanvas.height = parent.clientHeight - 20;
 }
 
 function startSpectrum() {
   if (spectrumRunning) return;
   spectrumRunning = true;
   var bufLen = analyser.frequencyBinCount;
-  var dataArr = new Uint8Array(bufLen);
+  var freqData = new Uint8Array(bufLen);
+  var timeData = new Uint8Array(bufLen);
 
   function update() {
-    if (!analyser) return;
-    analyser.getByteFrequencyData(dataArr);
+    if (!analyser) { spectrumRunning = false; return; }
+    analyser.getByteFrequencyData(freqData);
+    analyser.getByteTimeDomainData(timeData);
+
     var step = Math.floor(bufLen / spectrumBars.length);
     for (var i = 0; i < spectrumBars.length; i++) {
-      var val = dataArr[i * step] || 0;
-      var h = Math.max(2, (val / 255) * 80);
+      var val = freqData[i * step] || 0;
+      var h = Math.max(2, (val / 255) * 70);
       spectrumBars[i].style.height = h + 'px';
+      reflectionBars[i].style.height = (h * 0.4) + 'px';
     }
+
+    /* Draw waveform */
+    if (waveformCtx) {
+      var wCtx = waveformCtx;
+      var w = waveformCanvas.width;
+      var h = waveformCanvas.height;
+      wCtx.clearRect(0, 0, w, h);
+      wCtx.lineWidth = 2;
+      wCtx.strokeStyle = 'rgba(124,58,237,0.4)';
+      wCtx.shadowColor = 'rgba(124,58,237,0.3)';
+      wCtx.shadowBlur = 4;
+      wCtx.beginPath();
+      var sliceW = w / bufLen;
+      for (var i = 0; i < bufLen; i++) {
+        var v = timeData[i] / 128.0;
+        var y = (v * h) / 2;
+        if (i === 0) { wCtx.moveTo(0, y); }
+        else { wCtx.lineTo(i * sliceW, y); }
+      }
+      wCtx.lineTo(w, h / 2);
+      wCtx.stroke();
+      wCtx.shadowBlur = 0;
+    }
+
     requestAnimationFrame(update);
   }
   update();
