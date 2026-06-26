@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>开源实验室 — army-yorozuya.art</title>
+<meta property="og:title" content="开源实验室 — The Open Laboratory">
+<meta property="og:image" content="https://army-yorozuya.art/assets/img/avatar.jpg">
+<meta property="og:url" content="https://army-yorozuya.art/study/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Archivo+Black&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+body{
+  background:#f5f2ed;
+  color:#1a1a1a;
+  font-family:'Newsreader',serif;
+  overflow-x:hidden;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Grain overlay */
+body::after{
+  content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
+  opacity:0.3;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+}
+
+a{color:inherit;text-decoration:none}
+
+/* ── Top bar ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:52px;
+  background:rgba(245,242,237,0.88);
+  backdrop-filter:blur(20px);
+  border-bottom:2px solid #1a1a1a;
+}
+.topbar-left{
+  font-family:'DM Mono',monospace;
+  font-size:0.7em;font-weight:500;
+  letter-spacing:0.15em;text-transform:uppercase;
+}
+.topbar-right{
+  display:flex;gap:20px;
+  font-family:'DM Mono',monospace;
+  font-size:0.65em;letter-spacing:0.1em;
+  text-transform:uppercase;color:#999;
+}
+.topbar-right a:hover{color:#1a1a1a}
+
+/* ── Hero ── */
+.hero{
+  padding:100px 28px 0;
+  max-width:1200px;margin:0 auto;
+}
+.hero-eyebrow{
+  font-family:'DM Mono',monospace;
+  font-size:0.6em;letter-spacing:0.4em;
+  text-transform:uppercase;color:#999;
+  margin-bottom:24px;
+}
+.hero h1{
+  font-family:'Archivo Black',sans-serif;
+  font-size:clamp(3.2em,8vw,7em);
+  font-weight:400;
+  line-height:0.88;
+  letter-spacing:-0.04em;
+  text-transform:uppercase;
+  margin-bottom:20px;
+}
+.hero h1 .line2{
+  display:block;
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-weight:400;
+  font-size:0.55em;
+  letter-spacing:0.02em;
+  text-transform:none;
+  color:#777;
+  line-height:1.2;
+}
+.hero-desc{
+  font-size:1.05em;font-weight:300;
+  color:#666;line-height:1.7;
+  max-width:520px;
+  margin-bottom:40px;
+}
+
+/* Stats strip */
+.stats-strip{
+  display:flex;gap:0;
+  border-top:1px solid rgba(0,0,0,0.1);
+  border-bottom:1px solid rgba(0,0,0,0.1);
+  width:100%;
+}
+.stat-item{
+  flex:1;padding:18px 0;text-align:center;
+  border-right:1px solid rgba(0,0,0,0.06);
+}
+.stat-item:last-child{border-right:none}
+.stat-num{
+  font-family:'Archivo Black',sans-serif;
+  font-size:2em;line-height:1;
+}
+.stat-item:nth-child(1) .stat-num{color:#e63946}
+.stat-item:nth-child(2) .stat-num{color:#2a9d8f}
+.stat-item:nth-child(3) .stat-num{color:#264653}
+.stat-item:nth-child(4) .stat-num{color:#e9c46a}
+.stat-lbl{
+  font-family:'DM Mono',monospace;
+  font-size:0.55em;letter-spacing:0.2em;
+  text-transform:uppercase;color:#aaa;margin-top:4px;
+}
+
+/* ── Projects grid ── */
+.projects{
+  max-width:1200px;margin:0 auto;
+  padding:48px 28px 80px;
+}
+.section-label{
+  font-family:'DM Mono',monospace;
+  font-size:0.58em;letter-spacing:0.4em;
+  text-transform:uppercase;color:#bbb;
+  margin-bottom:36px;
+  display:flex;align-items:center;gap:16px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.08)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+
+/* ── Project card base ── */
+.proj{
+  position:relative;overflow:hidden;
+  cursor:pointer;
+  border-radius:6px;
+  transition:transform 0.5s cubic-bezier(0.23,1,0.32,1), box-shadow 0.5s ease;
+}
+.proj:hover{transform:translateY(-8px); box-shadow:0 16px 48px rgba(0,0,0,0.12)}
+.proj-inner{padding:32px 28px;position:relative;z-index:2;min-height:240px;display:flex;flex-direction:column}
+
+/* Project number watermark */
+.proj-nr{
+  position:absolute;font-family:'Archivo Black',sans-serif;
+  font-size:8em;line-height:0.85;opacity:0.04;
+  top:-20px;right:12px;z-index:0;pointer-events:none;
+}
+/* Project tag */
+.proj-tag{
+  font-family:'DM Mono',monospace;
+  font-size:0.55em;letter-spacing:0.2em;
+  text-transform:uppercase;margin-bottom:12px;
+}
+/* Project name */
+.proj-name{
+  font-family:'Archivo Black',sans-serif;
+  font-size:1.5em;line-height:1.1;
+  text-transform:uppercase;letter-spacing:-0.02em;
+  margin-bottom:8px;
+}
+.proj-name em{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-weight:400;
+  font-size:0.85em;
+  text-transform:none;letter-spacing:0;
+}
+.proj-desc{
+  font-size:0.85em;font-weight:300;
+  line-height:1.7;margin-bottom:auto;
+}
+/* Enter link */
+.proj-enter{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'DM Mono',monospace;
+  font-size:0.62em;letter-spacing:0.12em;
+  text-transform:uppercase;margin-top:20px;
+  padding:6px 0;border-bottom:1.5px solid;
+  opacity:0.5;transition:opacity 0.3s;
+}
+.proj:hover .proj-enter{opacity:1}
+.proj-enter .arr{transition:transform 0.3s;display:inline-block}
+.proj:hover .proj-enter .arr{transform:translateX(6px)}
+
+/* ══════════════════════════════════════════════
+   Project 1: Civ Sim — 羊皮纸/古地图风格
+   ══════════════════════════════════════════════ */
+.proj-1{
+  background:#f4efe4;
+  color:#2c2c2c;
+  border:1px solid rgba(200,169,110,.2);
+}
+.proj-1 .proj-nr{color:#8b7355}
+.proj-1 .proj-tag{color:#8b7355}
+.proj-1 .proj-name em{color:#a0522d}
+.proj-1 .proj-desc{color:#6b6356}
+.proj-1 .proj-enter{color:#8b7355;border-color:rgba(139,115,85,.3)}
+/* Parchment texture overlay */
+.proj-1::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  opacity:0.15;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='6' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+}
+/* Corner ornaments */
+.proj-1::after{
+  content:'❧';position:absolute;
+  top:12px;left:16px;
+  font-size:1.4em;color:rgba(139,115,85,.2);
+  z-index:0;font-family:'Cormorant Garamond',serif;
+}
+
+/* ══════════════════════════════════════════════
+   Project 2: Evo Music — 深紫/声波风格
+   ══════════════════════════════════════════════ */
+.proj-2{
+  background:#1b1432;
+  color:#e8e0f0;
+  border:1px solid rgba(167,139,250,.15);
+}
+.proj-2 .proj-nr{color:#a78bfa}
+.proj-2 .proj-tag{color:#a78bfa}
+.proj-2 .proj-name em{color:#a78bfa}
+.proj-2 .proj-desc{color:rgba(232,224,240,.4)}
+.proj-2 .proj-enter{color:#a78bfa;border-color:rgba(167,139,250,.3)}
+/* Sound wave decoration */
+.proj-2::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 100%, rgba(167,139,250,.06), transparent),
+    repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(167,139,250,.03) 8px, rgba(167,139,250,.03) 9px);
+  opacity:0;transition:opacity .5s;
+}
+.proj-2:hover::before{opacity:1}
+.proj-2::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:60px;z-index:1;pointer-events:none;
+  background:linear-gradient(to top, rgba(167,139,250,.08), transparent);
+}
+
+/* ══════════════════════════════════════════════
+   Project 3: Video Prompt — 暖琥珀/胶片风格
+   ══════════════════════════════════════════════ */
+.proj-3{
+  background:#fef7ed;
+  color:#2a1f0e;
+  border:1px solid rgba(231,111,81,.15);
+}
+.proj-3 .proj-nr{color:#e76f51}
+.proj-3 .proj-tag{color:#e76f51}
+.proj-3 .proj-name em{color:#e76f51}
+.proj-3 .proj-desc{color:#8a7060}
+.proj-3 .proj-enter{color:#e76f51;border-color:rgba(231,111,81,.3)}
+/* Film strip accent */
+.proj-3::before{
+  content:'';position:absolute;
+  top:0;left:0;width:6px;height:100%;z-index:1;
+  background:repeating-linear-gradient(to bottom, #e76f51 0px, #e76f51 6px, transparent 6px, transparent 12px);
+  opacity:.4;
+}
+.proj-3::after{
+  content:'';position:absolute;
+  top:0;right:0;bottom:0;left:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 80% 20%, rgba(231,111,81,.06), transparent 60%);
+}
+
+/* ══════════════════════════════════════════════
+   Project 4: Post-Quantum Crypto — 深蓝/量子网格风格
+   ══════════════════════════════════════════════ */
+.proj-4{
+  background:#0a0e1a;
+  color:#e0e7ff;
+  border:1px solid rgba(0,240,255,.12);
+}
+.proj-4 .proj-nr{color:#00f0ff}
+.proj-4 .proj-tag{color:#00f0ff}
+.proj-4 .proj-name em{color:#00f0ff}
+.proj-4 .proj-desc{color:rgba(224,231,255,.35)}
+.proj-4 .proj-enter{color:#00f0ff;border-color:rgba(0,240,255,.3)}
+/* Quantum grid */
+.proj-4::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,240,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,.04) 1px, transparent 1px);
+  background-size:30px 30px;
+}
+.proj-4::after{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 20%, rgba(0,240,255,.06), transparent 60%);
+}
+
+/* ══════════════════════════════════════════════
+   Project 5: Palette Shaker — 金色/调色盘风格
+   ══════════════════════════════════════════════ */
+.proj-5{
+  background:#faf5ee;
+  color:#2a2010;
+  border:1px solid rgba(232,166,48,.15);
+}
+.proj-5 .proj-nr{color:#e8a630}
+.proj-5 .proj-tag{color:#e8a630}
+.proj-5 .proj-name em{color:#e8a630}
+.proj-5 .proj-desc{color:#8a7a60}
+.proj-5 .proj-enter{color:#e8a630;border-color:rgba(232,166,48,.3)}
+/* Color palette dots decoration */
+.proj-5::before{
+  content:'';position:absolute;
+  top:-20px;right:-20px;
+  width:120px;height:120px;z-index:1;pointer-events:none;
+  border-radius:50%;
+  background:
+    radial-gradient(circle 18px at 20px 20px, #e8a630 .6, transparent .6),
+    radial-gradient(circle 18px at 50px 50px, #e76f51 .5, transparent .5),
+    radial-gradient(circle 18px at 80px 30px, #a78bfa .5, transparent .5),
+    radial-gradient(circle 18px at 35px 80px, #00f0ff .4, transparent .4),
+    radial-gradient(circle 18px at 90px 75px, #5ea882 .4, transparent .4);
+  opacity:.3;transition:opacity .5s;
+}
+.proj-5:hover::before{opacity:.5}
+.proj-5::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:4px;z-index:3;
+  background:linear-gradient(90deg, #e8a630, #e76f51, #a78bfa, #00f0ff, #5ea882);
+}
+
+/* ══════════════════════════════════════════════
+   Project 6: Chaos Butterfly — 深色/洛伦兹吸引子风格
+   ══════════════════════════════════════════════ */
+.proj-6{
+  background:#0a1628;
+  color:#c8daf0;
+  border:1px solid rgba(255,107,53,.12);
+}
+.proj-6 .proj-nr{color:#ff6b35}
+.proj-6 .proj-tag{color:#ff6b35}
+.proj-6 .proj-name em{color:#ff6b35}
+.proj-6 .proj-desc{color:rgba(200,218,240,.4)}
+.proj-6 .proj-enter{color:#ff6b35;border-color:rgba(255,107,53,.3)}
+/* Chaotic attractor swirl */
+.proj-6::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 200px 80px at 30% 60%, rgba(255,107,53,.08), transparent),
+    radial-gradient(ellipse 150px 120px at 70% 40%, rgba(100,180,255,.06), transparent);
+  transform:rotate(-8deg);
+}
+.proj-6::after{
+  content:'∞';position:absolute;
+  bottom:16px;right:20px;
+  font-size:3em;font-weight:300;
+  font-family:'Cormorant Garamond',serif;
+  color:rgba(255,107,53,.08);z-index:0;
+}
+
+/* ══════════════════════════════════════════════
+   Project 7: Digital Garden — 深绿/自然风格
+   ══════════════════════════════════════════════ */
+.proj-7{
+  background:linear-gradient(170deg, #1a2e1a 0%, #0d1a0d 100%);
+  color:#d4e8d0;
+  border:1px solid rgba(94,168,130,.15);
+}
+.proj-7 .proj-nr{color:#5ea882}
+.proj-7 .proj-tag{color:#5ea882}
+.proj-7 .proj-name em{color:#78c8a0}
+.proj-7 .proj-desc{color:rgba(212,232,208,.45)}
+.proj-7 .proj-enter{color:#5ea882;border-color:rgba(94,168,130,.3)}
+/* Firefly dots */
+.proj-7::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(circle 2px at 15% 25%, rgba(200,200,120,.3), transparent 3px),
+    radial-gradient(circle 1.5px at 75% 15%, rgba(200,200,120,.2), transparent 2.5px),
+    radial-gradient(circle 2px at 45% 75%, rgba(200,200,120,.25), transparent 3px),
+    radial-gradient(circle 1px at 85% 65%, rgba(200,200,120,.15), transparent 2px),
+    radial-gradient(circle 1.5px at 25% 85%, rgba(200,200,120,.2), transparent 2.5px);
+  animation:fireflies 4s ease-in-out infinite alternate;
+}
+@keyframes fireflies{
+  0%{opacity:.5}
+  50%{opacity:1}
+  100%{opacity:.6}
+}
+.proj-7::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:50px;z-index:1;pointer-events:none;
+  background:linear-gradient(to top, rgba(94,168,130,.08), transparent);
+}
+
+
+
+/* ── Footer ── */
+.footer{
+  max-width:1200px;margin:0 auto;
+  padding:32px 28px;
+  border-top:2px solid #1a1a1a;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'DM Mono',monospace;font-size:0.58em;
+  letter-spacing:0.15em;text-transform:uppercase;color:#bbb;
+}
+.footer-dot{display:inline-block;width:6px;height:6px;background:#e63946;transform:rotate(45deg);margin-right:10px;flex-shrink:0}
+.footer-left{display:flex;align-items:center}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .hero h1{font-size:clamp(2.6em,10vw,4em)}
+  .hero h1 .line2{font-size:0.5em}
+  .hero-desc{font-size:0.95em}
+}
+@media(max-width:600px){
+  .grid{grid-template-columns:1fr}
+  .topbar{padding:0 16px;height:46px}
+  .topbar-right{gap:12px;font-size:0.58em}
+  .hero{padding:72px 16px 0}
+  .hero h1{font-size:2.4em;letter-spacing:-0.03em}
+  .hero h1 .line2{font-size:0.48em}
+  .stats-strip{flex-wrap:wrap;border:none}
+  .stat-item{flex:1 1 50%;border-bottom:1px solid rgba(0,0,0,0.06);border-right:1px solid rgba(0,0,0,0.06)}
+  .stat-item:nth-child(2){border-right:none}
+  .stat-item:nth-child(3){border-right:1px solid rgba(0,0,0,0.06);border-left:none}
+  .stat-item:nth-child(4){border-left:none;border-right:none}
+  .stat-num{font-size:1.6em}
+  .projects{padding:32px 16px 60px}
+  .proj-inner{padding:22px 18px 20px;min-height:180px}
+  .proj-name{font-size:1.25em}
+
+  .proj-nr{font-size:5em}
+  .footer{flex-direction:column;gap:10px;text-align:center;padding:24px 16px}
+}
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-left">The Open Lab</div>
+  <div class="topbar-right">
+    <a href="/">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/study/">Lab</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Long-term AI experiment · 2026</div>
+  <h1>
+    THE OPEN
+    <span class="line2">Laboratory</span>
+  </h1>
+  <p class="hero-desc">
+    七条技术路线：文明模拟、音乐进化、视频提示词、后量子密码、智能配色、混沌理论、电子花园。逐步推进，宁可不推也不要推烂。
+  </p>
+</section>
+
+<div class="stats-strip">
+  <div class="stat-item"><div class="stat-num">7</div><div class="stat-lbl">Projects</div></div>
+  <div class="stat-item"><div class="stat-num" id="sDays">0</div><div class="stat-lbl">Days</div></div>
+  <div class="stat-item"><div class="stat-num" id="sCommits">4</div><div class="stat-lbl">Commits</div></div>
+  <div class="stat-item"><div class="stat-num">93</div><div class="stat-lbl">Tasks</div></div>
+</div>
+
+<section class="projects">
+  <div class="section-label">// active experiments</div>
+
+  <div class="grid">
+    <a class="proj proj-1" data-proj="civilization-sim" href="/study/civilization-sim/">
+      <div class="proj-nr">01</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🏛️ Civilization</div>
+        <div class="proj-name">Civ <em>Sim</em></div>
+        <div class="proj-desc">模拟经济、人口、资源、信仰、科技。每次运行诞生一个不同的文明。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-2" data-proj="evo-music" href="/study/evo-music/">
+      <div class="proj-nr">02</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🧬 Evolutionary Music</div>
+        <div class="proj-name">Evo <em>Music</em></div>
+        <div class="proj-desc">乐理 → 旋律 → 编曲 → 进化。让旋律自己生长。马尔可夫链 + 遗传算法。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-3" data-proj="video-prompt-gen" href="/study/video-prompt/">
+      <div class="proj-nr">03</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🎬 Video Prompt</div>
+        <div class="proj-name">Video <em>Prompt</em> Gen</div>
+        <div class="proj-desc">专业级AI视频提示词。相机运动、电影风格、镜头语言，选完一键生成。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-4" data-proj="post-quantum-crypto" href="/study/post-quantum-crypto/src/index.html">
+      <div class="proj-nr">04</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🔐 Post-Quantum Crypto</div>
+        <div class="proj-name">Quantum <em>Crypto</em></div>
+        <div class="proj-desc">量子破解了RSA？交互式可视化体验后量子密码学的未来。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-5" data-proj="palette-shaker" href="/study/palette-shaker/">
+      <div class="proj-nr">05</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🎨 PPT Color</div>
+        <div class="proj-name">PPT <em>Palette</em></div>
+        <div class="proj-desc">PPT配色搭配器。输入品牌色生成整套配色，模拟幻灯片实时预览，导出PPT主题/CSS。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-6" data-proj="chaos-butterfly" href="/study/chaos-butterfly/">
+      <div class="proj-nr">06</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🦋 Chaos Theory</div>
+        <div class="proj-name">Chaos <em>Butterfly</em></div>
+        <div class="proj-desc">混沌系统可视化。洛伦兹吸引子、双摆、逻辑映射、元细胞自动机。拖参数看蝴蝶效应。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+
+    <a class="proj proj-7" data-proj="digital-garden" href="/garden/">
+      <div class="proj-nr">07</div>
+      <div class="proj-inner">
+        <div class="proj-tag">🌿 Digital Garden</div>
+        <div class="proj-name">Digital <em>Garden</em></div>
+        <div class="proj-desc">程序化生成300+种花卉的交互式电子花园。SVG绘制、晨昏主题切换、花语图鉴、点击种下更多花。</div>
+        <div class="proj-enter">Enter <span class="arr">→</span></div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-left"><span class="footer-dot"></span>Open Lab · 2026</div>
+  <div>by 阿呆</div>
+</footer>
+
+<script>
+document.getElementById('sDays').textContent = Math.max(0, Math.floor((Date.now() - new Date('2026-06-17')) / 86400000));
+</script>
+</body>
+</html>

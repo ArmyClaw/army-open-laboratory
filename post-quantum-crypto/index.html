@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post-Quantum Crypto Lab — 后量子密码学实验室</title>
+<meta name="description" content="量子计算破解了RSA？交互式可视化体验后量子密码学的未来。">
+<meta property="og:title" content="Post-Quantum Crypto Lab">
+<meta property="og:image" content="https://army-yorozuya.art/assets/img/avatar.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#0a0e1a;--bg2:#111827;--surface:#1a2035;--surface2:#232b45;
+  --quantum:#00f0ff;--quantum-dim:rgba(0,240,255,0.15);--quantum-glow:rgba(0,240,255,0.3);
+  --threat:#ff2d55;--threat-dim:rgba(255,45,85,0.15);
+  --safe:#00ff88;--gold:#ffd700;--purple:#bf5af2;
+  --text:#e0e7ff;--text2:#94a3b8;--text3:#475569;
+  --mono:'JetBrains Mono','Space Mono',monospace;
+  --sans:'Inter',system-ui,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:var(--quantum);text-decoration:none}
+
+/* Grid background */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--quantum-dim) 1px,transparent 1px),
+    linear-gradient(90deg,var(--quantum-dim) 1px,transparent 1px);
+  background-size:60px 60px;opacity:0.3;
+}
+
+/* Topbar */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:52px;background:rgba(10,14,26,0.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,240,255,0.1)}
+.topbar-left{font-family:var(--mono);font-size:0.72em;font-weight:500;letter-spacing:0.1em;color:var(--quantum)}
+.topbar-right{display:flex;gap:20px;font-family:var(--mono);font-size:0.62em;letter-spacing:0.08em;color:var(--text3)}
+.topbar-right a:hover{color:var(--quantum)}
+
+/* Hero */
+.hero{position:relative;padding:100px 28px 0;max-width:1100px;margin:0 auto}
+.hero-badge{display:inline-block;font-family:var(--mono);font-size:0.6em;letter-spacing:0.3em;text-transform:uppercase;color:var(--threat);border:1px solid var(--threat);padding:4px 14px;border-radius:2px;margin-bottom:20px}
+.hero h1{font-family:var(--mono);font-size:clamp(2.2em,5.5vw,4em);font-weight:700;line-height:1.1;letter-spacing:-0.03em;margin-bottom:16px}
+.hero h1 .highlight{color:var(--quantum);position:relative}
+.hero h1 .highlight::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--quantum);box-shadow:0 0 20px var(--quantum-glow)}
+.hero-desc{font-size:1em;color:var(--text2);line-height:1.8;max-width:600px;margin-bottom:40px;font-weight:300}
+
+#heroCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+
+/* Stats */
+.stats{display:flex;gap:0;border:1px solid rgba(0,240,255,0.1);margin-bottom:48px}
+.stat{flex:1;padding:20px;text-align:center;border-right:1px solid rgba(0,240,255,0.1)}
+.stat:last-child{border-right:none}
+.stat-val{font-family:var(--mono);font-size:1.8em;font-weight:700;color:var(--quantum)}
+.stat:nth-child(2) .stat-val{color:var(--threat)}
+.stat:nth-child(3) .stat-val{color:var(--gold)}
+.stat:nth-child(4) .stat-val{color:var(--safe)}
+.stat-lbl{font-family:var(--mono);font-size:0.5em;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+
+/* Sections */
+.section{max-width:1100px;margin:0 auto;padding:0 28px 60px}
+.section-label{font-family:var(--mono);font-size:0.58em;letter-spacing:0.3em;text-transform:uppercase;color:var(--text3);margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.section-label::after{content:'';flex:1;height:1px;background:rgba(0,240,255,0.08)}
+.section-title{font-family:var(--mono);font-size:1.3em;font-weight:600;margin-bottom:20px}
+
+/* Panels */
+.panel{background:var(--surface);border:1px solid rgba(0,240,255,0.08);border-radius:8px;padding:28px;margin-bottom:20px;position:relative;overflow:hidden}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--quantum),var(--purple))}
+.panel-title{font-family:var(--mono);font-size:0.85em;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel-title .emoji{font-size:1.2em}
+
+/* Input */
+.input-group{margin-bottom:16px}
+.input-label{font-family:var(--mono);font-size:0.65em;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+textarea,.select-wrap{width:100%;background:var(--bg);border:1px solid rgba(0,240,255,0.12);border-radius:6px;padding:12px 14px;color:var(--text);font-family:var(--mono);font-size:0.82em;resize:vertical;outline:none;transition:border-color 0.3s}
+textarea:focus{border-color:var(--quantum)}
+textarea::placeholder{color:var(--text3)}
+select{width:100%;background:var(--bg);border:1px solid rgba(0,240,255,0.12);border-radius:6px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:0.82em;outline:none;cursor:pointer}
+select:focus{border-color:var(--quantum)}
+option{background:var(--bg)}
+
+/* Buttons */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{font-family:var(--mono);font-size:0.72em;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:10px 22px;border:1px solid;cursor:pointer;transition:all 0.3s;background:transparent}
+.btn-primary{color:var(--quantum);border-color:var(--quantum)}
+.btn-primary:hover{background:var(--quantum-dim);box-shadow:0 0 20px var(--quantum-glow)}
+.btn-danger{color:var(--threat);border-color:var(--threat)}
+.btn-danger:hover{background:var(--threat-dim);box-shadow:0 0 20px rgba(255,45,85,0.2)}
+.btn-gold{color:var(--gold);border-color:var(--gold)}
+.btn-gold:hover{background:rgba(255,215,0,0.1)}
+.btn-safe{color:var(--safe);border-color:var(--safe)}
+.btn-safe:hover{background:rgba(0,255,136,0.1)}
+.btn:disabled{opacity:0.4;cursor:not-allowed;pointer-events:none}
+
+/* Output */
+.output{background:var(--bg);border:1px solid rgba(0,240,255,0.08);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:0.72em;line-height:1.7;color:var(--text2);word-break:break-all;max-height:200px;overflow-y:auto;margin-top:12px}
+.output .label{color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;font-size:0.9em}
+.output .value{color:var(--text)}
+.output .highlight-val{color:var(--quantum)}
+.output .danger-val{color:var(--threat)}
+
+/* Crack canvas */
+.crack-viz{position:relative;height:60px;margin-top:16px;border-radius:6px;overflow:hidden;border:1px solid rgba(0,240,255,0.08)}
+.crack-viz canvas{width:100%;height:100%}
+
+/* Timeline */
+.timeline{position:relative;padding-left:24px;border-left:2px solid rgba(0,240,255,0.15)}
+.timeline-item{position:relative;padding-bottom:28px;padding-left:20px}
+.timeline-item::before{content:'';position:absolute;left:-27px;top:6px;width:10px;height:10px;border-radius:50%;border:2px solid var(--quantum);background:var(--bg)}
+.timeline-item.active::before{background:var(--quantum);box-shadow:0 0 10px var(--quantum-glow)}
+.timeline-item.threat::before{border-color:var(--threat);background:var(--threat);box-shadow:0 0 10px rgba(255,45,85,0.3)}
+.timeline-year{font-family:var(--mono);font-size:0.65em;letter-spacing:0.15em;color:var(--quantum);margin-bottom:4px}
+.timeline-title{font-weight:600;font-size:0.95em;margin-bottom:4px}
+.timeline-desc{color:var(--text2);font-size:0.82em;line-height:1.6}
+
+/* Comparison */
+.compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.compare-card{background:var(--surface);border:1px solid rgba(0,240,255,0.08);border-radius:8px;padding:20px;text-align:center}
+.compare-card h4{font-family:var(--mono);font-size:0.8em;margin-bottom:8px}
+.compare-card .big{font-family:var(--mono);font-size:2em;font-weight:700;margin:8px 0}
+.compare-card .sub{font-size:0.72em;color:var(--text2);line-height:1.5}
+
+/* Footer */
+.footer{max-width:1100px;margin:0 auto;padding:32px 28px;border-top:1px solid rgba(0,240,255,0.08);display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:0.58em;letter-spacing:0.12em;color:var(--text3)}
+.footer-dot{display:inline-block;width:6px;height:6px;background:var(--quantum);transform:rotate(45deg);margin-right:10px}
+
+/* Responsive */
+@media(max-width:768px){
+  .stats{flex-wrap:wrap}
+  .stat{flex:1 1 50%;border-right:1px solid rgba(0,240,255,0.1)}
+  .stat:nth-child(2){border-right:none}
+  .compare-grid{grid-template-columns:1fr}
+  .btn-row{flex-direction:column}
+  .btn{width:100%;text-align:center}
+}
+
+/* Animations */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.pulse{animation:pulse 2s infinite}
+@keyframes glitch{0%,100%{transform:translate(0)}20%{transform:translate(-2px,2px)}40%{transform:translate(2px,-2px)}60%{transform:translate(-1px,-1px)}80%{transform:translate(1px,1px)}}
+.glitch:hover{animation:glitch 0.3s}
+
+/* Quantum Crack Animation */
+.quantum-crack-area{margin-top:16px}
+.qc-canvas-wrap{position:relative;height:130px;border-radius:6px;overflow:hidden;border:1px solid rgba(0,240,255,0.08);margin-top:12px}
+.qc-canvas-wrap canvas{width:100%;height:100%}
+.crack-result-box{margin-top:12px;padding:14px;border-radius:6px;font-family:var(--mono);font-size:0.78em}
+.crack-result-box.breached{background:rgba(255,45,85,0.08);border:1px solid var(--threat);color:var(--threat)}
+.crack-result-box .revealed{font-size:1.1em;color:var(--text);margin-top:6px}
+
+/* Shor Animation */
+.shor-steps{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.shor-step{flex:1;min-width:130px;padding:14px;background:var(--surface);border:1px solid rgba(0,240,255,0.08);border-radius:6px;cursor:pointer;text-align:center;transition:all 0.3s}
+.shor-step.active{border-color:var(--quantum);box-shadow:0 0 20px var(--quantum-glow)}
+.shor-step .step-num{font-family:var(--mono);font-size:1.4em;color:var(--quantum);margin-bottom:4px}
+.shor-step .step-label{font-family:var(--mono);font-size:0.6em;letter-spacing:0.1em;color:var(--text2)}
+.shor-canvas-wrap{position:relative;height:280px;border-radius:6px;overflow:hidden;border:1px solid rgba(0,240,255,0.08);margin-bottom:16px}
+.shor-canvas-wrap canvas{width:100%;height:100%}
+.shor-desc{font-size:0.82em;color:var(--text2);line-height:1.7;margin-bottom:16px}
+
+/* Qubit Slider */
+.qubit-slider-section{margin-top:28px}
+.slider-row{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.slider-row label{font-family:var(--mono);font-size:0.68em;color:var(--text3);white-space:nowrap;min-width:90px}
+.slider-row input[type=range]{flex:1;accent-color:var(--quantum);height:6px;cursor:pointer;-webkit-appearance:none;background:rgba(0,240,255,0.1);border-radius:3px;outline:none}
+.slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--quantum);cursor:pointer;box-shadow:0 0 8px var(--quantum-glow)}
+.slider-row .slider-val{font-family:var(--mono);font-size:0.78em;color:var(--quantum);min-width:110px;text-align:right}
+.qubit-curve-wrap{height:200px;border-radius:6px;overflow:hidden;border:1px solid rgba(0,240,255,0.08);margin-top:16px}
+.qubit-curve-wrap canvas{width:100%;height:100%}
+.qubit-info{margin-top:12px;font-family:var(--mono);font-size:0.7em;color:var(--text2);line-height:1.8}
+.qubit-info .val{color:var(--quantum)}
+.qubit-info .danger{color:var(--threat)}
+
+/* Lattice */
+.lattice-controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.lattice-controls .ctrl-group{flex:1;min-width:110px}
+.lattice-controls label{font-family:var(--mono);font-size:0.6em;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:4px;display:block}
+.lattice-controls input[type=range]{width:100%;accent-color:var(--safe);height:4px;cursor:pointer;-webkit-appearance:none;background:rgba(0,255,136,0.1);border-radius:2px;outline:none}
+.lattice-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--safe);cursor:pointer}
+.lattice-canvas-wrap{height:340px;border-radius:6px;overflow:hidden;border:1px solid rgba(0,240,255,0.08);margin-bottom:16px}
+.lattice-canvas-wrap canvas{width:100%;height:100%}
+.lattice-info{font-family:var(--mono);font-size:0.7em;color:var(--text2);line-height:1.8}
+.lattice-info strong{color:var(--quantum)}
+.lattice-info .safe-text{color:var(--safe)}
+
+/* Security Detector */
+.security-inputs{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.security-inputs .ctrl-group{flex:1;min-width:180px}
+.security-bar-wrap{height:36px;border-radius:6px;overflow:hidden;margin:16px 0;border:1px solid rgba(0,240,255,0.08)}
+.security-bar-wrap canvas{width:100%;height:100%}
+.security-result{text-align:center;padding:20px;border-radius:6px;font-family:var(--mono);background:var(--surface);border:1px solid rgba(0,240,255,0.08);margin-top:12px}
+.security-result .big-num{font-size:2em;font-weight:700}
+.security-result .sub-text{font-size:0.7em;color:var(--text2);margin-top:8px}
+
+/* Phase badges */
+.phase-badge{display:inline-block;font-family:var(--mono);font-size:0.55em;letter-spacing:0.25em;text-transform:uppercase;padding:3px 10px;border-radius:2px;margin-bottom:12px}
+.phase-badge.p2{color:var(--threat);border:1px solid var(--threat)}
+.phase-badge.p3{color:var(--safe);border:1px solid var(--safe)}
+.phase-badge.p4{color:var(--gold);border:1px solid var(--gold)}
+
+/* Attack Simulator */
+.attack-sim-controls{margin-bottom:24px}
+.control-row{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.control-group{flex:1;min-width:200px}
+.slider-container{display:flex;align-items:center;gap:12px}
+.slider-container input[type=range]{flex:1;accent-color:var(--quantum);height:6px;cursor:pointer;-webkit-appearance:none;background:rgba(0,240,255,0.1);border-radius:3px;outline:none}
+.slider-container input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--quantum);cursor:pointer;box-shadow:0 0 8px var(--quantum-glow)}
+.slider-value{font-family:var(--mono);font-size:0.78em;color:var(--quantum);min-width:80px;text-align:right}
+
+.attack-sim-results{margin-bottom:24px}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.result-card{background:var(--bg);border:1px solid rgba(0,240,255,0.08);border-radius:6px;padding:16px;text-align:center}
+.result-label{font-family:var(--mono);font-size:0.6em;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
+.result-value{font-family:var(--mono);font-size:1.1em;font-weight:600;color:var(--text)}
+.result-value.danger{color:var(--threat)}
+.result-value.safe{color:var(--safe)}
+.result-value.warning{color:var(--gold)}
+
+.attack-curve-container{margin-top:24px}
+.curve-title{font-family:var(--mono);font-size:0.8em;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;text-align:center}
+.curve-canvas-wrap{height:400px;border-radius:6px;overflow:hidden;border:1px solid rgba(0,240,255,0.08);margin-bottom:16px}
+.curve-canvas-wrap canvas{width:100%;height:100%}
+.curve-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.btn-small{font-family:var(--mono);font-size:0.6em;padding:6px 16px;min-width:auto}
+
+@media(max-width:768px){
+  .shor-steps{flex-direction:column}
+  .lattice-controls{flex-direction:column}
+  .security-inputs{flex-direction:column}
+  .slider-row{flex-wrap:wrap}
+  .slider-row label{min-width:auto;width:100%}
+  .control-row{flex-direction:column}
+  .control-group{min-width:auto}
+  .results-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-left">🔐 POST-QUANTUM LAB</div>
+  <div class="topbar-right">
+    <a href="/study/">Lab</a>
+    <a href="/">Home</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <canvas id="heroCanvas"></canvas>
+  <div class="hero-badge">⚠️ ALERT: RSA-2048 COMPROMISED</div>
+  <h1>量子时代<br><span class="highlight">密码学危机</span></h1>
+  <p class="hero-desc">
+    量子计算机首次破解 RSA-2048 加密。你现在的密码安全吗？
+    用交互式可视化理解 RSA 如何工作、量子如何破解它、以及后量子密码学如何拯救我们。
+  </p>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-val" id="sKeyLen">—</div><div class="stat-lbl">Key Bits</div></div>
+  <div class="stat"><div class="stat-val">2048</div><div class="stat-lbl">Broken RSA</div></div>
+  <div class="stat"><div class="stat-val">~4100</div><div class="stat-lbl">Qubits Needed</div></div>
+  <div class="stat"><div class="stat-val">∞</div><div class="stat-lbl">Classical Time</div></div>
+</div>
+
+<!-- ═══ RSA 加密体验 ═══ -->
+<div class="section">
+  <div class="section-label">// 01 — RSA 加密体验</div>
+  <div class="panel">
+    <div class="panel-title"><span class="emoji">🔐</span> 生成密钥 & 加密你的消息</div>
+    <div class="input-group">
+      <div class="input-label">密钥长度</div>
+      <select id="keyBits">
+        <option value="128">128 bit（演示用，瞬间破解）</option>
+        <option value="256">256 bit（几秒可破解）</option>
+        <option value="512" selected>512 bit（演示用）</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <div class="input-label">输入秘密消息</div>
+      <textarea id="msgInput" rows="2" placeholder="输入你的秘密消息…">Hello Quantum World!</textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="doGenerate()">🔑 生成密钥对</button>
+      <button class="btn btn-primary" onclick="doEncrypt()" id="btnEncrypt" disabled>🔒 加密消息</button>
+      <button class="btn btn-safe" onclick="doDecrypt()" id="btnDecrypt" disabled>🔓 解密消息</button>
+      <button class="btn btn-danger" onclick="doCrack()" id="btnCrack" disabled>⚛️ 量子破解!</button>
+      <button class="btn btn-danger" onclick="doQuantumCrack()" id="btnQcCrack" style="border-style:dashed" disabled>🔬 模拟量子破解消息</button>
+    </div>
+    <div id="keyOutput"></div>
+    <div id="encryptOutput"></div>
+    <div class="quantum-crack-area" id="qcArea">
+      <div class="qc-canvas-wrap"><canvas id="qcCanvas"></canvas></div>
+      <div id="qcResult"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 暴力破解可视化 ═══ -->
+<div class="section">
+  <div class="section-label">// 02 — 暴力破解可视化</div>
+  <div class="panel">
+    <div class="panel-title"><span class="emoji">⚡</span> 看着你的密码被暴力破解</div>
+    <p style="color:var(--text2);font-size:0.85em;margin-bottom:16px">
+      对小密钥（128/256 bit），体验暴力分解质因数有多慢。对 2048-bit？用超级计算机算到宇宙热寂也算不完。
+    </p>
+    <div id="crackOutput"></div>
+    <div class="crack-viz" id="crackViz"><canvas id="crackCanvas"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══ 破解时间对比 ═══ -->
+<div class="section">
+  <div class="section-label">// 03 — 量子 vs 经典</div>
+  <div class="section-title">破解不同长度 RSA 密钥需要多久？</div>
+  <div class="compare-grid" id="compareGrid"></div>
+  <div class="qubit-slider-section" id="qubitSection">
+    <div class="panel" style="margin-top:20px">
+      <div class="panel-title"><span class="emoji">🎛️</span> 量子比特数 vs 破解能力</div>
+      <p style="color:var(--text2);font-size:0.82em;margin-bottom:16px">拖动滑块，看看不同量子比特数的计算机能破解多大的 RSA 密钥。</p>
+      <div class="slider-row">
+        <label>量子比特数</label>
+        <input type="range" id="qubitSlider" min="100" max="20000" step="100" value="4000">
+        <div class="slider-val" id="qubitSliderVal">4000 qubits</div>
+      </div>
+      <div class="qubit-curve-wrap"><canvas id="qubitCurveCanvas"></canvas></div>
+      <div class="qubit-info" id="qubitInfo"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 密码学时间线 ═══ -->
+<div class="section">
+  <div class="section-label">// 04 — 密码学时间线</div>
+  <div class="panel">
+    <div class="panel-title"><span class="emoji">⏰</span> 交互式密码学发展时间线</div>
+    <p style="color:var(--text2);font-size:0.85em;margin-bottom:16px">
+      点击时间点查看详细信息，探索密码学从古至今的演进之路。
+      从凯撒密码到后量子密码学，每个时期都改变了安全的历史。
+    </p>
+    <div style="position:relative;height:340px;border-radius:6px;overflow:hidden;border:1px solid rgba(0,240,255,0.08);margin-bottom:16px">
+      <canvas id="timelineCanvas"></canvas>
+    </div>
+    <div style="text-align:center;font-family:var(--mono);font-size:0.7em;color:var(--text2);line-height:1.6">
+      <span style="color:var(--quantum);display:inline-block;margin-right:16px">🔵 经典密码学</span>
+      <span style="color:var(--threat);display:inline-block;margin-right:16px">🔴 量子威胁</span>
+      <span style="color:var(--safe);display:inline-block">🟢 后量子安全</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 后量子算法对比 ═══ -->
+<div class="section">
+  <div class="section-label">// 05 — 后量子密码学</div>
+  <div class="section-title">量子来了，什么还安全？</div>
+  <div class="compare-grid">
+    <div class="compare-card" style="border-color:var(--quantum)">
+      <h4>🔑 RSA / ECC</h4>
+      <div class="big" style="color:var(--threat)">⚠️</div>
+      <div class="sub">被 Shor 算法破解<br>量子计算机可多项式时间破解</div>
+    </div>
+    <div class="compare-card" style="border-color:var(--safe)">
+      <h4>📐 格密码 (Lattice)</h4>
+      <div class="big" style="color:var(--safe)">✓</div>
+      <div class="sub">CRYSTALS-Kyber (已标准化)<br>NIST 推荐</div>
+    </div>
+    <div class="compare-card" style="border-color:var(--gold)">
+      <h4>#️⃣ 哈希签名</h4>
+      <div class="big" style="color:var(--gold)">✓</div>
+      <div class="sub">CRYSTALS-Dilithium<br>SPHINCS+ (无状态)</div>
+    </div>
+    <div class="compare-card" style="border-color:var(--purple)">
+      <h4>📐 编码密码</h4>
+      <div class="big" style="color:var(--purple)">✓</div>
+      <div class="sub">McEliece / Classic McEliece<br>基于纠错码</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Shor 算法动画 ═══ -->
+<div class="section">
+  <div class="section-label">// 06 — Shor 算法动画</div>
+  <span class="phase-badge p2">Phase 2</span>
+  <div class="section-title">量子计算机如何分解 RSA？</div>
+  <div class="panel">
+    <div class="panel-title"><span class="emoji">⚛️</span> Shor 算法三步走</div>
+    <p class="shor-desc">Shor 算法利用量子并行计算在多项式时间内分解大整数。以 N=15 为例，演示三个关键步骤。点击每个步骤查看动画。</p>
+    <div class="shor-steps" id="shorSteps">
+      <div class="shor-step" onclick="activateShorStep(1)">
+        <div class="step-num">①</div>
+        <div class="step-label">周期查找<br><span style="color:var(--text3);font-size:0.85em">Quantum Phase Estimation</span></div>
+      </div>
+      <div class="shor-step" onclick="activateShorStep(2)">
+        <div class="step-num">②</div>
+        <div class="step-label">量子傅里叶变换<br><span style="color:var(--text3);font-size:0.85em">QFT</span></div>
+      </div>
+      <div class="shor-step" onclick="activateShorStep(3)">
+        <div class="step-num">③</div>
+        <div class="step-label">GCD 提取因子<br><span style="color:var(--text3);font-size:0.85em">Euclidean Algorithm</span></div>
+      </div>
+    </div>
+    <div class="shor-canvas-wrap"><canvas id="shorCanvas"></canvas></div>
+    <div id="shorDesc" style="font-family:var(--mono);font-size:0.72em;color:var(--text2);line-height:1.7"></div>
+  </div>
+</div>
+
+<!-- ═══ 格密码可视化 ═══ -->
+<div class="section">
+  <div class="section-label">// 07 — 格密码可视化</div>
+  <span class="phase-badge p3">Phase 3</span>
+  <div class="section-title">为什么量子计算机解不了格问题？</div>
+  <div class="panel">
+    <div class="panel-title"><span class="emoji">📐</span> 2D 格与最短向量问题 (SVP)</div>
+    <p style="color:var(--text2);font-size:0.82em;margin-bottom:16px">调节基底向量 v₁ 和 v₂，观察格点分布变化。红色箭头标记最短非零向量——在 n 维空间中找到它就是 SVP 问题。</p>
+    <div class="lattice-controls">
+      <div class="ctrl-group">
+        <label>v₁x: <span id="laxVal">40</span></label>
+        <input type="range" id="lax" min="-60" max="60" value="40">
+      </div>
+      <div class="ctrl-group">
+        <label>v₁y: <span id="layVal">15</span></label>
+        <input type="range" id="lay" min="-60" max="60" value="15">
+      </div>
+      <div class="ctrl-group">
+        <label>v₂x: <span id="lbxVal">10</span></label>
+        <input type="range" id="lbx" min="-60" max="60" value="10">
+      </div>
+      <div class="ctrl-group">
+        <label>v₂y: <span id="lbyVal">35</span></label>
+        <input type="range" id="lby" min="-60" max="60" value="35">
+      </div>
+    </div>
+    <div class="lattice-canvas-wrap"><canvas id="latticeCanvas"></canvas></div>
+    <div class="lattice-info" id="latticeInfo"></div>
+  </div>
+</div>
+
+<!-- ═══ 安全检测器 ═══ -->
+<div class="section">
+  <div class="section-label">// 08 — 安全检测器</div>
+  <span class="phase-badge p3">Phase 3</span>
+  <div class="section-title">你的密钥在量子时代还能撑多久？</div>
+  <div class="panel">
+    <div class="panel-title"><span class="emoji">🛡️</span> 量子时代安全评估</div>
+    <div class="security-inputs">
+      <div class="ctrl-group">
+        <div class="input-label">RSA 密钥长度 (bit)</div>
+        <select id="secKeyBits">
+          <option value="512">512 bit</option>
+          <option value="1024">1024 bit</option>
+          <option value="2048" selected>2048 bit</option>
+          <option value="3072">3072 bit</option>
+          <option value="4096">4096 bit</option>
+          <option value="8192">8192 bit</option>
+          <option value="16384">16384 bit</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <div class="input-label">量子计算机比特数</div>
+        <input type="range" id="secQubits" min="100" max="50000" step="100" value="4100" style="width:100%;margin-top:8px;accent-color:var(--threat);-webkit-appearance:none;background:rgba(255,45,85,0.1);border-radius:3px;height:6px;outline:none;cursor:pointer">
+        <div style="font-family:var(--mono);font-size:0.72em;color:var(--threat);margin-top:4px;text-align:right" id="secQubitVal">4100 qubits</div>
+      </div>
+    </div>
+    <div class="security-bar-wrap"><canvas id="secBarCanvas"></canvas></div>
+    <div class="security-result" id="secResult">
+      <div class="big-num" id="secBigNum" style="color:var(--gold)">—</div>
+      <div class="sub-text" id="secSubText">调整参数查看结果</div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div><span class="footer-dot"></span>Post-Quantum Crypto Lab · Open Lab</div>
+  <div>by 阿呆 🤪</div>
+</footer>
+
+<script src="rsa-engine.js"></script>
+<script src="viz.js"></script>
+<script>
+// ── State ──
+let keys = null;
+let cipherText = null;
+let crackViz = null;
+let heroParticles = null;
+let shorAnim = null;
+let qubitChart = null;
+let qcAnim = null;
+let latticeViz = null;
+let secBar = null;
+let timelineViz = null;
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  heroParticles = new Viz.QuantumParticles(document.getElementById('heroCanvas'));
+  crackViz = new Viz.CrackProgress(document.getElementById('crackCanvas'));
+  renderCompareGrid();
+  // Quantum crack animation
+  qcAnim = new Viz.QuantumCrackAnim(document.getElementById('qcCanvas'));
+  // Shor animation
+  shorAnim = new Viz.ShorAnimation(document.getElementById('shorCanvas'));
+  // Qubit curve chart
+  qubitChart = new Viz.QubitCurveChart(document.getElementById('qubitCurveCanvas'));
+  updateQubitInfo(4000);
+  document.getElementById('qubitSlider').addEventListener('input', function() {
+    const q = parseInt(this.value);
+    document.getElementById('qubitSliderVal').textContent = q.toLocaleString() + ' qubits';
+    qubitChart.setQubits(q);
+    updateQubitInfo(q);
+  });
+  // Lattice
+  latticeViz = new Viz.LatticeViz(document.getElementById('latticeCanvas'));
+  updateLatticeInfo();
+  ['lax','lay','lbx','lby'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', function() {
+      document.getElementById(id + 'Val').textContent = this.value;
+      latticeViz.setBasis(
+        parseInt(document.getElementById('lax').value),
+        parseInt(document.getElementById('lay').value),
+        parseInt(document.getElementById('lbx').value),
+        parseInt(document.getElementById('lby').value)
+      );
+      updateLatticeInfo();
+    });
+  });
+  // Security detector
+  secBar = new Viz.SecurityBar(document.getElementById('secBarCanvas'));
+  updateSecurity();
+  document.getElementById('secKeyBits').addEventListener('change', updateSecurity);
+  document.getElementById('secQubits').addEventListener('input', function() {
+    document.getElementById('secQubitVal').textContent = parseInt(this.value).toLocaleString() + ' qubits';
+    updateSecurity();
+  });
+  // Interactive timeline
+  timelineViz = new Viz.TimelineViz(document.getElementById('timelineCanvas'));
+  window.addEventListener('resize', () => {
+    heroParticles.resize();
+    crackViz.resize();
+    if (shorAnim) shorAnim.resize();
+    if (qubitChart) qubitChart.resize();
+    if (qcAnim) qcAnim.resize();
+    if (latticeViz) latticeViz.resize();
+    if (secBar) secBar.resize();
+    if (timelineViz) timelineViz.resize();
+  });
+});
+
+// ── Generate Keys ──
+async function doGenerate() {
+  const bits = parseInt(document.getElementById('keyBits').value);
+  document.getElementById('sKeyLen').textContent = bits;
+  const out = document.getElementById('keyOutput');
+  out.innerHTML = '<div class="output"><span class="label">⏳ 生成中…</span><br>搜索' + (bits/2) + '位质数…</div>';
+
+  await sleep(50);
+  keys = RSA.generateKeys(bits);
+
+  out.innerHTML = `
+    <div class="output">
+      <span class="label">公钥 (e, n)</span><br>
+      e = <span class="highlight-val">${keys.e}</span><br>
+      n = <span class="highlight-val">${keys.n.toString().slice(0,30)}…</span> (${keys.bitLength} bit)<br><br>
+      <span class="label">私钥 (d, n)</span><br>
+      d = <span class="danger-val">${keys.d.toString().slice(0,30)}…</span><br><br>
+      <span class="label">质因数</span><br>
+      p = ${keys.p}<br>
+      q = ${keys.q}
+    </div>`;
+
+  document.getElementById('btnEncrypt').disabled = false;
+  document.getElementById('btnCrack').disabled = false;
+  document.getElementById('btnQcCrack').disabled = false;
+  document.getElementById('encryptOutput').innerHTML = '';
+  cipherText = null;
+  document.getElementById('btnDecrypt').disabled = true;
+}
+
+// ── Encrypt ──
+function doEncrypt() {
+  if (!keys) return;
+  const msg = document.getElementById('msgInput').value || 'Hello!';
+  const plainNum = RSA.textToBigInt(msg);
+  cipherText = RSA.encrypt(plainNum, keys.pub);
+
+  const out = document.getElementById('encryptOutput');
+  out.innerHTML = `
+    <div class="output">
+      <span class="label">原文</span> "${msg}"<br>
+      <span class="label">→ BigInt</span> <span class="highlight-val">${plainNum}</span><br>
+      <span class="label">→ 密文 (c = m^e mod n)</span><br>
+      <span class="danger-val" style="font-size:0.9em;word-break:break-all">${cipherText}</span>
+    </div>`;
+  document.getElementById('btnDecrypt').disabled = false;
+}
+
+// ── Decrypt ──
+function doDecrypt() {
+  if (!keys || !cipherText) return;
+  const plainNum = RSA.decrypt(cipherText, keys.priv);
+  const text = RSA.bigIntToText(plainNum);
+
+  document.getElementById('encryptOutput').innerHTML += `
+    <div class="output" style="border-color:var(--safe)">
+      <span class="label" style="color:var(--safe)">✓ 解密成功</span><br>
+      <span class="label">密文 → 明文</span> "${text}"
+    </div>`;
+}
+
+// ── Crack (Brute Force Factor) ──
+let crackJob = null;
+function doCrack() {
+  if (!keys) return;
+  const out = document.getElementById('crackOutput');
+  out.innerHTML = '<div class="output"><span class="label">⚛️ 暴力分解中…</span></div>';
+  crackViz.setProgress(0, true);
+
+  crackJob = new RSA.FactorBruteForce(keys.n);
+  crackJob.onProgress = (report) => {
+    const pct = Math.min((Number(report.current) / Math.sqrt(Number(keys.n))) * 50, 99.9);
+    crackViz.setProgress(pct, true);
+    out.innerHTML = `<div class="output">
+      <span class="label">⚡ 暴力分解进度</span><br>
+      已尝试: <span class="highlight-val">${report.trials.toLocaleString()}</span> 个因子<br>
+      当前检测到: ${report.current}<br>
+      耗时: ${(report.elapsed / 1000).toFixed(1)}s
+      ${report.found ? '<br><span class="danger-val" style="font-size:1em">❌ 找到因子: ' + report.found + '</span>' : ''}
+    </div>`;
+    if (report.done && report.found) {
+      crackViz.setProgress(100, true);
+      const other = keys.n / BigInt(report.found);
+      out.innerHTML += `<div class="output" style="border-color:var(--threat)">
+        <span class="danger-val" style="font-size:1em">🔓 RSA 被破解!</span><br>
+        p = ${report.found}<br>
+        q = ${other}<br>
+        密钥不再安全！
+      </div>`;
+    }
+  };
+  crackJob.start();
+}
+
+// ── Compare Grid ──
+function renderCompareGrid() {
+  const configs = [
+    { bits: 128, qubits: 256 },
+    { bits: 256, qubits: 512 },
+    { bits: 512, qubits: 1024 },
+    { bits: 1024, qubits: 2048 },
+    { bits: 2048, qubits: 4100 },
+  ];
+  const grid = document.getElementById('compareGrid');
+  grid.innerHTML = configs.map(c => {
+    const qTime = RSA.estimateBreakTimeRSA(c.bits, c.qubits);
+    const cTime = RSA.estimateBreakTimeClassical(c.bits);
+    return `<div class="compare-card">
+      <h4>RSA-${c.bits}</h4>
+      <div class="big" style="color:var(--threat)">${c.bits}</div>
+      <div style="font-family:var(--mono);font-size:0.7em;line-height:1.8">
+        <span style="color:var(--text3)">⚛️ 量子(${c.qubits}q)</span><br>
+        <span style="color:var(--threat)">${qTime.formatted}</span><br>
+        <span style="color:var(--text3)">🖥️ 经典</span><br>
+        <span style="color:var(--text2)">${cTime.formatted}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Quantum Crack Message Animation ──
+function doQuantumCrack() {
+  if (!keys || !cipherText) {
+    // Auto-generate and encrypt if needed
+    if (!keys) doGenerate();
+    if (!cipherText) doEncrypt();
+    setTimeout(doQuantumCrack, 300);
+    return;
+  }
+  const msg = document.getElementById('msgInput').value || 'Hello!';
+  const cipherStr = cipherText.toString();
+  qcAnim.start(cipherStr, msg, () => {
+    document.getElementById('qcResult').innerHTML = `
+      <div class="crack-result-box breached">
+        <span style="font-size:1em">🔓 你的消息已被量子破解!</span>
+        <div class="revealed">"${msg}"</div>
+      </div>`;
+  });
+  document.getElementById('qcResult').innerHTML = '';
+}
+
+// ── Shor Animation Steps ──
+function activateShorStep(step) {
+  if (shorAnim) shorAnim.setPhase(step);
+  document.querySelectorAll('.shor-step').forEach((el, i) => {
+    el.classList.toggle('active', i + 1 === step);
+  });
+  const descs = {
+    1: '<strong style="color:var(--quantum)">Step ① 周期查找</strong> — 对 N=15，随机选取 a=3。量子计算机同时计算 3^x mod 15 对所有 x（量子并行），然后通过量子相位估计找到函数的周期 r=4。<br><span style="color:var(--text3)">经典计算需要逐个试，量子计算机可以同时试所有值。</span>',
+    2: '<strong style="color:var(--quantum)">Step ② 量子傅里叶变换 (QFT)</strong> — 对量子态施加 QFT，将周期信息从时域转换到频域。频率峰值出现在 k/r 处，从而读出周期 r。<br><span style="color:var(--text3)">QFT 是 Shor 算法的核心，利用量子干涉加速频率分析。</span>',
+    3: '<strong style="color:var(--quantum)">Step ③ GCD 提取因子</strong> — 已知 r=4，计算 gcd(3^(4/2)-1, 15) = gcd(8, 15) = 1（不行），gcd(3^(4/2)+1, 15) = gcd(10, 15) = 5 ✓。因子 5 找到了！另一个因子 3 = 15/5。<br><span style="color:var(--text3)">这一步是经典算法，但前两步的量子加速让整体复杂度从指数级降到多项式级。</span>'
+  };
+  document.getElementById('shorDesc').innerHTML = descs[step] || '';
+}
+
+// ── Qubit Slider Info ──
+function updateQubitInfo(qubits) {
+  const bits = Viz.QubitCurveChart.crackableBits(qubits);
+  const qTime = RSA.estimateBreakTimeRSA(2048, qubits);
+ const canBreak2048 = bits >= 2048;
+  const canBreak4096 = bits >= 4096;
+  document.getElementById('qubitInfo').innerHTML =
+    `⚡ ${qubits.toLocaleString()} 量子比特可破解: <span class="val">RSA-${bits}</span>` +
+    (canBreak2048 ? ' <span class="danger">⚠️ RSA-2048 已不安全!</span>' : '') +
+    (canBreak4096 ? ' <span class="danger">⚠️ RSA-4096 也不安全!</span>' : '') +
+    `<br>破解 RSA-2048 预计需要: <span class="${canBreak2048 ? 'danger' : 'val'}">${qTime.formatted}</span>`;
+}
+
+// ── Lattice Info ──
+function updateLatticeInfo() {
+  const sv = latticeViz.shortestVec;
+  const sl = latticeViz.shortestLen;
+  document.getElementById('latticeInfo').innerHTML =
+    `最短非零向量: <strong>v = (${sv ? sv.px.toFixed(1) : '?'}, ${sv ? sv.py.toFixed(1) : '?'})</strong>` +
+    ` | 长度 = <strong>${sl ? sl.toFixed(2) : '?'}</strong><br>` +
+    `<span class="safe-text">为什么量子计算机解不了 SVP？</span> 在 n 维格中，最短向量问题是 NP 困难的。即使是量子计算机，目前最好的算法（量子化后的格基规约）也只能获得亚指数级加速，不足以威胁足够大的格。这就是 CRYSTALS-Kyber 等格密码安全的根本原因。<br>` +
+    `<span style="color:var(--text3)">提示: 调节基底向量使格变得"更密"或"更稀疏"，观察最短向量的变化。</span>`;
+}
+
+// ── Security Detector ──
+function updateSecurity() {
+  const bits = parseInt(document.getElementById('secKeyBits').value);
+  const qubits = parseInt(document.getElementById('secQubits').value);
+  const years = RSA.estimateSecurityYears(bits, qubits);
+  const safety = RSA.getSecurityColor(years);
+  // Map years to safety score (0-1) for the bar
+  // >100 years = 1, 0 years = 0
+  let score;
+  if (years > 100) score = 1;
+  else if (years > 10) score = 0.7 + (years - 10) / 90 * 0.3;
+  else if (years > 1) score = 0.4 + (years - 1) / 9 * 0.3;
+  else if (years > 0.01) score = years / 1 * 0.4;
+  else score = 0;
+  secBar.setSafety(score);
+  document.getElementById('secBigNum').style.color = safety.color;
+  document.getElementById('secBigNum').textContent = years > 0.01 ? RSA.formatYears(years) : '即时破解';
+  document.getElementById('secSubText').innerHTML =
+    `RSA-${bits} + ${qubits.toLocaleString()} 量子比特 → <span style="color:${safety.color}">${safety.label}</span>`;
+}
+</script>
+
+<!-- ═══ 攻击模拟器 ═══ -->
+<div class="section">
+  <div class="section-label">// 09 — 攻击模拟器</div>
+  <span class="phase-badge p4">Phase 4</span>
+  <div class="section-title">参数化量子攻击模拟器</div>
+  <div class="panel">
+    <div class="panel-title"><span class="emoji">🎯</span> 攻击参数调节与安全曲线分析</div>
+    
+    <div class="attack-sim-controls">
+      <div class="control-row">
+        <div class="control-group">
+          <div class="input-label">RSA 密钥长度 (bit)</div>
+          <div class="slider-container">
+            <input type="range" id="attackKeyBits" min="128" max="4096" value="2048" step="128">
+            <div class="slider-value" id="attackKeyBitsVal">2048</div>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <div class="input-label">量子比特数量</div>
+          <div class="slider-container">
+            <input type="range" id="attackQubits" min="128" max="8192" value="4100" step="128">
+            <div class="slider-value" id="attackQubitsVal">4100</div>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <div class="input-label">量子算法效率</div>
+          <div class="slider-container">
+            <input type="range" id="attackEfficiency" min="0.1" max="1.0" value="0.5" step="0.1">
+            <div class="slider-value" id="attackEfficiencyVal">50%</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="control-row">
+        <div class="control-group">
+          <div class="input-label">攻击目标</div>
+          <select id="attackTarget">
+            <option value="rsa2048">RSA-2048</option>
+            <option value="rsa4096">RSA-4096</option>
+            <option value="custom">自定义</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <div class="input-label">时间范围</div>
+          <select id="timeRange">
+            <option value="1">1小时内</option>
+            <option value="24">24小时内</option>
+            <option value="365">1年内</option>
+            <option value="inf">无限期</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <button class="btn btn-primary" id="runSimulation">🚀 运行模拟</button>
+          <button class="btn btn-secondary" id="resetParams">🔄 重置参数</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="attack-sim-results">
+      <div class="results-grid">
+        <div class="result-card">
+          <div class="result-label">破解时间</div>
+          <div class="result-value" id="breakTime">计算中...</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">安全等级</div>
+          <div class="result-value" id="securityLevel">计算中...</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">攻击成功率</div>
+          <div class="result-value" id="successRate">计算中...</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">资源消耗</div>
+          <div class="result-value" id="resourceUsage">计算中...</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="attack-curve-container">
+      <div class="curve-title">安全曲线分析</div>
+      <div class="curve-canvas-wrap">
+        <canvas id="attackCurveCanvas" width="800" height="400"></canvas>
+      </div>
+      <div class="curve-controls">
+        <button class="btn btn-small" id="addCurve">添加曲线</button>
+        <button class="btn btn-small" id="clearCurves">清除曲线</button>
+        <button class="btn btn-small" id="exportData">导出数据</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 攻击模拟器 ──
+class AttackSimulator {
+  constructor() {
+    this.curves = [];
+    this.currentParams = {
+      keyBits: 2048,
+      qubits: 4100,
+      efficiency: 0.5,
+      target: 'rsa2048',
+      timeRange: 24
+    };
+    this.init();
+  }
+  
+  init() {
+    this.bindEvents();
+    this.updateDisplay();
+    this.drawInitialCurve();
+  }
+  
+  bindEvents() {
+    // 参数滑块事件
+    document.getElementById('attackKeyBits').addEventListener('input', (e) => {
+      this.currentParams.keyBits = parseInt(e.target.value);
+      document.getElementById('attackKeyBitsVal').textContent = e.target.value;
+      this.updateDisplay();
+    });
+    
+    document.getElementById('attackQubits').addEventListener('input', (e) => {
+      this.currentParams.qubits = parseInt(e.target.value);
+      document.getElementById('attackQubitsVal').textContent = e.target.value;
+      this.updateDisplay();
+    });
+    
+    document.getElementById('attackEfficiency').addEventListener('input', (e) => {
+      this.currentParams.efficiency = parseFloat(e.target.value);
+      document.getElementById('attackEfficiencyVal').textContent = Math.round(e.target.value * 100) + '%';
+      this.updateDisplay();
+    });
+    
+    // 控制按钮事件
+    document.getElementById('runSimulation').addEventListener('click', () => this.runSimulation());
+    document.getElementById('resetParams').addEventListener('click', () => this.resetParams());
+    document.getElementById('addCurve').addEventListener('click', () => this.addCurve());
+    document.getElementById('clearCurves').addEventListener('click', () => this.clearCurves());
+    document.getElementById('exportData').addEventListener('click', () => this.exportData());
+    
+    // 选择框事件
+    document.getElementById('attackTarget').addEventListener('change', (e) => {
+      this.currentParams.target = e.target.value;
+      this.updateDisplay();
+    });
+    
+    document.getElementById('timeRange').addEventListener('change', (e) => {
+      this.currentParams.timeRange = parseInt(e.target.value);
+      this.updateDisplay();
+    });
+  }
+  
+  updateDisplay() {
+    const breakTime = this.estimateBreakTime();
+    const securityLevel = this.assessSecurityLevel();
+    const successRate = this.calculateSuccessRate();
+    const resourceUsage = this.estimateResourceUsage();
+    
+    document.getElementById('breakTime').innerHTML = this.formatTime(breakTime.time);
+    document.getElementById('breakTime').className = 'result-value ' + breakTime.class;
+    
+    document.getElementById('securityLevel').innerHTML = securityLevel.label;
+    document.getElementById('securityLevel').className = 'result-value ' + securityLevel.class;
+    
+    document.getElementById('successRate').innerHTML = successRate + '%';
+    document.getElementById('successRate').className = 'result-value ' + (successRate > 50 ? 'danger' : 'safe');
+    
+    document.getElementById('resourceUsage').innerHTML = resourceUsage;
+    document.getElementById('resourceUsage').className = 'result-value ' + (resourceUsage > 70 ? 'danger' : 'normal');
+    
+    this.drawCurves();
+  }
+  
+  estimateBreakTime() {
+    const { keyBits, qubits, efficiency } = this.currentParams;
+    const qubitsNeeded = Math.ceil(keyBits * 2);
+    const qubitRatio = qubits / qubitsNeeded;
+    const efficiencyFactor = efficiency;
+    
+    // 基础时间估计
+    let baseTime = Math.pow(2, keyBits / 20) * 3600;
+    
+    // 量子加速因子
+    const quantumSpeedup = Math.pow(qubitRatio * efficiencyFactor, 3);
+    const actualTime = baseTime / quantumSpeedup;
+    
+    let formatted, className;
+    if (actualTime < 3600) {
+      formatted = Math.round(actualTime / 60) + ' 分钟';
+      className = 'danger';
+    } else if (actualTime < 86400) {
+      formatted = Math.round(actualTime / 3600) + ' 小时';
+      className = 'danger';
+    } else if (actualTime < 31536000) {
+      formatted = Math.round(actualTime / 86400) + ' 天';
+      className = 'warning';
+    } else {
+      formatted = Math.round(actualTime / 31536000) + ' 年';
+      className = 'safe';
+    }
+    
+    return { time: actualTime, formatted, class: className };
+  }
+  
+  assessSecurityLevel() {
+    const { keyBits, qubits, efficiency } = this.currentParams;
+    const qubitsNeeded = Math.ceil(keyBits * 2);
+    const qubitRatio = qubits / qubitsNeeded;
+    
+    let level, className, label;
+    
+    if (qubitRatio * efficiency < 0.5) {
+      level = 5;
+      className = 'safe';
+      label = '🛡️ 极安全';
+    } else if (qubitRatio * efficiency < 0.8) {
+      level = 4;
+      className = 'safe';
+      label = '🟢 安全';
+    } else if (qubitRatio * efficiency < 1.2) {
+      level = 3;
+      className = 'warning';
+      label = '🟡 脆弱';
+    } else if (qubitRatio * efficiency < 2.0) {
+      level = 2;
+      className = 'danger';
+      label = '🟠 危险';
+    } else {
+      level = 1;
+      className = 'danger';
+      label = '🔴 极危险';
+    }
+    
+    return { level, className, label };
+  }
+  
+  calculateSuccessRate() {
+    const { keyBits, qubits, efficiency } = this.currentParams;
+    const qubitsNeeded = Math.ceil(keyBits * 2);
+    const qubitRatio = qubits / qubitsNeeded;
+    
+    const baseRate = Math.min(qubitRatio * efficiency, 3.0);
+    const successRate = Math.min(baseRate * 33.33, 99.99);
+    
+    return Math.round(successRate);
+  }
+  
+  estimateResourceUsage() {
+    const { qubits, efficiency } = this.currentParams;
+    
+    const baseResources = qubits * 1000;
+    const efficiencyFactor = (2 - efficiency);
+    const totalResources = baseResources * efficiencyFactor;
+    
+    const percentage = Math.min((totalResources / 1000000) * 100, 100);
+    
+    return Math.round(percentage) + '%';
+  }
+  
+  formatTime(seconds) {
+    if (seconds < 60) {
+      return Math.round(seconds) + ' 秒';
+    } else if (seconds < 3600) {
+      return Math.round(seconds / 60) + ' 分钟';
+    } else if (seconds < 86400) {
+      return Math.round(seconds / 3600) + ' 小时';
+    } else if (seconds < 31536000) {
+      return Math.round(seconds / 86400) + ' 天';
+    } else {
+      return Math.round(seconds / 31536000) + ' 年';
+    }
+  }
+  
+  drawInitialCurve() {
+    const canvas = document.getElementById('attackCurveCanvas');
+    const ctx = canvas.getContext('2d');
+    this.canvas = canvas;
+    this.ctx = ctx;
+    
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+    
+    this.drawCurves();
+  }
+  
+  resizeCanvas() {
+    const container = this.canvas.parentElement;
+    const rect = container.getBoundingClientRect();
+    this.canvas.width = rect.width * window.devicePixelRatio;
+    this.canvas.height = rect.height * window.devicePixelRatio;
+    this.canvas.style.width = rect.width + 'px';
+    this.canvas.style.height = rect.height + 'px';
+    this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    this.w = rect.width;
+    this.h = rect.height;
+    
+    this.drawCurves();
+  }
+  
+  drawCurves() {
+    const ctx = this.ctx;
+    const w = this.w;
+    const h = this.h;
+    
+    ctx.clearRect(0, 0, w, h);
+    
+    this.drawGrid();
+    this.drawCurrentCurve();
+    this.drawHistoricalCurves();
+    this.drawLegend();
+  }
+  
+  drawGrid() {
+    const ctx = this.ctx;
+    const w = this.w;
+    const h = this.h;
+    
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
+    ctx.lineWidth = 1;
+    
+    for (let i = 0; i <= 10; i++) {
+      const x = (w / 10) * i;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+    
+    for (let i = 0; i <= 8; i++) {
+      const y = (h / 8) * i;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+  }
+  
+  drawCurrentCurve() {
+    const ctx = this.ctx;
+    const w = this.w;
+    const h = this.h;
+    
+    const points = [];
+    for (let i = 0; i <= 100; i++) {
+      const qubits = (i / 100) * 8192;
+      const security = this.calculateSecurityAtQubits(qubits);
+      points.push({ qubits, security });
+    }
+    
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    
+    points.forEach((point, index) => {
+      const x = (point.qubits / 8192) * w;
+      const y = h - (point.security / 100) * h;
+      
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    
+    ctx.stroke();
+    
+    const currentX = (this.currentParams.qubits / 8192) * w;
+    const currentY = h - (this.assessSecurityLevel().level / 5) * (h / 5);
+    
+    ctx.fillStyle = '#ff2d55';
+    ctx.beginPath();
+    ctx.arc(currentX, currentY, 6, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.shadowColor = '#ff2d55';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(currentX, currentY, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  
+  drawHistoricalCurves() {
+    const ctx = this.ctx;
+    const w = this.w;
+    const h = this.h;
+    
+    this.curves.forEach((curve) => {
+      ctx.strokeStyle = curve.color;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.6;
+      
+      ctx.beginPath();
+      curve.points.forEach((point) => {
+        const x = (point.qubits / 8192) * w;
+        const y = h - (point.security / 100) * h;
+        ctx.lineTo(x, y);
+      });
+      
+      ctx.stroke();
+    });
+    
+    ctx.globalAlpha = 1;
+  }
+  
+  drawLegend() {
+    const ctx = this.ctx;
+    const w = this.w;
+    const h = this.h;
+    
+    ctx.fillStyle = '#e0e7ff';
+    ctx.font = '12px JetBrains Mono';
+    ctx.textAlign = 'center';
+    
+    for (let i = 0; i <= 4; i++) {
+      const x = (w / 4) * i;
+      const qubits = Math.round((i / 4) * 8192);
+      ctx.fillText(qubits.toString(), x, h - 5);
+    }
+    
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 4; i++) {
+      const y = h - (h / 4) * i;
+      const security = (i / 4) * 100;
+      ctx.fillText(security + '%', w - 10, y + 4);
+    }
+    
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '14px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('量子比特数量', w / 2, h - 30);
+    
+    ctx.save();
+    ctx.translate(15, h / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('安全等级', 0, 0);
+    ctx.restore();
+  }
+  
+  calculateSecurityAtQubits(qubits) {
+    const { keyBits, efficiency } = this.currentParams;
+    const qubitsNeeded = Math.ceil(keyBits * 2);
+    const qubitRatio = qubits / qubitsNeeded;
+    
+    let security = 100;
+    if (qubitRatio * efficiency > 0.5) {
+      security = Math.max(0, 100 - (qubitRatio * efficiency - 0.5) * 66.67);
+    }
+    
+    return security;
+  }
+  
+  runSimulation() {
+    const button = document.getElementById('runSimulation');
+    const originalText = button.textContent;
+    button.textContent = '🔄 运行中...';
+    button.disabled = true;
+    
+    setTimeout(() => {
+      this.updateDisplay();
+      button.textContent = originalText;
+      button.disabled = false;
+    }, 1500);
+  }
+  
+  resetParams() {
+    this.currentParams = {
+      keyBits: 2048,
+      qubits: 4100,
+      efficiency: 0.5,
+      target: 'rsa2048',
+      timeRange: 24
+    };
+    
+    document.getElementById('attackKeyBits').value = 2048;
+    document.getElementById('attackKeyBitsVal').textContent = '2048';
+    document.getElementById('attackQubits').value = 4100;
+    document.getElementById('attackQubitsVal').textContent = '4100';
+    document.getElementById('attackEfficiency').value = 0.5;
+    document.getElementById('attackEfficiencyVal').textContent = '50%';
+    document.getElementById('attackTarget').value = 'rsa2048';
+    document.getElementById('timeRange').value = '24';
+    
+    this.updateDisplay();
+  }
+  
+  addCurve() {
+    const newCurve = {
+      id: Date.now(),
+      color: this.getRandomColor(),
+      params: { ...this.currentParams },
+      points: []
+    };
+    
+    for (let i = 0; i <= 100; i++) {
+      const qubits = (i / 100) * 8192;
+      const security = this.calculateSecurityAtQubits(qubits);
+      newCurve.points.push({ qubits, security });
+    }
+    
+    this.curves.push(newCurve);
+    this.drawCurves();
+  }
+  
+  clearCurves() {
+    this.curves = [];
+    this.drawCurves();
+  }
+  
+  exportData() {
+    const data = {
+      currentParams: this.currentParams,
+      curves: this.curves,
+      results: {
+        breakTime: this.estimateBreakTime(),
+        securityLevel: this.assessSecurityLevel(),
+        successRate: this.calculateSuccessRate(),
+        resourceUsage: this.estimateResourceUsage()
+      }
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'attack-simulation-data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  
+  getRandomColor() {
+    const colors = ['#00f0ff', '#ff2d55', '#00ff88', '#ffd700', '#bf5af2', '#ff6b35'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
+}
+
+// 初始化攻击模拟器
+const attackSim = new AttackSimulator();
+</script>
+
+</body>
+</html>

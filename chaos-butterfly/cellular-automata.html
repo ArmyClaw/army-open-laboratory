@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元细胞自动机 - 混沌蝴蝶实验室</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .main-canvas {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #canvas {
+            flex: 1;
+            background: #0a0a0a;
+            cursor: crosshair;
+        }
+
+        .control-panel {
+            width: 320px;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid #333;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .control-section h3 {
+            color: #FF6B35;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #FF6B35;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .value-display {
+            min-width: 50px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            color: #FF6B35;
+        }
+
+        .button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.secondary {
+            background: linear-gradient(45deg, #4D96FF, #6BCF7F);
+        }
+
+        .button.danger {
+            background: linear-gradient(45deg, #FF4343, #FF6B35);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #FF6B35;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .rule-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .rule-cell {
+            width: 30px;
+            height: 30px;
+            background: #333;
+            border: 1px solid #555;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .rule-cell:hover {
+            background: #555;
+            transform: scale(1.1);
+        }
+
+        .rule-cell.active {
+            background: #FF6B35;
+            border-color: #FF6B35;
+            color: white;
+        }
+
+        .rule-cell.center {
+            background: #FFD93D;
+            border-color: #FFD93D;
+            color: #000;
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .pattern-btn {
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 4px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .pattern-btn:hover {
+            background: rgba(255, 107, 53, 0.2);
+            color: #FF6B35;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(26, 26, 46, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            min-width: 200px;
+        }
+
+        .info-panel h2 {
+            color: #FF6B35;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info-panel p {
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.4;
+        }
+
+        .stats-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(26, 26, 46, 0.9);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .stats-item {
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        .stats-value {
+            color: #FF6B35;
+            font-weight: bold;
+        }
+
+        .rule-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 5px;
+        }
+
+        .rule-tab {
+            flex: 1;
+            padding: 8px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .rule-tab.active {
+            background: rgba(255, 107, 53, 0.3);
+            color: #FF6B35;
+        }
+
+        .rule-content {
+            display: none;
+        }
+
+        .rule-content.active {
+            display: block;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .play-pause-btn {
+            padding: 8px 16px;
+            background: linear-gradient(45deg, #6BCF7F, #4D96FF);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .preset-btn {
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 4px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 107, 53, 0.2);
+            color: #FF6B35;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-canvas">
+            <canvas id="canvas"></canvas>
+            
+            <div class="info-panel">
+                <h2>🧬 元细胞自动机</h2>
+                <p>点击细胞切换状态，设计规则，观察混沌演化</p>
+            </div>
+            
+            <div class="stats-panel">
+                <div class="stats-item">代数: <span class="stats-value" id="generation">0</span></div>
+                <div class="stats-item">活细胞: <span class="stats-value" id="live-cells">0</span></div>
+                <div class="stats-item">规则: <span class="stats-value" id="current-rule">30</span></div>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <div class="control-section">
+                <h3>🎮 基本控制</h3>
+                <button class="button" id="start-btn">▶️ 开始演化</button>
+                <button class="button secondary" id="pause-btn">⏸️ 暂停</button>
+                <button class="button danger" id="clear-btn">🗑️ 清空</button>
+                <button class="button secondary" id="random-btn">🎲 随机填充</button>
+                
+                <div class="speed-control">
+                    <label style="flex: 0;">速度:</label>
+                    <input type="range" id="speed-slider" min="1" max="20" value="5">
+                    <span class="value-display" id="speed-value">5</span>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>🧬 规则设计</h3>
+                <div class="rule-tabs">
+                    <button class="rule-tab active" onclick="switchRuleTab('elementary')">基础</button>
+                    <button class="rule-tab" onclick="switchRuleTab('bs')">B/S规则</button>
+                    <button class="rule-tab" onclick="switchRuleTab('custom')">自定义</button>
+                    <button class="rule-tab" onclick="switchRuleTab('life')">生命</button>
+                </div>
+                
+                <div class="rule-content active" id="elementary-tab">
+                    <div class="control-group">
+                        <label>元胞自动机规则 (0-255)</label>
+                        <div class="slider-container">
+                            <input type="range" id="rule-slider" min="0" max="255" value="30">
+                            <span class="value-display" id="rule-value">30</span>
+                        </div>
+                    </div>
+                    <div class="rule-grid" id="rule-display">
+                        <!-- 规则显示将由JavaScript生成 -->
+                    </div>
+                </div>
+                
+                <div class="rule-content" id="bs-tab">
+                    <div class="control-group">
+                        <label>Birth (诞生) 条件</label>
+                        <div class="slider-container">
+                            <input type="range" id="birth-slider" min="0" max="8" value="3">
+                            <span class="value-display" id="birth-value">3</span>
+                        </div>
+                        <p style="font-size: 11px; color: #999; margin-top: 5px;">
+                            死细胞周围有多少个活细胞时诞生
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label>Survival (存活) 条件</label>
+                        <div class="slider-container">
+                            <input type="range" id="survival-slider" min="0" max="8" value="23">
+                            <span class="value-display" id="survival-value">23</span>
+                        </div>
+                        <p style="font-size: 11px; color: #999; margin-top: 5px;">
+                            活细胞周围有多少个活细胞时存活 (多选)
+                        </p>
+                    </div>
+                    <div class="control-group">
+                        <label>规则格式</label>
+                        <input type="text" id="bs-rule" value="B3/S23" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,107,53,0.3); border-radius: 4px; color: white; text-align: center; font-family: monospace;">
+                    </div>
+                    <button class="button secondary" id="apply-bs-rule">应用B/S规则</button>
+                </div>
+                
+                <div class="rule-content" id="custom-tab">
+                    <div class="control-group">
+                        <label>自定义规则</label>
+                        <input type="text" id="custom-rule" placeholder="例如: 110" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,107,53,0.3); border-radius: 4px; color: white;">
+                    </div>
+                    <button class="button secondary" id="apply-custom-rule">应用规则</button>
+                </div>
+                
+                <div class="rule-content" id="life-tab">
+                    <div class="control-group">
+                        <label>康威生命游戏规则</label>
+                        <p style="font-size: 12px; color: #ccc; margin-top: 5px;">
+                            B3/S23<br>
+                            (3个邻居诞生，2-3个邻居存活)
+                        </p>
+                    </div>
+                    <button class="button secondary" id="apply-life-rule">应用生命游戏</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>🎨 预设模式</h3>
+                <div class="presets-grid">
+                    <button class="preset-btn" onclick="loadPreset('glider')">滑翔机</button>
+                    <button class="preset-btn" onclick="loadPreset('blinker')">闪烁器</button>
+                    <button class="preset-btn" onclick="loadPreset('toad')">蟾蜍</button>
+                    <button class="preset-btn" onclick="loadPreset('beacon')">信标</button>
+                    <button class="preset-btn" onclick="loadPreset('pulsar')">脉冲星</button>
+                    <button class="preset-btn" onclick="loadPreset('gun')">滑翔机枪</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>📚 预设规则库</h3>
+                <div class="rule-tabs">
+                    <button class="rule-tab active" onclick="switchPresetTab('classic')">经典</button>
+                    <button class="rule-tab" onclick="switchPresetTab('interesting')">趣味</button>
+                    <button class="rule-tab" onclick="switchPresetTab('chaos')">混沌</button>
+                    <button class="rule-tab" onclick="switchPresetTab('complex')">复杂</button>
+                </div>
+                
+                <div class="rule-content active" id="classic-presets">
+                    <div class="presets-grid">
+                        <button class="preset-btn" onclick="loadPresetRule('life')">康威生命游戏</button>
+                        <button class="preset-btn" onclick="loadPresetRule('highlife')">高生命</button>
+                        <button class="preset-btn" onclick="loadPresetRule('seeds')">种子</button>
+                        <button class="preset-btn" onclick="loadPresetRule('maze')">迷宫</button>
+                        <button class="preset-btn" onclick="loadPresetRule('coral')">珊瑚</button>
+                        <button class="preset-btn" onclick="loadPresetRule('maze2')">迷宫2</button>
+                    </div>
+                </div>
+                
+                <div class="rule-content" id="interesting-presets">
+                    <div class="presets-grid">
+                        <button class="preset-btn" onclick="loadPresetRule('pulsar')">脉冲星</button>
+                        <button class="preset-btn" onclick="loadPresetRule('gliderGun')">滑翔机枪</button>
+                        <button class="preset-btn" onclick="loadPresetRule('spaceship')">飞船</button>
+                        <button class="preset-btn" onclick="loadPresetRule('knight')">骑士</button>
+                        <button class="preset-btn" onclick="loadPresetRule('centipede')">蜈蚣</button>
+                        <button class="preset-btn" onclick="loadPresetRule('switch')">开关</button>
+                    </div>
+                </div>
+                
+                <div class="rule-content" id="chaos-presets">
+                    <div class="presets-grid">
+                        <button class="preset-btn" onclick="loadPresetRule('brian')">布莱恩的大脑</button>
+                        <button class="preset-btn" onclick="loadPresetRule('rule30')">规则30</button>
+                        <button class="preset-btn" onclick="loadPresetRule('rule90')">规则90</button>
+                        <button class="preset-btn" onclick="loadPresetRule('rule110')">规则110</button>
+                        <button class="preset-btn" onclick="loadPresetRule('rule184')">规则184</button>
+                        <button class="preset-btn" onclick="loadPresetRule('wireworld')">线世界</button>
+                    </div>
+                </div>
+                
+                <div class="rule-content" id="complex-presets">
+                    <div class="presets-grid">
+                        <button class="preset-btn" onclick="loadPresetRule('daynight')">昼夜</button>
+                        <button class="preset-btn" onclick="loadPresetRule('replicator')">复制器</button>
+                        <button class="preset-btn" onclick="loadPresetRule('fractal')">分形</button>
+                        <button class="preset-btn" onclick="loadPresetRule('wator')">瓦特</button>
+                        <button class="preset-btn" onclick="loadPresetRule('langton')">朗顿蚂蚁</button>
+                        <button class="preset-btn" onclick="loadPresetRule('billiard')">台球</button>
+                        <button class="preset-btn" onclick="loadPresetRule('traffic')">交通</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>📊 统计分析</h3>
+                <div class="control-group">
+                    <label>人口密度</label>
+                    <div class="value-display" id="density">0.00</div>
+                </div>
+                <div class="control-group">
+                    <label>稳定性</label>
+                    <div class="value-display" id="stability">0.00</div>
+                </div>
+                <button class="button secondary" id="analyze-btn">📊 详细分析</button>
+            </div>
+            
+            <div class="control-section">
+                <h3>🔄 规则突变模式</h3>
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="mutation-mode">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span style="margin-left: 10px;">启用规则突变</span>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>突变频率: <span id="mutation-frequency">10</span></label>
+                    <input type="range" id="mutation-slider" min="5" max="50" value="10" style="width: 100%; margin-top: 5px;">
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>突变强度: <span id="mutation-intensity">1</span></label>
+                    <input type="range" id="intensity-slider" min="1" max="10" value="1" style="width: 100%; margin-top: 5px;">
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>🎨 经典图案库</h3>
+                <select id="pattern-category" style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid #555; border-radius: 4px; color: white;">
+                    <option value="gliders">滑翔机类</option>
+                    <option value="oscillators">振荡器类</option>
+                    <option value="still-lifes">静态生命</option>
+                    <option value="guns">机枪类</option>
+                    <option value="complex">复杂结构</option>
+                </select>
+                <select id="pattern-select" style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid #555; border-radius: 4px; color: white;">
+                    <option value="">选择图案...</option>
+                </select>
+                <button class="button" id="load-pattern-btn">📥 加载图案</button>
+                <button class="button secondary" id="random-pattern-btn">🎲 随机图案</button>
+                <button class="button danger" id="clear-pattern-btn">🗑️ 清空画布</button>
+            </div>
+
+            <div class="control-section">
+                <h3>💾 导出导入</h3>
+                <button class="button secondary" id="export-btn">📥 导出配置</button>
+                <button class="button secondary" id="import-btn">📤 导入配置</button>
+                <input type="file" id="file-input" accept=".json" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 经典图案库数据
+        const CLASSIC_PATTERNS = {
+            gliders: {
+                "lightweight-spaceship": {
+                    name: "轻量级飞船",
+                    pattern: [
+                        [0, 1, 1, 1, 1],
+                        [1, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 1],
+                        [0, 0, 0, 1, 0]
+                    ]
+                },
+                "glider": {
+                    name: "滑翔机",
+                    pattern: [
+                        [0, 1, 0],
+                        [0, 0, 1],
+                        [1, 1, 1]
+                    ]
+                },
+                "spaceship": {
+                    name: "飞船",
+                    pattern: [
+                        [0, 0, 1, 1, 1],
+                        [1, 0, 0, 0, 1],
+                        [0, 0, 0, 0, 1],
+                        [1, 0, 0, 1, 0]
+                    ]
+                }
+            },
+            oscillators: {
+                "blinker": {
+                    name: "闪烁器",
+                    pattern: [
+                        [1, 1, 1]
+                    ]
+                },
+                "toad": {
+                    name: "蟾蜍",
+                    pattern: [
+                        [0, 1, 1, 1],
+                        [1, 1, 1, 0]
+                    ]
+                },
+                "beacon": {
+                    name: "信标",
+                    pattern: [
+                        [1, 1, 0, 0],
+                        [1, 0, 0, 0],
+                        [0, 0, 0, 1],
+                        [0, 0, 1, 1]
+                    ]
+                }
+            },
+            stillLifes: {
+                "block": {
+                    name: "方块",
+                    pattern: [
+                        [1, 1],
+                        [1, 1]
+                    ]
+                },
+                "beehive": {
+                    name: "蜂巢",
+                    pattern: [
+                        [0, 1, 1, 0],
+                        [1, 0, 0, 1],
+                        [0, 1, 1, 0]
+                    ]
+                },
+                "loaf": {
+                    name: "面包",
+                    pattern: [
+                        [0, 1, 1, 0],
+                        [1, 0, 0, 1],
+                        [0, 1, 1, 0],
+                        [0, 0, 1, 0]
+                    ]
+                }
+            },
+            guns: {
+                "gosper-gun": {
+                    name: "高斯帕机枪",
+                    pattern: [
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                    ]
+                }
+            },
+            complex: {
+                "pulsar": {
+                    name: "脉冲星",
+                    pattern: [
+                        [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,1,1,1,0,0,0,1,1,1,0,0]
+                    ]
+                }
+            }
+        };
+
+        class CellularAutomata {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.cellSize = 8;
+                this.rows = 0;
+                this.cols = 0;
+                this.grid = [];
+                this.nextGrid = [];
+                this.nextRow = []; // 用于基础元胞自动机的临时行
+                this.generation = 0;
+                this.isRunning = false;
+                this.animationId = null;
+                this.speed = 5;
+                this.rule = 30; // 默认规则
+                this.isElementary = true; // 是否为基础元胞自动机
+                this.birthRule = [3]; // 默认诞生规则 B3
+                this.survivalRule = [2, 3]; // 默认存活规则 S23
+                this.currentRuleType = 'elementary'; // 当前规则类型: elementary, bs, life, custom
+                
+                // 规则突变模式相关属性
+                this.mutationMode = false;
+                this.mutationFrequency = 10;
+                this.mutationIntensity = 1;
+                
+                this.setupCanvas();
+                this.initializeGrid();
+                this.setupControls();
+                this.draw();
+                
+                // 初始化图案库UI
+                this.initializePatternLibrary();
+            }
+            
+            // ========== 初始化图案库 ==========
+            initializePatternLibrary() {
+                // 绑定突变模式控件
+                const mutationToggle = document.getElementById('mutation-mode');
+                mutationToggle.addEventListener('change', (e) => {
+                    this.mutationMode = e.target.checked;
+                    if (this.mutationMode) {
+                        this.showMessage('规则突变模式已启用！');
+                    }
+                });
+                
+                // 突变频率滑块
+                const mutationSlider = document.getElementById('mutation-slider');
+                mutationSlider.addEventListener('input', (e) => {
+                    this.mutationFrequency = parseInt(e.target.value);
+                    document.getElementById('mutation-frequency').textContent = this.mutationFrequency;
+                });
+                
+                // 突变强度滑块
+                const intensitySlider = document.getElementById('intensity-slider');
+                intensitySlider.addEventListener('input', (e) => {
+                    this.mutationIntensity = parseInt(e.target.value);
+                    document.getElementById('mutation-intensity').textContent = this.mutationIntensity;
+                });
+                
+                // 图案类别选择
+                const patternCategory = document.getElementById('pattern-category');
+                patternCategory.addEventListener('change', () => {
+                    this.updatePatternList();
+                });
+                
+                // 图案选择
+                const patternSelect = document.getElementById('pattern-select');
+                patternSelect.addEventListener('change', (e) => {
+                    if (e.target.value) {
+                        this.loadPattern(e.target.value);
+                    }
+                });
+                
+                // 图案按钮
+                document.getElementById('load-pattern-btn').addEventListener('click', () => {
+                    const selectedPattern = document.getElementById('pattern-select').value;
+                    if (selectedPattern) {
+                        this.loadPattern(selectedPattern);
+                    } else {
+                        this.showMessage('请先选择一个图案！');
+                    }
+                });
+                
+                document.getElementById('random-pattern-btn').addEventListener('click', () => {
+                    this.loadRandomPattern();
+                });
+                
+                document.getElementById('clear-pattern-btn').addEventListener('click', () => {
+                    this.clear();
+                });
+                
+                // 初始化图案列表
+                this.updatePatternList();
+            }
+            
+            // 显示消息的方法
+            showMessage(message) {
+                const messagePanel = document.getElementById('mutation-message');
+                if (!messagePanel) {
+                    // 创建消息显示区域
+                    const messageDiv = document.createElement('div');
+                    messageDiv.id = 'mutation-message';
+                    messageDiv.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: rgba(255, 107, 53, 0.9);
+                        color: white;
+                        padding: 15px;
+                        border-radius: 8px;
+                        z-index: 1000;
+                        max-width: 300px;
+                        font-size: 14px;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                    `;
+                    document.body.appendChild(messageDiv);
+                }
+                
+                const messageDiv = document.getElementById('mutation-message');
+                messageDiv.textContent = message;
+                messageDiv.style.opacity = '1';
+                
+                // 3秒后淡出
+                setTimeout(() => {
+                    messageDiv.style.transition = 'opacity 0.5s ease';
+                    messageDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        if (messageDiv.parentNode) {
+                            messageDiv.parentNode.removeChild(messageDiv);
+                        }
+                    }, 500);
+                }, 3000);
+            }
+            
+            setupCanvas() {
+                const resizeCanvas = () => {
+                    this.canvas.width = this.canvas.offsetWidth;
+                    this.canvas.height = this.canvas.offsetHeight;
+                    
+                    // 计算网格尺寸
+                    this.cols = Math.floor(this.canvas.width / this.cellSize);
+                    this.rows = Math.floor(this.canvas.height / this.cellSize);
+                    
+                    // 调整网格大小
+                    this.resizeGrid();
+                    
+                    this.draw();
+                };
+                
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                
+                // 鼠标点击交互
+                this.canvas.addEventListener('click', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const col = Math.floor(x / this.cellSize);
+                    const row = Math.floor(y / this.cellSize);
+                    
+                    if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+                        this.grid[row][col] = this.grid[row][col] ? 0 : 1;
+                        this.draw();
+                        this.updateStats();
+                    }
+                });
+            }
+            
+            resizeGrid() {
+                const newGrid = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
+                const newNextGrid = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
+                const newNextRow = Array(this.cols).fill(0);
+                
+                // 复制现有数据
+                for (let i = 0; i < Math.min(this.rows, this.grid.length); i++) {
+                    for (let j = 0; j < Math.min(this.cols, this.grid[0].length); j++) {
+                        newGrid[i][j] = this.grid[i][j];
+                    }
+                }
+                
+                this.grid = newGrid;
+                this.nextGrid = newNextGrid;
+                this.nextRow = newNextRow;
+            }
+            
+            initializeGrid() {
+                this.grid = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
+                this.nextGrid = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
+                this.nextRow = Array(this.cols).fill(0);
+                this.generation = 0;
+            }
+            
+            setupControls() {
+                // 开始按钮
+                document.getElementById('start-btn').addEventListener('click', () => {
+                    this.start();
+                });
+                
+                // 暂停按钮
+                document.getElementById('pause-btn').addEventListener('click', () => {
+                    this.pause();
+                });
+                
+                // 清空按钮
+                document.getElementById('clear-btn').addEventListener('click', () => {
+                    this.clear();
+                });
+                
+                // 随机填充按钮
+                document.getElementById('random-btn').addEventListener('click', () => {
+                    this.randomFill();
+                });
+                
+                // 速度滑块
+                const speedSlider = document.getElementById('speed-slider');
+                speedSlider.addEventListener('input', (e) => {
+                    this.speed = parseInt(e.target.value);
+                    document.getElementById('speed-value').textContent = this.speed;
+                });
+                
+                // 规则滑块
+                const ruleSlider = document.getElementById('rule-slider');
+                ruleSlider.addEventListener('input', (e) => {
+                    this.rule = parseInt(e.target.value);
+                    document.getElementById('rule-value').textContent = this.rule;
+                    document.getElementById('current-rule').textContent = this.rule;
+                    this.updateRuleDisplay();
+                });
+                
+                // 自定义规则
+                document.getElementById('apply-custom-rule').addEventListener('click', () => {
+                    const customRule = document.getElementById('custom-rule').value;
+                    if (customRule) {
+                        this.rule = parseInt(customRule);
+                        document.getElementById('rule-slider').value = this.rule;
+                        document.getElementById('rule-value').textContent = this.rule;
+                        document.getElementById('current-rule').textContent = this.rule;
+                        this.updateRuleDisplay();
+                    }
+                });
+                
+                // 生命游戏规则
+                document.getElementById('apply-life-rule').addEventListener('click', () => {
+                    this.applyLifeGame();
+                });
+                
+                // B/S规则控件
+                const birthSlider = document.getElementById('birth-slider');
+                const birthValue = document.getElementById('birth-value');
+                birthSlider.addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    this.birthRule = [value];
+                    birthValue.textContent = value;
+                    this.updateBSRule();
+                });
+                
+                const survivalSlider = document.getElementById('survival-slider');
+                const survivalValue = document.getElementById('survival-value');
+                survivalSlider.addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    this.survivalRule = [];
+                    for (let i = 0; i <= 8; i++) {
+                        if (value.toString().includes(i.toString())) {
+                            this.survivalRule.push(i);
+                        }
+                    }
+                    survivalValue.textContent = value;
+                    this.updateBSRule();
+                });
+                
+                // B/S规则应用按钮
+                document.getElementById('apply-bs-rule').addEventListener('click', () => {
+                    this.applyBSRule();
+                });
+                
+                // 分析按钮
+                document.getElementById('analyze-btn').addEventListener('click', () => {
+                    this.analyze();
+                });
+                
+                // 导出按钮
+                document.getElementById('export-btn').addEventListener('click', () => {
+                    this.exportConfig();
+                });
+                
+                // 导入按钮
+                document.getElementById('import-btn').addEventListener('click', () => {
+                    document.getElementById('file-input').click();
+                });
+                
+                // 文件输入
+                document.getElementById('file-input').addEventListener('change', (e) => {
+                    this.importConfig(e.target.files[0]);
+                });
+            }
+            
+            start() {
+                this.isRunning = true;
+                this.animate();
+            }
+            
+            pause() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+            }
+            
+            clear() {
+                this.pause();
+                this.initializeGrid();
+                this.draw();
+                this.updateStats();
+            }
+            
+            randomFill() {
+                this.pause();
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        this.grid[i][j] = Math.random() > 0.7 ? 1 : 0;
+                    }
+                }
+                this.draw();
+                this.updateStats();
+            }
+            
+            updateRuleDisplay() {
+                const ruleDisplay = document.getElementById('rule-display');
+                ruleDisplay.innerHTML = '';
+                
+                const binary = this.rule.toString(2).padStart(8, '0');
+                
+                for (let i = 0; i < 8; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'rule-cell';
+                    if (i === 4) cell.classList.add('center');
+                    cell.textContent = i;
+                    cell.classList.toggle('active', binary[7-i] === '1');
+                    cell.addEventListener('click', () => {
+                        const newBinary = binary.split('');
+                        newBinary[7-i] = newBinary[7-i] === '1' ? '0' : '1';
+                        const newRule = parseInt(newBinary.join(''), 2);
+                        this.rule = newRule;
+                        document.getElementById('rule-slider').value = newRule;
+                        document.getElementById('rule-value').textContent = newRule;
+                        document.getElementById('current-rule').textContent = newRule;
+                        this.updateRuleDisplay();
+                    });
+                    ruleDisplay.appendChild(cell);
+                }
+            }
+            
+            applyLifeGame() {
+                this.isElementary = false;
+                // 这里可以实现完整的生命游戏逻辑
+                // 为了简化，我们使用一个特殊的规则标识
+                this.rule = -1; // 使用负数表示生命游戏
+                document.getElementById('current-rule').textContent = 'Life (B3/S23)';
+            }
+            
+            applyBSRule() {
+                this.isElementary = false;
+                this.currentRuleType = 'bs';
+                document.getElementById('current-rule').textContent = 'B/S规则';
+            }
+            
+            updateBSRule() {
+                const bsRule = 'B' + this.birthRule[0] + '/S' + this.survivalRule.join('');
+                document.getElementById('bs-rule').value = bsRule;
+            }
+            
+            elementaryRule(left, center, right) {
+                const pattern = (left << 2) | (center << 1) | right;
+                return (this.rule >> pattern) & 1;
+            }
+            
+            countNeighbors(row, col) {
+                let count = 0;
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        if (i === 0 && j === 0) continue;
+                        const newRow = row + i;
+                        const newCol = col + j;
+                        if (newRow >= 0 && newRow < this.rows && newCol >= 0 && newCol < this.cols) {
+                            count += this.grid[newRow][newCol];
+                        }
+                    }
+                }
+                return count;
+            }
+            
+            nextGeneration() {
+                if (this.isElementary && this.rule >= 0) {
+                    // 基础元胞自动机 - 只处理中间一行
+                    const centerRow = Math.floor(this.rows / 2);
+                    
+                    // 创建下一行
+                    const nextRow = Array(this.cols).fill(0);
+                    for (let col = 0; col < this.cols; col++) {
+                        const left = this.grid[centerRow][(col - 1 + this.cols) % this.cols];
+                        const center = this.grid[centerRow][col];
+                        const right = this.grid[centerRow][(col + 1) % this.cols];
+                        
+                        nextRow[col] = this.elementaryRule(left, center, right);
+                    }
+                    
+                    // 向下移动
+                    for (let row = this.rows - 1; row > 0; row--) {
+                        for (let col = 0; col < this.cols; col++) {
+                            this.grid[row][col] = this.grid[row - 1][col];
+                        }
+                    }
+                    
+                    // 复制新行到顶部
+                    for (let col = 0; col < this.cols; col++) {
+                        this.grid[0][col] = nextRow[col];
+                    }
+                } else if (this.currentRuleType === 'bs') {
+                    // B/S规则（如生命游戏等）
+                    for (let row = 0; row < this.rows; row++) {
+                        for (let col = 0; col < this.cols; col++) {
+                            const neighbors = this.countNeighbors(row, col);
+                            const current = this.grid[row][col];
+                            
+                            if (current === 1) {
+                                // 检查存活条件
+                                const survives = this.survivalRule.includes(neighbors);
+                                this.nextGrid[row][col] = survives ? 1 : 0;
+                            } else {
+                                // 检查诞生条件
+                                const born = this.birthRule.includes(neighbors);
+                                this.nextGrid[row][col] = born ? 1 : 0;
+                            }
+                        }
+                    }
+                    
+                    // 交换网格
+                    [this.grid, this.nextGrid] = [this.nextGrid, this.grid];
+                } else {
+                    // 其他规则（如自定义规则）
+                    for (let row = 0; row < this.rows; row++) {
+                        for (let col = 0; col < this.cols; col++) {
+                            const neighbors = this.countNeighbors(row, col);
+                            const current = this.grid[row][col];
+                            
+                            if (this.rule === -1) {
+                                // 康威生命游戏规则
+                                if (current === 1) {
+                                    this.nextGrid[row][col] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+                                } else {
+                                    this.nextGrid[row][col] = neighbors === 3 ? 1 : 0;
+                                }
+                            } else {
+                                // 其他规则可以在这里实现
+                                this.nextGrid[row][col] = current;
+                            }
+                        }
+                    }
+                    
+                    // 交换网格
+                    [this.grid, this.nextGrid] = [this.nextGrid, this.grid];
+                }
+                
+                this.generation++;
+            }
+            
+            draw() {
+                // 清空画布
+                this.ctx.fillStyle = '#0a0a0a';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制网格
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        if (this.grid[row][col]) {
+                            this.ctx.fillStyle = '#FF6B35';
+                            this.ctx.fillRect(
+                                col * this.cellSize,
+                                row * this.cellSize,
+                                this.cellSize - 1,
+                                this.cellSize - 1
+                            );
+                        }
+                    }
+                }
+                
+                // 绘制网格线
+                this.ctx.strokeStyle = '#222';
+                this.ctx.lineWidth = 0.5;
+                for (let i = 0; i <= this.rows; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, i * this.cellSize);
+                    this.ctx.lineTo(this.canvas.width, i * this.cellSize);
+                    this.ctx.stroke();
+                }
+                for (let i = 0; i <= this.cols; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(i * this.cellSize, 0);
+                    this.ctx.lineTo(i * this.cellSize, this.canvas.height);
+                    this.ctx.stroke();
+                }
+            }
+            
+            updateStats() {
+                let liveCells = 0;
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        if (this.grid[row][col]) liveCells++;
+                    }
+                }
+                
+                const density = liveCells / (this.rows * this.cols);
+                
+                document.getElementById('generation').textContent = this.generation;
+                document.getElementById('live-cells').textContent = liveCells;
+                document.getElementById('density').textContent = density.toFixed(2);
+            }
+            
+            animate() {
+                if (!this.isRunning) return;
+                
+                this.nextGeneration();
+                this.draw();
+                this.updateStats();
+                
+                setTimeout(() => {
+                    this.animationId = requestAnimationFrame(() => this.animate());
+                }, 1000 / this.speed);
+            }
+            
+            analyze() {
+                let liveCells = 0;
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        if (this.grid[row][col]) liveCells++;
+                    }
+                }
+                
+                const density = liveCells / (this.rows * this.cols);
+                const stability = this.calculateStability();
+                
+                alert(`📊 详细分析结果:\n\n` +
+                      `🔢 当前代数: ${this.generation}\n` +
+                      `🧬 活细胞数量: ${liveCells}\n` +
+                      `📊 人口密度: ${(density * 100).toFixed(2)}%\n` +
+                      `⚖️ 稳定性指数: ${stability.toFixed(4)}\n\n` +
+                      `✨ 提示: 稳定性接近1表示系统趋于稳定，接近0表示混沌状态`);
+            }
+            
+            calculateStability() {
+                // 简化的稳定性计算
+                let changes = 0;
+                let comparisons = 0;
+                
+                // 检查最近几代的相似性
+                const recentGenerations = Math.min(10, this.generation);
+                for (let g = 0; g < recentGenerations - 1; g++) {
+                    const gen1 = this.getGenerationPattern(this.generation - g);
+                    const gen2 = this.getGenerationPattern(this.generation - g - 1);
+                    
+                    for (let row = 0; row < this.rows; row++) {
+                        for (let col = 0; col < this.cols; col++) {
+                            if (gen1[row][col] !== gen2[row][col]) {
+                                changes++;
+                            }
+                            comparisons++;
+                        }
+                    }
+                }
+                
+                return comparisons > 0 ? 1 - (changes / comparisons) : 0;
+            }
+            
+            getGenerationPattern(generation) {
+                // 简化版本：返回当前网格的深拷贝
+                return this.grid.map(row => [...row]);
+            }
+            
+            exportConfig() {
+                const config = {
+                    rule: this.rule,
+                    grid: this.grid,
+                    generation: this.generation,
+                    speed: this.speed,
+                    isElementary: this.isElementary,
+                    birthRule: this.birthRule,
+                    survivalRule: this.survivalRule,
+                    currentRuleType: this.currentRuleType,
+                    timestamp: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(config, null, 2)], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cellular-automata-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            
+            importConfig(file) {
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const config = JSON.parse(e.target.result);
+                        
+                        this.rule = config.rule || 30;
+                        this.speed = config.speed || 5;
+                        this.generation = config.generation || 0;
+                        this.isElementary = config.isElementary !== undefined ? config.isElementary : true;
+                        this.birthRule = config.birthRule || [3];
+                        this.survivalRule = config.survivalRule || [2, 3];
+                        this.currentRuleType = config.currentRuleType || 'elementary';
+                        
+                        // 更新UI
+                        document.getElementById('rule-slider').value = this.rule;
+                        document.getElementById('rule-value').textContent = this.rule;
+                        document.getElementById('current-rule').textContent = this.rule;
+                        document.getElementById('speed-slider').value = this.speed;
+                        document.getElementById('speed-value').textContent = this.speed;
+                        
+                        // 如果是B/S规则，更新B/S控件
+                        if (this.currentRuleType === 'bs') {
+                            document.getElementById('birth-slider').value = this.birthRule[0] || 0;
+                            document.getElementById('birth-value').textContent = this.birthRule[0] || 0;
+                            
+                            const survivalValue = this.survivalRule.join('');
+                            document.getElementById('survival-slider').value = parseInt(survivalValue) || 0;
+                            document.getElementById('survival-value').textContent = survivalValue;
+                            
+                            this.updateBSRule();
+                        }
+                        
+                        // 重新调整网格大小并加载数据
+                        this.resizeGrid();
+                        if (config.grid && config.grid.length === this.rows && config.grid[0].length === this.cols) {
+                            this.grid = config.grid.map(row => [...row]);
+                        } else {
+                            this.initializeGrid();
+                        }
+                        
+                        this.draw();
+                        this.updateStats();
+                        
+                        alert('✅ 配置导入成功！');
+                    } catch (error) {
+                        alert('❌ 配置文件格式错误！');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+        
+        // 预设规则库
+        const presetRules = {
+            // 经典规则
+            'life': { name: '康威生命游戏', type: 'bs', birth: [3], survival: [2, 3], description: '最经典的细胞自动机规则' },
+            'highlife': { name: '高生命', type: 'bs', birth: [3, 6], survival: [2, 3], description: '生命游戏的变种，产生更多滑翔机' },
+            'seeds': { name: '种子', type: 'bs', birth: [2], survival: [], description: '所有细胞都会死亡，只诞生新细胞' },
+            'maze': { name: '迷宫', type: 'bs', birth: [3], survival: [1, 2, 3, 4, 5], description: '产生迷宫状的模式' },
+            'coral': { name: '珊瑚', type: 'bs', birth: [3], survival: [3, 4, 5, 6, 7, 8], description: '类似珊瑚的生长模式' },
+            'maze2': { name: '迷宫2', type: 'bs', birth: [3], survival: [1, 2, 3, 4, 5, 6, 7, 8], description: '完全连通的迷宫模式' },
+            
+            // 趣味规则
+            'pulsar': { name: '脉冲星', type: 'bs', birth: [3], survival: [2, 3], description: '周期为3的振荡器' },
+            'gliderGun': { name: '滑翔机枪', type: 'bs', birth: [3], survival: [2, 3], description: '持续产生滑翔机的复杂结构' },
+            'spaceship': { name: '飞船', type: 'bs', birth: [3], survival: [2, 3], description: '移动的周期性结构' },
+            'knight': { name: '骑士', type: 'bs', birth: [3], survival: [2, 3], description: '类似国际象棋骑士的移动模式' },
+            'centipede': { name: '蜈蚣', type: 'bs', birth: [3, 6], survival: [1, 2, 3], description: '长条状的移动结构' },
+            'switch': { name: '开关', type: 'bs', birth: [3], survival: [1, 2, 3, 4, 5], description: '产生开关状振荡器' },
+            
+            // 混沌规则
+            'brian': { name: '布莱恩的大脑', type: 'custom', rule: 0b11010000, description: '四状态细胞自动机' },
+            'rule30': { name: '规则30', type: 'elementary', rule: 30, description: '产生混沌模式的经典规则' },
+            'rule90': { name: '规则90', type: 'elementary', rule: 90, description: '产生三角分形的规则' },
+            'rule110': { name: '规则110', type: 'elementary', rule: 110, description: '图灵完备的规则' },
+            'rule184': { name: '规则184', type: 'elementary', rule: 184, description: '模拟交通流的规则' },
+            'wireworld': { name: '线世界', type: 'custom', rule: 0b00011000, description: '模拟电子线的四状态规则' },
+            
+            // 复杂规则
+            'daynight': { name: '昼夜', type: 'bs', birth: [3, 6, 7, 8], survival: [3, 4, 6, 7, 8], description: '类似昼夜交替的复杂模式' },
+            'replicator': { name: '复制器', type: 'bs', birth: [1, 3, 5, 7], survival: [1, 3, 5, 7], description: '能自我复制的模式' },
+            'fractal': { name: '分形', type: 'bs', birth: [1, 2, 3, 5, 7], survival: [3, 5, 7], description: '产生分形图案的规则' },
+            'wator': { name: '瓦特', type: 'bs', birth: [4], survival: [3], description: '模拟捕食者-猎物系统' },
+            'langton': { name: '朗顿蚂蚁', type: 'custom', rule: 0b00000000, description: '能建造高速公路的蚂蚁' },
+            'billiard': { name: '台球', type: 'bs', birth: [5], survival: [6, 7, 8], description: '模拟台球碰撞的规则' },
+            'traffic': { name: '交通', type: 'bs', birth: [3], survival: [2, 3], description: '模拟交通流的二维规则' }
+        };
+        
+        // 加载预设规则
+        function loadPresetRule(ruleName) {
+            const rule = presetRules[ruleName];
+            if (!rule) {
+                alert('未找到预设规则: ' + ruleName);
+                return;
+            }
+            
+            // 切换到对应的规则标签
+            if (rule.type === 'bs') {
+                switchRuleTab('bs');
+            } else if (rule.type === 'elementary') {
+                switchRuleTab('elementary');
+            } else {
+                switchRuleTab('custom');
+            }
+            
+            // 应用规则
+            if (rule.type === 'bs') {
+                // 设置B/S规则
+                automata.birthRule = rule.birth;
+                automata.survivalRule = rule.survival;
+                automata.currentRuleType = 'bs';
+                
+                // 更新UI
+                document.getElementById('birth-slider').value = rule.birth[0] || 0;
+                document.getElementById('birth-value').textContent = rule.birth[0] || 0;
+                
+                const survivalValue = rule.survival.join('');
+                document.getElementById('survival-slider').value = parseInt(survivalValue) || 0;
+                document.getElementById('survival-value').textContent = survivalValue;
+                
+                const bsRule = 'B' + (rule.birth[0] || '') + '/S' + rule.survival.join('');
+                document.getElementById('bs-rule').value = bsRule;
+                
+            } else if (rule.type === 'elementary') {
+                // 设置基础规则
+                automata.rule = rule.rule;
+                automata.isElementary = true;
+                automata.currentRuleType = 'elementary';
+                
+                // 更新UI
+                document.getElementById('rule-slider').value = rule.rule;
+                document.getElementById('rule-value').textContent = rule.rule;
+                document.getElementById('current-rule').textContent = rule.rule;
+                automata.updateRuleDisplay();
+            }
+            
+            alert('✅ 已加载预设规则: ' + rule.name + '\n\n' + rule.description);
+        }
+        
+        // 切换预设规则标签
+        function switchPresetTab(tabName) {
+            // 隐藏所有预设标签内容
+            document.querySelectorAll('#classic-presets, #interesting-presets, #chaos-presets, #complex-presets').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有标签的激活状态
+            document.querySelectorAll('#classic-presets .rule-tab, #interesting-presets .rule-tab, #chaos-presets .rule-tab, #complex-presets .rule-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的标签内容
+            document.getElementById(tabName + '-presets').classList.add('active');
+            
+            // 激活选中的标签
+            event.target.classList.add('active');
+        }
+        
+        // 预设模式
+        function loadPreset(presetName) {
+            const centerRow = Math.floor(automata.rows / 2);
+            const centerCol = Math.floor(automata.cols / 2);
+            
+            automata.clear();
+            
+            switch(presetName) {
+                case 'glider':
+                    automata.grid[centerRow][centerCol] = 1;
+                    automata.grid[centerRow + 1][centerCol + 1] = 1;
+                    automata.grid[centerRow + 1][centerCol + 2] = 1;
+                    automata.grid[centerRow + 2][centerCol] = 1;
+                    automata.grid[centerRow + 2][centerCol + 1] = 1;
+                    break;
+                case 'blinker':
+                    automata.grid[centerRow][centerCol - 1] = 1;
+                    automata.grid[centerRow][centerCol] = 1;
+                    automata.grid[centerRow][centerCol + 1] = 1;
+                    break;
+                case 'toad':
+                    automata.grid[centerRow][centerCol] = 1;
+                    automata.grid[centerRow][centerCol + 1] = 1;
+                    automata.grid[centerRow][centerCol + 2] = 1;
+                    automata.grid[centerRow + 1][centerCol - 1] = 1;
+                    automata.grid[centerRow + 1][centerCol] = 1;
+                    automata.grid[centerRow + 1][centerCol + 1] = 1;
+                    break;
+                case 'beacon':
+                    automata.grid[centerRow][centerCol] = 1;
+                    automata.grid[centerRow][centerCol + 1] = 1;
+                    automata.grid[centerRow + 1][centerCol] = 1;
+                    automata.grid[centerRow + 2][centerCol + 3] = 1;
+                    automata.grid[centerRow + 3][centerCol + 2] = 1;
+                    automata.grid[centerRow + 3][centerCol + 3] = 1;
+                    break;
+                case 'pulsar':
+                    // 简化的脉冲星模式
+                    const pattern = [
+                        [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,1,1,1,0,0,0,1,1,1,0,0]
+                    ];
+                    
+                    for (let i = 0; i < pattern.length; i++) {
+                        for (let j = 0; j < pattern[i].length; j++) {
+                            const row = centerRow - 6 + i;
+                            const col = centerCol - 6 + j;
+                            if (row >= 0 && row < automata.rows && col >= 0 && col < automata.cols) {
+                                automata.grid[row][col] = pattern[i][j];
+                            }
+                        }
+                    }
+                    break;
+                case 'gun':
+                    // 简化的滑翔机枪模式
+                    const gunPattern = [
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                    ];
+                    
+                    for (let i = 0; i < gunPattern.length; i++) {
+                        for (let j = 0; j < gunPattern[i].length; j++) {
+                            const row = centerRow - 4 + i;
+                            const col = centerCol - 18 + j;
+                            if (row >= 0 && row < automata.rows && col >= 0 && col < automata.cols) {
+                                automata.grid[row][col] = gunPattern[i][j];
+                            }
+                        }
+                    }
+                    break;
+            }
+            
+            automata.draw();
+            automata.updateStats();
+        }
+        
+        // 切换规则标签
+        function switchRuleTab(tabName) {
+            // 隐藏所有标签内容
+            document.querySelectorAll('.rule-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有标签的激活状态
+            document.querySelectorAll('.rule-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的标签内容
+            const tabContent = document.getElementById(tabName + '-tab');
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
+            
+            // 激活选中的标签
+            if (event.target) {
+                event.target.classList.add('active');
+            }
+            
+            // 更新当前规则类型
+            automata.currentRuleType = tabName;
+        }
+        
+        ========== 规则突变模式方法 ==========
+        
+        // 检查是否需要突变规则
+        shouldMutateRule() {
+            if (!this.mutationMode) return false;
+            return this.generation % this.mutationFrequency === 0;
+        }
+        
+        // 执行规则突变
+        mutateRule() {
+            if (this.currentRuleType === 'elementary') {
+                // 基础元胞自动机规则突变
+                const maxRule = 255;
+                const ruleChange = Math.floor(Math.random() * this.mutationIntensity * 16) - 8;
+                this.rule = Math.max(0, Math.min(maxRule, this.rule + ruleChange));
+                
+                // 更新UI
+                document.getElementById('rule-slider').value = this.rule;
+                document.getElementById('rule-value').textContent = this.rule;
+                document.getElementById('current-rule').textContent = this.rule;
+                this.updateRuleDisplay();
+                
+            } else if (this.currentRuleType === 'bs') {
+                // B/S规则突变
+                const birthChange = Math.random() < 0.5 ? 1 : -1;
+                const survivalChange = Math.random() < 0.5 ? 1 : -1;
+                
+                if (birthChange !== 0) {
+                    const currentBirth = [...this.birthRule];
+                    const newValue = Math.floor(Math.random() * 9);
+                    
+                    if (currentBirth.includes(newValue)) {
+                        // 如果数值已存在，移除它
+                        this.birthRule = currentBirth.filter(n => n !== newValue);
+                    } else {
+                        // 如果数值不存在，添加它
+                        this.birthRule.push(newValue);
+                        this.birthRule.sort();
+                    }
+                }
+                
+                if (survivalChange !== 0) {
+                    const currentSurvival = [...this.survivalRule];
+                    const newValue = Math.floor(Math.random() * 9);
+                    
+                    if (currentSurvival.includes(newValue)) {
+                        // 如果数值已存在，移除它
+                        this.survivalRule = currentSurvival.filter(n => n !== newValue);
+                    } else {
+                        // 如果数值不存在，添加它
+                        this.survivalRule.push(newValue);
+                        this.survivalRule.sort();
+                    }
+                }
+                
+                // 更新UI
+                const birthValue = this.birthRule.join(',');
+                const survivalValue = this.survivalRule.join(',');
+                
+                document.getElementById('birth-slider').value = this.birthRule[0] || 0;
+                document.getElementById('birth-value').textContent = birthValue;
+                document.getElementById('survival-slider').value = parseInt(survivalValue) || 0;
+                document.getElementById('survival-value').textContent = survivalValue;
+                
+                this.updateBSRule();
+            }
+        }
+        
+        ========== 经典图案库方法 ==========
+        
+        // 更新图案选择列表
+        updatePatternList() {
+            const category = document.getElementById('pattern-category').value;
+            const patternSelect = document.getElementById('pattern-select');
+            
+            // 清空现有选项
+            patternSelect.innerHTML = '<option value="">选择图案...</option>';
+            
+            // 添加当前类别的图案
+            if (CLASSIC_PATTERNS[category]) {
+                for (const [key, pattern] of Object.entries(CLASSIC_PATTERNS[category])) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = pattern.name;
+                    patternSelect.appendChild(option);
+                }
+            }
+        }
+        
+        // 加载图案到画布
+        loadPattern(patternKey) {
+            const category = document.getElementById('pattern-category').value;
+            const patternData = CLASSIC_PATTERNS[category][patternKey];
+            
+            if (!patternData) return;
+            
+            const pattern = patternData.pattern;
+            
+            // 计算图案居中位置
+            const patternHeight = pattern.length;
+            const patternWidth = pattern[0].length;
+            const startRow = Math.floor((this.rows - patternHeight) / 2);
+            const startCol = Math.floor((this.cols - patternWidth) / 2);
+            
+            // 清空画布
+            this.clear();
+            
+            // 放置图案
+            for (let i = 0; i < patternHeight; i++) {
+                for (let j = 0; j < patternWidth; j++) {
+                    const row = startRow + i;
+                    const col = startCol + j;
+                    
+                    if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+                        this.grid[row][col] = pattern[i][j];
+                    }
+                }
+            }
+            
+            this.draw();
+            this.updateStats();
+        }
+        
+        // 随机加载图案
+        loadRandomPattern() {
+            const categories = Object.keys(CLASSIC_PATTERNS);
+            const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+            
+            const patterns = Object.keys(CLASSIC_PATTERNS[randomCategory]);
+            const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
+            
+            // 更新类别选择
+            document.getElementById('pattern-category').value = randomCategory;
+            this.updatePatternList();
+            
+            // 加载图案
+            this.loadPattern(randomPattern);
+        }
+        
+        // ========== 核心动画方法 ==========
+            
+            // 更新新一代
+            update() {
+                this.generation++;
+                
+                // 检查并执行规则突变
+                if (this.shouldMutateRule()) {
+                    this.mutateRule();
+                    this.showMessage(`第 ${this.generation} 代: 规则突变! 当前规则: ${this.currentRuleType === 'elementary' ? '规则' + this.rule : 'B/S'}`);
+                }
+                
+                if (this.isElementary && this.rule >= 0) {
+                    // 基础元胞自动机 - 只处理中间一行
+                    const centerRow = Math.floor(this.rows / 2);
+                    
+                    // 创建下一行
+                    const nextRow = Array(this.cols).fill(0);
+                    for (let col = 0; col < this.cols; col++) {
+                        const left = this.grid[centerRow][(col - 1 + this.cols) % this.cols];
+                        const center = this.grid[centerRow][col];
+                        const right = this.grid[centerRow][(col + 1) % this.cols];
+                        
+                        nextRow[col] = this.elementaryRule(left, center, right);
+                    }
+                    
+                    // 向下移动
+                    for (let row = this.rows - 1; row > 0; row--) {
+                        for (let col = 0; col < this.cols; col++) {
+                            this.grid[row][col] = this.grid[row - 1][col];
+                        }
+                    }
+                    
+                    // 复制新行到顶部
+                    for (let col = 0; col < this.cols; col++) {
+                        this.grid[0][col] = nextRow[col];
+                    }
+                } else if (this.currentRuleType === 'bs') {
+                    // B/S规则（如生命游戏等）
+                    for (let row = 0; row < this.rows; row++) {
+                        for (let col = 0; col < this.cols; col++) {
+                            const neighbors = this.countNeighbors(row, col);
+                            const current = this.grid[row][col];
+                            
+                            if (current === 1) {
+                                // 检查存活条件
+                                const survives = this.survivalRule.includes(neighbors);
+                                this.nextGrid[row][col] = survives ? 1 : 0;
+                            } else {
+                                // 检查诞生条件
+                                const born = this.birthRule.includes(neighbors);
+                                this.nextGrid[row][col] = born ? 1 : 0;
+                            }
+                        }
+                    }
+                    
+                    // 交换网格
+                    [this.grid, this.nextGrid] = [this.nextGrid, this.grid];
+                } else {
+                    // 其他规则（如自定义规则）
+                    for (let row = 0; row < this.rows; row++) {
+                        for (let col = 0; col < this.cols; col++) {
+                            const neighbors = this.countNeighbors(row, col);
+                            const current = this.grid[row][col];
+                            
+                            if (this.rule === -1) {
+                                // 康威生命游戏规则
+                                const survives = (current === 1 && (neighbors === 2 || neighbors === 3)) || 
+                                                (current === 0 && neighbors === 3);
+                                this.nextGrid[row][col] = survives ? 1 : 0;
+                            } else {
+                                // 其他自定义规则处理
+                                this.nextGrid[row][col] = current;
+                            }
+                        }
+                    }
+                    
+                    // 交换网格
+                    [this.grid, this.nextGrid] = [this.nextGrid, this.grid];
+                }
+            }
+            
+            // 动画循环
+            animate() {
+                if (!this.isRunning) return;
+                
+                this.update();
+                this.draw();
+                this.updateStats();
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+            
+        // 初始化
+        const canvas = document.getElementById('canvas');
+        const automata = new CellularAutomata(canvas);
+        
+        // 初始化规则显示
+        automata.updateRuleDisplay();
+    </script>
+</body>
+</html>

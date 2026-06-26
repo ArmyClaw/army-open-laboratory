@@ -1,0 +1,240 @@
+/* Video Prompt Generator - 样式文件 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+header p {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.parameter-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.result-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.parameter-section h2, .result-section h2 {
+    margin-bottom: 20px;
+    color: #4a5568;
+    font-size: 1.5em;
+}
+
+.parameter-group {
+    margin-bottom: 25px;
+}
+
+.parameter-group h3 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.parameter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.param-option {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.param-option:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+.param-option.selected {
+    background: #bee3f8;
+    border-color: #3182ce;
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
+.param-option h4 {
+    color: #2d3748;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+}
+
+.param-option p {
+    color: #4a5568;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.template-option {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.template-option:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+.template-option.selected {
+    background: #fbb6ce;
+    border-color: #d53f8c;
+    box-shadow: 0 4px 12px rgba(213, 63, 140, 0.3);
+}
+
+.template-option h4 {
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.template-option p {
+    color: #4a5568;
+    font-size: 0.85em;
+    line-height: 1.4;
+}
+
+.result-output {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 25px;
+    min-height: 200px;
+    margin-bottom: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 1.1em;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.result-output.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a0aec0;
+    font-style: italic;
+}
+
+.copy-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.copy-btn:active {
+    transform: translateY(0);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+    
+    header h1 {
+        font-size: 2em;
+    }
+    
+    .parameter-grid, .template-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.parameter-section, .result-section {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* 图标样式 */
+.param-icon, .template-icon {
+    font-size: 1.2em;
+}

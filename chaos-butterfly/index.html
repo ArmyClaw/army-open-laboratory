@@ -1,0 +1,2279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>混沌蝴蝶实验室 - 多系统混沌研究</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .main-canvas {
+            flex: 1;
+            position: relative;
+        }
+
+        #lorenzCanvas {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+            cursor: grab;
+        }
+
+        #lorenzCanvas:active {
+            cursor: grabbing;
+        }
+
+        .control-panel {
+            width: 300px;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid #333;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .control-section h3 {
+            color: #FF6B35;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #FF6B35;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .value-display {
+            min-width: 50px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            color: #FF6B35;
+        }
+
+        .button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .butterfly-active {
+            background: linear-gradient(45deg, #FF1744, #FF6B35) !important;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 107, 53, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
+        }
+        
+        .butterfly-btn {
+            background: linear-gradient(45deg, #FF6B35, #FF6B35) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .butterfly-btn.active {
+            background: linear-gradient(45deg, #FF1744, #FF6B35) !important;
+            animation: pulse 2s infinite;
+        }
+        
+        .butterfly-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .butterfly-btn:hover::before {
+            left: 100%;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(26, 26, 46, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            min-width: 200px;
+        }
+
+        .info-panel h2 {
+            color: #FF6B35;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info-panel p {
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.4;
+        }
+
+        .phase-space-container {
+            flex: 1;
+            position: relative;
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .phase-space-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(26, 26, 46, 0.95);
+            border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+        }
+        
+        .phase-space-header h2 {
+            color: #FF6B35;
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .phase-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #phaseCanvas {
+            flex: 1;
+            width: 100%;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+        }
+        
+        .phase-info {
+            padding: 15px 20px;
+            background: rgba(26, 26, 46, 0.95);
+            border-top: 1px solid rgba(255, 107, 53, 0.3);
+        }
+        
+        .phase-legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .trajectory-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .trajectory-controls button {
+            flex: 1;
+            padding: 8px;
+            background: rgba(255, 107, 53, 0.2);
+            border: 1px solid #FF6B35;
+            border-radius: 4px;
+            color: #FF6B35;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .trajectory-controls button:hover {
+            background: rgba(255, 107, 53, 0.3);
+        }
+
+        .clear-button {
+            background: rgba(255, 67, 67, 0.2) !important;
+            border-color: #FF4343 !important;
+            color: #FF4343 !important;
+        }
+
+        .clear-button:hover {
+            background: rgba(255, 67, 67, 0.3) !important;
+        }
+
+        .multi-button {
+            background: linear-gradient(45deg, #4D96FF, #6BCF7F) !important;
+            border-color: #4D96FF !important;
+        }
+
+        .multi-button:hover {
+            background: linear-gradient(45deg, #6BCF7F, #4D96FF) !important;
+            box-shadow: 0 4px 15px rgba(77, 150, 255, 0.4) !important;
+        }
+        
+        /* 标签页样式 */
+        .tab-nav {
+            display: flex;
+            background: rgba(26, 26, 46, 0.95);
+            border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+            padding: 10px 20px;
+            gap: 10px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 6px 6px 0 0;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .tab-btn.active {
+            background: rgba(255, 107, 53, 0.2);
+            color: #FF6B35;
+            border-bottom: 2px solid #FF6B35;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(255, 107, 53, 0.1);
+            color: #FF6B35;
+        }
+        
+        .tab-content {
+            height: calc(100vh - 60px);
+        }
+        
+        #pendulum-tab, #logistic-tab, #cellular-tab {
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 标签页导航 -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('lorenz')">🌪️ 洛伦兹吸引子</button>
+        <button class="tab-btn" onclick="switchTab('pendulum')">🎯 双摆系统</button>
+        <button class="tab-btn" onclick="switchTab('logistic')">🔢 逻辑映射</button>
+        <button class="tab-btn" onclick="switchTab('cellular')">🧬 元细胞自动机</button>
+    </div>
+    
+    <div class="tab-content" id="lorenz-tab" style="display: flex; flex-direction: column; height: calc(100vh - 60px);">
+    <div class="tab-content" id="cellular-tab" style="display: none; flex-direction: column; height: calc(100vh - 60px);">
+        <div class="container" style="flex: 1; display: flex;">
+            <div class="main-canvas" id="pendulum-view">
+                <canvas id="pendulumCanvas"></canvas>
+                <div class="info-panel">
+                    <h2>🌪️ 洛伦兹吸引子</h2>
+                    <p>拖动设置初始点，调节参数观察混沌行为</p>
+                </div>
+            </div>
+            
+            <div class="phase-space-container" id="phase-view" style="display: none;">
+                <div class="phase-space-header">
+                    <h2>📊 相空间图 (X vs Y)</h2>
+                    <div class="phase-controls">
+                        <button class="button" id="toggle-comparison">🔄 并排对比模式</button>
+                        <button class="button" id="clear-phase">🗑️ 清除相空间</button>
+                    </div>
+                </div>
+                <canvas id="phaseCanvas"></canvas>
+                <div class="phase-info">
+                    <div class="phase-legend">
+                        <div class="legend-item"><span class="legend-color" style="background: #FF6B35;"></span> X</div>
+                        <div class="legend-item"><span class="legend-color" style="background: #4D96FF;"></span> Y</div>
+                        <div class="legend-item"><span class="legend-color" style="background: #6BCF7F;"></span> Z</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+        <div class="main-canvas" id="pendulum-view">
+            <canvas id="pendulumCanvas"></canvas>
+            <div class="info-panel">
+                <h2>🎯 双摆系统</h2>
+                <p>拖拽设置初始角度，观察混沌运动</p>
+            </div>
+        </div>
+        
+        <div class="phase-space-container" id="phase-view" style="display: none;">
+            <div class="phase-space-header">
+                <h2>📊 相空间图 (θ₁ vs θ₂)</h2>
+                <div class="phase-controls">
+                    <button class="button" id="toggle-comparison">🔄 并排对比模式</button>
+                    <button class="button" id="clear-phase">🗑️ 清除相空间</button>
+                </div>
+            </div>
+            <canvas id="phaseCanvas"></canvas>
+            <div class="phase-info">
+                <div class="phase-legend">
+                    <div class="legend-item"><span class="legend-color" style="background: #FF6B35;"></span> θ₁ (rad)</div>
+                    <div class="legend-item"><span class="legend-color" style="background: #4D96FF;"></span> θ₂ (rad)</div>
+                    <div class="legend-item"><span class="legend-color" style="background: #6BCF7F;"></span> 轨迹</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <div class="control-section">
+                <h3>🎯 初始值设置</h3>
+                <div class="control-group">
+                    <label>X₀ 初始值</label>
+                    <div class="slider-container">
+                        <input type="range" id="x0" min="-10" max="10" step="0.1" value="1">
+                        <span class="value-display" id="x0-value">1.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Y₀ 初始值</label>
+                    <div class="slider-container">
+                        <input type="range" id="y0" min="-10" max="10" step="0.1" value="1">
+                        <span class="value-display" id="y0-value">1.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Z₀ 初始值</label>
+                    <div class="slider-container">
+                        <input type="range" id="z0" min="0" max="30" step="0.1" value="1">
+                        <span class="value-display" id="z0-value">1.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>⚙️ 洛伦兹参数</h3>
+                <div class="control-group">
+                    <label>σ (sigma) - 对流强度</label>
+                    <div class="slider-container">
+                        <input type="range" id="sigma" min="0" max="20" step="0.1" value="10">
+                        <span class="value-display" id="sigma-value">10.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>ρ (rho) - 温度差</label>
+                    <div class="slider-container">
+                        <input type="range" id="rho" min="0" max="50" step="0.1" value="28">
+                        <span class="value-display" id="rho-value">28.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>β (beta) - 几何因子</label>
+                    <div class="slider-container">
+                        <input type="range" id="beta" min="0" max="5" step="0.01" value="2.67">
+                        <span class="value-display" id="beta-value">2.67</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>🎨 轨迹控制</h3>
+                <div class="trajectory-controls">
+                    <button id="start-trajectory">开始轨迹</button>
+                    <button id="clear-trajectories" class="clear-button">清除轨迹</button>
+                </div>
+                <button class="button butterfly-btn" id="butterfly-effect">🦋 蝴蝶效应演示</button>
+                <button class="button multi-button" id="multi-trajectory">📊 多轨迹对比</button>
+            </div>
+            
+            <div class="control-section">
+                <h3>🔍 验证测试</h3>
+                <button class="button" id="verify-accuracy" onclick="verifyTrajectoryAccuracy()" style="background: linear-gradient(45deg, #6BCF7F, #4D96FF);">🔍 验证轨迹精度</button>
+                <button class="button" id="verify-response" onclick="verifyInteractionResponsiveness()" style="background: linear-gradient(45deg, #FFD93D, #FF6B35);">⚡ 验证交互响应</button>
+            </div>
+            
+            <div class="control-section">
+                <h3>🔍 蝴蝶效应说明</h3>
+                <div id="butterfly-info" style="display: none;">
+                    <p style="font-size: 12px; line-height: 1.4; color: #ccc;">
+                        <strong>红色轨迹：</strong>原始条件<br>
+                        <strong>蓝色轨迹：</strong>扰动条件（仅差0.001）<br>
+                        观察两条轨迹随时间的发散情况
+                    </p>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>🎯 双摆参数设置</h3>
+                <div class="control-group">
+                    <label>摆杆长度 L1 (像素)</label>
+                    <div class="slider-container">
+                        <input type="range" id="pendulum-l1" min="50" max="200" step="5" value="100">
+                        <span class="value-display" id="pendulum-l1-value">100</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>摆杆长度 L2 (像素)</label>
+                    <div class="slider-container">
+                        <input type="range" id="pendulum-l2" min="50" max="200" step="5" value="100">
+                        <span class="value-display" id="pendulum-l2-value">100</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>摆球质量 m1</label>
+                    <div class="slider-container">
+                        <input type="range" id="pendulum-m1" min="1" max="10" step="0.1" value="1">
+                        <span class="value-display" id="pendulum-m1-value">1.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>摆球质量 m2</label>
+                    <div class="slider-container">
+                        <input type="range" id="pendulum-m2" min="1" max="10" step="0.1" value="1">
+                        <span class="value-display" id="pendulum-m2-value">1.0</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>重力加速度 g</label>
+                    <div class="slider-container">
+                        <input type="range" id="pendulum-g" min="1" max="20" step="0.1" value="9.8">
+                        <span class="value-display" id="pendulum-g-value">9.8</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>阻尼系数</label>
+                    <div class="slider-container">
+                        <input type="range" id="pendulum-damping" min="0" max="1" step="0.01" value="0.01">
+                        <span class="value-display" id="pendulum-damping-value">0.01</span>
+                    </div>
+                </div>
+                <button class="button" id="reset-pendulum" style="background: linear-gradient(45deg, #9C27B0, #E91E63);">🔄 重置双摆</button>
+                <button class="button" id="pendulum-trace" style="background: linear-gradient(45deg, #00BCD4, #3F51B5);">🌊 轨迹追踪</button>
+            </div>
+
+            <div class="control-section">
+                <h3>📊 实时信息</h3>
+                <div class="control-group">
+                    <label>当前轨迹数</label>
+                    <div class="value-display" id="trajectory-count">0</div>
+                </div>
+                <div class="control-group">
+                    <label>渲染点数</label>
+                    <div class="value-display" id="point-count">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class PhaseSpace {
+            constructor(canvas, pendulum) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.pendulum = pendulum;
+                this.setupCanvas();
+                
+                // 相空间数据
+                this.theta1Data = [];
+                this.theta2Data = [];
+                this.maxDataPoints = 2000;
+                
+                // 相空间参数
+                this.scale = 100;
+                this.offsetX = this.canvas.width / 2;
+                this.offsetY = this.canvas.height / 2;
+                
+                // 颜色配置
+                this.colors = {
+                    theta1: '#FF6B35',
+                    theta2: '#4D96FF',
+                    trajectory: '#6BCF7F',
+                    grid: '#333'
+                };
+                
+                this.setupControls();
+                this.draw();
+            }
+            
+            setupCanvas() {
+                const resizeCanvas = () => {
+                    this.canvas.width = this.canvas.offsetWidth;
+                    this.canvas.height = this.canvas.offsetHeight;
+                    this.offsetX = this.canvas.width / 2;
+                    this.offsetY = this.canvas.height / 2;
+                };
+                
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }
+            
+            setupControls() {
+                // 清除相空间按钮
+                document.getElementById('clear-phase').addEventListener('click', () => {
+                    this.clearData();
+                });
+                
+                // 切换对比模式按钮
+                document.getElementById('toggle-comparison').addEventListener('click', () => {
+                    this.toggleComparisonMode();
+                });
+            }
+            
+            clearData() {
+                this.theta1Data = [];
+                this.theta2Data = [];
+                this.draw();
+            }
+            
+            toggleComparisonMode() {
+                comparisonMode = !comparisonMode;
+                const pendulumView = document.getElementById('pendulum-view');
+                const phaseView = document.getElementById('phase-view');
+                const toggleBtn = document.getElementById('toggle-comparison');
+                
+                if (comparisonMode) {
+                    // 并排模式
+                    pendulumView.style.flex = '1';
+                    phaseView.style.display = 'flex';
+                    phaseView.style.flex = '1';
+                    toggleBtn.textContent = '📱 单一模式';
+                } else {
+                    // 单一模式
+                    pendulumView.style.flex = '1';
+                    phaseView.style.display = 'none';
+                    toggleBtn.textContent = '🔄 并排对比模式';
+                }
+                
+                // 调整画布大小
+                setTimeout(() => {
+                    if (this.pendulum) {
+                        const canvas = document.getElementById('pendulumCanvas');
+                        if (canvas) {
+                            this.pendulum.canvas = canvas;
+                            this.pendulum.setupCanvas();
+                        }
+                    }
+                    this.setupCanvas();
+                    this.draw();
+                }, 100);
+            }
+            
+            updateData() {
+                if (this.pendulum && this.pendulum.isRunning) {
+                    // 添加新的角度数据
+                    this.theta1Data.push(this.pendulum.theta1);
+                    this.theta2Data.push(this.pendulum.theta2);
+                    
+                    // 限制数据点数量
+                    if (this.theta1Data.length > this.maxDataPoints) {
+                        this.theta1Data.shift();
+                        this.theta2Data.shift();
+                    }
+                }
+            }
+            
+            drawGrid() {
+                const ctx = this.ctx;
+                const centerX = this.offsetX;
+                const centerY = this.offsetY;
+                
+                ctx.strokeStyle = this.colors.grid;
+                ctx.lineWidth = 0.5;
+                
+                // 绘制网格线
+                const gridSize = Math.PI / 2; // π/2 间隔
+                const pixelsPerUnit = this.scale;
+                
+                // 垂直线
+                for (let x = -Math.PI; x <= Math.PI; x += gridSize) {
+                    const pixelX = centerX + x * pixelsPerUnit;
+                    ctx.beginPath();
+                    ctx.moveTo(pixelX, 0);
+                    ctx.lineTo(pixelX, this.canvas.height);
+                    ctx.stroke();
+                    
+                    // 标签
+                    if (x !== 0) {
+                        ctx.fillStyle = '#666';
+                        ctx.font = '12px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(x.toFixed(1) + 'π', pixelX, centerY + 15);
+                    }
+                }
+                
+                // 水平线
+                for (let y = -Math.PI; y <= Math.PI; y += gridSize) {
+                    const pixelY = centerY - y * pixelsPerUnit;
+                    ctx.beginPath();
+                    ctx.moveTo(0, pixelY);
+                    ctx.lineTo(this.canvas.width, pixelY);
+                    ctx.stroke();
+                    
+                    // 标签
+                    if (y !== 0) {
+                        ctx.fillStyle = '#666';
+                        ctx.font = '12px sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.fillText(y.toFixed(1) + 'π', centerX + 5, pixelY + 3);
+                    }
+                }
+                
+                // 绘制坐标轴
+                ctx.strokeStyle = '#888';
+                ctx.lineWidth = 1;
+                
+                // X轴 (θ1)
+                ctx.beginPath();
+                ctx.moveTo(0, centerY);
+                ctx.lineTo(this.canvas.width, centerY);
+                ctx.stroke();
+                
+                // Y轴 (θ2)
+                ctx.beginPath();
+                ctx.moveTo(centerX, 0);
+                ctx.lineTo(centerX, this.canvas.height);
+                ctx.stroke();
+                
+                // 轴标签
+                ctx.fillStyle = '#FF6B35';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('θ₁', this.canvas.width - 20, centerY - 10);
+                
+                ctx.fillStyle = '#4D96FF';
+                ctx.fillText('θ₂', centerX + 15, 20);
+            }
+            
+            drawTrajectory() {
+                if (this.theta1Data.length < 2) return;
+                
+                const ctx = this.ctx;
+                const centerX = this.offsetX;
+                const centerY = this.offsetY;
+                const pixelsPerUnit = this.scale;
+                
+                // 绘制相空间轨迹
+                ctx.strokeStyle = this.colors.trajectory;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                
+                for (let i = 1; i < this.theta1Data.length; i++) {
+                    const x1 = centerX + this.theta1Data[i-1] * pixelsPerUnit;
+                    const y1 = centerY - this.theta2Data[i-1] * pixelsPerUnit;
+                    const x2 = centerX + this.theta1Data[i] * pixelsPerUnit;
+                    const y2 = centerY - this.theta2Data[i] * pixelsPerUnit;
+                    
+                    // 渐变透明度
+                    const alpha = i / this.theta1Data.length;
+                    ctx.globalAlpha = alpha * 0.8;
+                    
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                }
+                
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+                
+                // 绘制当前点
+                if (this.theta1Data.length > 0) {
+                    const currentX = centerX + this.theta1Data[this.theta1Data.length - 1] * pixelsPerUnit;
+                    const currentY = centerY - this.theta2Data[this.theta2Data.length - 1] * pixelsPerUnit;
+                    
+                    // θ1点
+                    ctx.fillStyle = this.colors.theta1;
+                    ctx.beginPath();
+                    ctx.arc(currentX, currentY, 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // θ2点（稍微偏移以便显示）
+                    ctx.fillStyle = this.colors.theta2;
+                    ctx.beginPath();
+                    ctx.arc(currentX + 5, currentY - 5, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
+            
+            draw() {
+                // 清空画布
+                this.ctx.fillStyle = '#0a0a0a';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制网格
+                this.drawGrid();
+                
+                // 绘制轨迹
+                this.drawTrajectory();
+                
+                // 绘制信息
+                this.drawInfo();
+            }
+            
+            drawInfo() {
+                const ctx = this.ctx;
+                const info = [
+                    `数据点: ${this.theta1Data.length}`,
+                    `θ₁: ${this.theta1Data[this.theta1Data.length - 1]?.toFixed(3) || '0.000'}`,
+                    `θ₂: ${this.theta2Data[this.theta2Data.length - 1]?.toFixed(3) || '0.000'}`
+                ];
+                
+                ctx.fillStyle = 'rgba(26, 26, 46, 0.9)';
+                ctx.fillRect(10, 10, 180, 80);
+                
+                ctx.fillStyle = '#FF6B35';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.fillText('相空间状态', 20, 30);
+                
+                ctx.fillStyle = '#ccc';
+                ctx.font = '11px sans-serif';
+                info.forEach((text, index) => {
+                    ctx.fillText(text, 20, 50 + index * 15);
+                });
+            }
+            
+            animate() {
+                this.updateData();
+                this.draw();
+            }
+        }
+        
+class DoublePendulum {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.setupCanvas();
+                
+                // 双摆参数
+                this.l1 = 100;  // 第一段摆杆长度
+                this.l2 = 100;  // 第二段摆杆长度
+                this.m1 = 1;    // 第一个摆球质量
+                this.m2 = 1;    // 第二个摆球质量
+                this.g = 9.8;   // 重力加速度
+                this.damping = 0.01; // 阻尼系数
+                
+                // 初始角度和角速度
+                this.theta1 = Math.PI / 2;    // 第一段摆的角度
+                this.theta2 = Math.PI / 2;    // 第二段摆的角度
+                this.omega1 = 0;             // 第一段摆的角速度
+                this.omega2 = 0;             // 第二段摆的角速度
+                
+                // 轨迹追踪
+                this.trace = [];
+                this.traceFades = []; // 存储每个点的透明度信息用于渐隐效果
+                this.maxTraceLength = 1000;
+                this.isTracing = false;
+                
+                // 动画控制
+                this.isRunning = false;
+                this.animationId = null;
+                
+                this.setupEventListeners();
+                this.setupControls();
+                this.draw();
+            }
+            
+            setupCanvas() {
+                const resizeCanvas = () => {
+                    this.canvas.width = this.canvas.offsetWidth;
+                    this.canvas.height = this.canvas.offsetHeight;
+                    this.centerX = this.canvas.width / 2;
+                    this.centerY = this.canvas.height / 3;
+                };
+                
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }
+            
+            setupEventListeners() {
+                // 鼠标拖拽设置初始角度和长度
+                this.canvas.addEventListener('mousedown', (e) => {
+                    this.isDragging = true;
+                    this.updateMousePosition(e);
+                    this.setMouseAngleAndLength();
+                });
+                
+                this.canvas.addEventListener('mousemove', (e) => {
+                    if (this.isDragging) {
+                        this.updateMousePosition(e);
+                        this.setMouseAngleAndLength();
+                    }
+                });
+                
+                this.canvas.addEventListener('mouseup', () => {
+                    this.isDragging = false;
+                });
+                
+                this.canvas.addEventListener('mouseleave', () => {
+                    this.isDragging = false;
+                });
+            }
+            
+            updateMousePosition(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                this.mouseX = e.clientX - rect.left;
+                this.mouseY = e.clientY - rect.top;
+            }
+            
+            setMouseAngleAndLength() {
+                const pos = this.getPositions();
+                
+                // 检查是否点击了第二个摆球来设置第二个摆的参数
+                const distToBob2 = Math.sqrt(
+                    Math.pow(this.mouseX - pos.x2, 2) + 
+                    Math.pow(this.mouseY - pos.y2, 2)
+                );
+                
+                if (distToBob2 < 20) {
+                    // 设置第二个摆的角度和长度
+                    const dx2 = this.mouseX - pos.x1;
+                    const dy2 = this.mouseY - pos.y1;
+                    this.theta2 = Math.atan2(dx2, dy2);
+                    this.l2 = Math.min(Math.sqrt(dx2 * dx2 + dy2 * dy2), 200);
+                } else {
+                    // 设置第一个摆的角度和长度
+                    const dx = this.mouseX - this.centerX;
+                    const dy = this.mouseY - this.centerY;
+                    this.theta1 = Math.atan2(dx, dy);
+                    this.l1 = Math.min(Math.sqrt(dx * dx + dy * dy), 200);
+                }
+                
+                // 重置角速度
+                this.omega1 = 0;
+                this.omega2 = 0;
+                
+                // 重置轨迹并开始新的渐隐轨迹
+                this.trace = [];
+                this.traceFades = []; // 存储每个点的透明度信息
+                
+                if (!this.isRunning) {
+                    this.draw();
+                }
+            }
+            
+            setupControls() {
+                // 摆杆长度控制
+                const pendulumL1 = document.getElementById('pendulum-l1');
+                const pendulumL2 = document.getElementById('pendulum-l2');
+                pendulumL1.addEventListener('input', (e) => {
+                    this.l1 = parseInt(e.target.value);
+                    document.getElementById('pendulum-l1-value').textContent = this.l1;
+                    this.draw();
+                });
+                
+                pendulumL2.addEventListener('input', (e) => {
+                    this.l2 = parseInt(e.target.value);
+                    document.getElementById('pendulum-l2-value').textContent = this.l2;
+                    this.draw();
+                });
+                
+                // 质量控制
+                const pendulumM1 = document.getElementById('pendulum-m1');
+                const pendulumM2 = document.getElementById('pendulum-m2');
+                pendulumM1.addEventListener('input', (e) => {
+                    this.m1 = parseFloat(e.target.value);
+                    document.getElementById('pendulum-m1-value').textContent = this.m1.toFixed(1);
+                    this.draw();
+                });
+                
+                pendulumM2.addEventListener('input', (e) => {
+                    this.m2 = parseFloat(e.target.value);
+                    document.getElementById('pendulum-m2-value').textContent = this.m2.toFixed(1);
+                    this.draw();
+                });
+                
+                // 重力和阻尼控制
+                const pendulumG = document.getElementById('pendulum-g');
+                const pendulumDamping = document.getElementById('pendulum-damping');
+                pendulumG.addEventListener('input', (e) => {
+                    this.g = parseFloat(e.target.value);
+                    document.getElementById('pendulum-g-value').textContent = this.g.toFixed(1);
+                });
+                
+                pendulumDamping.addEventListener('input', (e) => {
+                    this.damping = parseFloat(e.target.value);
+                    document.getElementById('pendulum-damping-value').textContent = this.damping.toFixed(2);
+                });
+                
+                // 重置按钮
+                document.getElementById('reset-pendulum').addEventListener('click', () => {
+                    this.reset();
+                });
+                
+                // 轨迹追踪按钮
+                document.getElementById('pendulum-trace').addEventListener('click', () => {
+                    this.toggleTrace();
+                });
+                
+                // 相空间控制按钮
+                document.getElementById('phase-space-toggle').addEventListener('click', () => {
+                    this.togglePhaseSpace();
+                });
+                
+                document.getElementById('clear-phase-data').addEventListener('click', () => {
+                    if (phaseSpace) {
+                        phaseSpace.clearData();
+                    }
+                });
+            }
+            
+            togglePhaseSpace() {
+                if (phaseSpace) {
+                    phaseSpace.toggleComparisonMode();
+                }
+            }
+            }
+            
+            reset() {
+                this.theta1 = Math.PI / 2;
+                this.theta2 = Math.PI / 2;
+                this.omega1 = 0;
+                this.omega2 = 0;
+                this.trace = [];
+                this.traceFades = [];
+                this.isRunning = false;
+                this.isTracing = false;
+                
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+                
+                this.draw();
+            }
+            
+            toggleTrace() {
+                this.isTracing = !this.isTracing;
+                if (this.isTracing) {
+                    this.trace = [];
+                    this.traceFades = [];
+                    this.start();
+                } else {
+                    this.stop();
+                }
+            }
+            
+            // 双摆运动的微分方程
+            derivatives(theta1, omega1, theta2, omega2) {
+                const m1 = this.m1;
+                const m2 = this.m2;
+                const l1 = this.l1;
+                const l2 = this.l2;
+                const g = this.g;
+                
+                const sin1 = Math.sin(theta1);
+                const cos1 = Math.cos(theta1);
+                const sin2 = Math.sin(theta2);
+                const cos2 = Math.cos(theta2);
+                const sin12 = Math.sin(theta1 - theta2);
+                const cos12 = Math.cos(theta1 - theta2);
+                
+                // 分母
+                const den1 = l1 * (m1 + m2 * sin12 * sin12);
+                const den2 = l2 * (m1 + m2 * sin12 * sin12);
+                
+                // 角加速度
+                const num1 = -m2 * l1 * omega1 * omega1 * sin12 * cos12
+                    + m2 * g * sin2 * cos12
+                    + m2 * l2 * omega2 * omega2 * sin12
+                    - (m1 + m2) * g * sin1
+                    - this.damping * omega1;
+                    
+                const num2 = m2 * l2 * omega2 * omega2 * sin12 * cos12
+                    - (m1 + m2) * g * sin1 * cos12
+                    - (m1 + m2) * l1 * omega1 * omega1 * sin12
+                    - (m1 + m2) * g * sin2
+                    - this.damping * omega2;
+                    
+                const alpha1 = num1 / den1;
+                const alpha2 = num2 / den2;
+                
+                return {
+                    dtheta1: omega1,
+                    domega1: alpha1,
+                    dtheta2: omega2,
+                    domega2: alpha2
+                };
+            }
+            
+            // RK4数值积分
+            rk4Step() {
+                const dt = 0.01;
+                
+                const deriv1 = this.derivatives(this.theta1, this.omega1, this.theta2, this.omega2);
+                
+                const k1 = {
+                    theta1: deriv1.dtheta1 * dt,
+                    omega1: deriv1.domega1 * dt,
+                    theta2: deriv1.dtheta2 * dt,
+                    omega2: deriv1.domega2 * dt
+                };
+                
+                const deriv2 = this.derivatives(
+                    this.theta1 + k1.theta1 / 2,
+                    this.omega1 + k1.omega1 / 2,
+                    this.theta2 + k1.theta2 / 2,
+                    this.omega2 + k1.omega2 / 2
+                );
+                
+                const k2 = {
+                    theta1: deriv2.dtheta1 * dt,
+                    omega1: deriv2.domega1 * dt,
+                    theta2: deriv2.dtheta2 * dt,
+                    omega2: deriv2.domega2 * dt
+                };
+                
+                const deriv3 = this.derivatives(
+                    this.theta1 + k2.theta1 / 2,
+                    this.omega1 + k2.omega1 / 2,
+                    this.theta2 + k2.theta2 / 2,
+                    this.omega2 + k2.omega2 / 2
+                );
+                
+                const k3 = {
+                    theta1: deriv3.dtheta1 * dt,
+                    omega1: deriv3.domega1 * dt,
+                    theta2: deriv3.dtheta2 * dt,
+                    omega2: deriv3.domega2 * dt
+                };
+                
+                const deriv4 = this.derivatives(
+                    this.theta1 + k3.theta1,
+                    this.omega1 + k3.omega1,
+                    this.theta2 + k3.theta2,
+                    this.omega2 + k3.omega2
+                );
+                
+                const k4 = {
+                    theta1: deriv4.dtheta1 * dt,
+                    omega1: deriv4.domega1 * dt,
+                    theta2: deriv4.dtheta2 * dt,
+                    omega2: deriv4.domega2 * dt
+                };
+                
+                // 更新状态
+                this.theta1 += (k1.theta1 + 2 * k2.theta1 + 2 * k3.theta1 + k4.theta1) / 6;
+                this.omega1 += (k1.omega1 + 2 * k2.omega1 + 2 * k3.omega1 + k4.omega1) / 6;
+                this.theta2 += (k1.theta2 + 2 * k2.theta2 + 2 * k3.theta2 + k4.theta2) / 6;
+                this.omega2 += (k1.omega2 + 2 * k2.omega2 + 2 * k3.omega2 + k4.omega2) / 6;
+            }
+            
+            // 计算摆球位置
+            getPositions() {
+                const x1 = this.centerX + this.l1 * Math.sin(this.theta1);
+                const y1 = this.centerY + this.l1 * Math.cos(this.theta1);
+                
+                const x2 = x1 + this.l2 * Math.sin(this.theta2);
+                const y2 = y1 + this.l2 * Math.cos(this.theta2);
+                
+                return {
+                    x1, y1, x2, y2
+                };
+            }
+            
+            // 绘制双摆
+            draw() {
+                // 清空画布
+                this.ctx.fillStyle = '#0a0a0a';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                const pos = this.getPositions();
+                
+                // 绘制支点
+                this.ctx.fillStyle = '#FF6B35';
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, 5, 0, 2 * Math.PI);
+                this.ctx.fill();
+                
+                // 绘制摆杆
+                this.ctx.strokeStyle = '#FF6B35';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.centerX, this.centerY);
+                this.ctx.lineTo(pos.x1, pos.y1);
+                this.ctx.lineTo(pos.x2, pos.y2);
+                this.ctx.stroke();
+                
+                // 绘制摆球
+                this.ctx.fillStyle = '#FF6B35';
+                this.ctx.beginPath();
+                this.ctx.arc(pos.x1, pos.y1, 8 + this.m1 * 3, 0, 2 * Math.PI);
+                this.ctx.fill();
+                
+                this.ctx.fillStyle = '#4D96FF';
+                this.ctx.beginPath();
+                this.ctx.arc(pos.x2, pos.y2, 8 + this.m2 * 3, 0, 2 * Math.PI);
+                this.ctx.fill();
+                
+                // 绘制轨迹（带渐隐效果）
+                if (this.trace.length > 1) {
+                    this.ctx.lineWidth = 2;
+                    
+                    // 绘制轨迹线段，每段使用不同的透明度
+                    for (let i = 0; i < this.trace.length - 1; i++) {
+                        const alpha = this.traceFades[i] || 0;
+                        if (alpha > 0.01) { // 只绘制可见的线段
+                            // 创建渐变色
+                            const gradient = this.ctx.createLinearGradient(
+                                this.trace[i].x, this.trace[i].y,
+                                this.trace[i + 1].x, this.trace[i + 1].y
+                            );
+                            gradient.addColorStop(0, `rgba(255, 107, 53, ${alpha * 0.8})`);
+                            gradient.addColorStop(1, `rgba(255, 107, 53, ${alpha * 0.3})`);
+                            
+                            this.ctx.strokeStyle = gradient;
+                            this.ctx.globalAlpha = 1;
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(this.trace[i].x, this.trace[i].y);
+                            this.ctx.lineTo(this.trace[i + 1].x, this.trace[i + 1].y);
+                            this.ctx.stroke();
+                        }
+                    }
+                    
+                    this.ctx.globalAlpha = 1;
+                }
+            }
+            
+            animate() {
+                if (!this.isRunning) return;
+                
+                // RK4步进
+                this.rk4Step();
+                
+                // 记录轨迹
+                if (this.isTracing) {
+                    const pos = this.getPositions();
+                    this.trace.push({x: pos.x2, y: pos.y2});
+                    
+                    // 为新点设置透明度（最新点完全不透明）
+                    this.traceFades.push(1.0);
+                    
+                    // 更新所有点的透明度，实现渐隐效果
+                    for (let i = 0; i < this.traceFades.length; i++) {
+                        this.traceFades[i] *= 0.995; // 衰减率
+                    }
+                    
+                    // 限制轨迹长度
+                    if (this.trace.length > this.maxTraceLength) {
+                        this.trace.shift();
+                        this.traceFades.shift();
+                    }
+                }
+                
+                // 更新相空间数据
+                if (phaseSpace && comparisonMode) {
+                    phaseSpace.updateData();
+                }
+                
+                // 绘制
+                this.draw();
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+            
+            start() {
+                this.isRunning = true;
+                this.animate();
+            }
+            
+            stop() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+        }
+        
+class LorenzAttractor {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.setupCanvas();
+                
+                // 洛伦兹参数
+                this.sigma = 10;
+                this.rho = 28;
+                this.beta = 2.67;
+                
+                // 初始值
+                this.x = 1;
+                this.y = 1;
+                this.z = 1;
+                
+                // 轨迹数组
+                this.trajectories = [];
+                this.currentTrajectory = [];
+                
+                // 渲染参数
+                this.scale = 8;
+                this.offsetX = this.canvas.width / 2;
+                this.offsetY = this.canvas.height / 2;
+                
+                // 动画控制
+                this.isRunning = false;
+                this.animationId = null;
+                
+                // 鼠标交互
+                this.isDragging = false;
+                this.mouseX = 0;
+                this.mouseY = 0;
+                
+                this.setupEventListeners();
+                this.setupControls();
+            }
+            
+            setupCanvas() {
+                const resizeCanvas = () => {
+                    this.canvas.width = this.canvas.offsetWidth;
+                    this.canvas.height = this.canvas.offsetHeight;
+                    this.offsetX = this.canvas.width / 2;
+                    this.offsetY = this.canvas.height / 2;
+                };
+                
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }
+            
+            setupEventListeners() {
+                // 鼠标拖拽设置初始点
+                this.canvas.addEventListener('mousedown', (e) => {
+                    this.isDragging = true;
+                    this.updateMousePosition(e);
+                    this.setInitialPosition();
+                });
+                
+                this.canvas.addEventListener('mousemove', (e) => {
+                    this.updateMousePosition(e);
+                });
+                
+                this.canvas.addEventListener('mouseup', () => {
+                    this.isDragging = false;
+                });
+                
+                this.canvas.addEventListener('mouseleave', () => {
+                    this.isDragging = false;
+                });
+            }
+            
+            updateMousePosition(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                this.mouseX = e.clientX - rect.left;
+                this.mouseY = e.clientY - rect.top;
+            }
+            
+            setInitialPosition() {
+                // 将鼠标位置转换为3D坐标
+                this.x = (this.mouseX - this.offsetX) / this.scale;
+                this.y = (this.mouseY - this.offsetY) / this.scale;
+                this.z = 1;
+                
+                // 重置当前轨迹
+                this.currentTrajectory = [];
+            }
+            
+            setupControls() {
+                // 参数滑块
+                const controls = ['sigma', 'rho', 'beta', 'x0', 'y0', 'z0'];
+                controls.forEach(param => {
+                    const slider = document.getElementById(param);
+                    const valueDisplay = document.getElementById(param + '-value');
+                    
+                    slider.addEventListener('input', (e) => {
+                        const value = parseFloat(e.target.value);
+                        valueDisplay.textContent = value.toFixed(1);
+                        
+                        if (param === 'sigma') this.sigma = value;
+                        else if (param === 'rho') this.rho = value;
+                        else if (param === 'beta') this.beta = value;
+                        else if (param === 'x0') this.x = value;
+                        else if (param === 'y0') this.y = value;
+                        else if (param === 'z0') this.z = value;
+                    });
+                });
+                
+                // 轨迹控制
+                document.getElementById('start-trajectory').addEventListener('click', () => {
+                    this.startNewTrajectory();
+                });
+                
+                document.getElementById('clear-trajectories').addEventListener('click', () => {
+                    this.clearTrajectories();
+                });
+                
+                document.getElementById('butterfly-effect').addEventListener('click', () => {
+                    this.butterflyEffect();
+                    // 切换按钮激活状态
+                    const btn = document.getElementById('butterfly-effect');
+                    btn.classList.toggle('active');
+                });
+                
+                document.getElementById('multi-trajectory').addEventListener('click', () => {
+                    this.multiTrajectoryComparison();
+                });
+            }
+            
+            startNewTrajectory() {
+                // 保存当前轨迹
+                if (this.currentTrajectory.length > 0) {
+                    this.trajectories.push([...this.currentTrajectory]);
+                }
+                
+                // 重置并开始新轨迹
+                this.currentTrajectory = [{x: this.x, y: this.y, z: this.z}];
+                this.isRunning = true;
+                this.animate();
+                
+                this.updateInfo();
+            }
+            
+            clearTrajectories() {
+                this.trajectories = [];
+                this.currentTrajectory = [];
+                this.isRunning = false;
+                
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+                
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 隐藏说明信息
+                document.getElementById('butterfly-info').style.display = 'none';
+                
+                // 取消按钮激活状态
+                document.getElementById('butterfly-effect').classList.remove('active');
+                
+                this.updateInfo();
+            }
+            
+            butterflyEffect() {
+                // 创建两个非常接近的初始条件
+                const originalX = this.x;
+                const originalY = this.y;
+                const originalZ = this.z;
+                
+                // 轻微扰动
+                const epsilon = 0.001;
+                
+                // 清除现有轨迹
+                this.clearTrajectories();
+                
+                // 轨迹1 - 原始条件
+                this.x = originalX;
+                this.y = originalY;
+                this.z = originalZ;
+                this.currentTrajectory = [{x: this.x, y: this.y, z: this.z}];
+                this.trajectories.push([...this.currentTrajectory]);
+                
+                // 轨迹2 - 扰动条件
+                this.x = originalX + epsilon;
+                this.y = originalY + epsilon;
+                this.z = originalZ + epsilon;
+                this.currentTrajectory = [{x: this.x, y: this.y, z: this.z}];
+                this.trajectories.push([...this.currentTrajectory]);
+                
+                // 开始动画
+                this.isRunning = true;
+                this.animate();
+                this.updateInfo();
+            }
+            
+            // 验证交互响应性能
+            verifyInteractionResponsiveness() {
+                console.log('🔍 开始验证交互响应...');
+                
+                const performanceResults = {
+                    clickResponse: [],
+                    dragResponse: [],
+                    sliderResponse: [],
+                    overallScore: 0
+                };
+                
+                // 测试点击响应
+                const clickStart = performance.now();
+                this.simulateUserInteraction('click');
+                const clickEnd = performance.now();
+                performanceResults.clickResponse.push(clickEnd - clickStart);
+                
+                // 测试拖拽响应
+                const dragStart = performance.now();
+                this.simulateUserInteraction('drag');
+                const dragEnd = performance.now();
+                performanceResults.dragResponse.push(dragEnd - dragStart);
+                
+                // 测试滑块响应
+                const sliderStart = performance.now();
+                this.simulateUserInteraction('slider');
+                const sliderEnd = performance.now();
+                performanceResults.sliderResponse.push(sliderEnd - sliderStart);
+                
+                // 计算平均响应时间
+                const avgClick = performanceResults.clickResponse.reduce((a, b) => a + b, 0) / performanceResults.clickResponse.length;
+                const avgDrag = performanceResults.dragResponse.reduce((a, b) => a + b, 0) / performanceResults.dragResponse.length;
+                const avgSlider = performanceResults.sliderResponse.reduce((a, b) => a + b, 0) / performanceResults.sliderResponse.length;
+                
+                performanceResults.overallScore = (avgClick + avgDrag + avgSlider) / 3;
+                
+                console.log(`✅ 交互响应验证:`);
+                console.log(`   - 点击响应: ${avgClick.toFixed(2)}ms`);
+                console.log(`   - 拖拽响应: ${avgDrag.toFixed(2)}ms`);
+                console.log(`   - 滑块响应: ${avgSlider.toFixed(2)}ms`);
+                console.log(`   - 平均响应: ${performanceResults.overallScore.toFixed(2)}ms`);
+                
+                // 显示交互响应结果
+                this.showInteractionResults(performanceResults);
+                
+                return {
+                    avgClick: avgClick,
+                    avgDrag: avgDrag,
+                    avgSlider: avgSlider,
+                    overallScore: performanceResults.overallScore,
+                    responsive: performanceResults.overallScore < 50 // 50ms以下认为响应良好
+                };
+            }
+            
+            simulateUserInteraction(type) {
+                // 模拟用户交互来测试响应性能
+                switch(type) {
+                    case 'click':
+                        // 模拟点击画布
+                        this.handleCanvasClick({offsetX: 200, offsetY: 200});
+                        break;
+                    case 'drag':
+                        // 模拟拖拽操作
+                        this.handleCanvasMouseDown({offsetX: 200, offsetY: 200});
+                        this.handleCanvasMouseMove({offsetX: 220, offsetY: 220});
+                        this.handleCanvasMouseUp();
+                        break;
+                    case 'slider':
+                        // 模拟滑块调节
+                        this.sigma = 10;
+                        this.rho = 28;
+                        this.beta = 8/3;
+                        this.updateSliderValues();
+                        break;
+                }
+            }
+            
+            showInteractionResults(results) {
+                const infoPanel = document.getElementById('butterfly-info');
+                if (!infoPanel) return;
+                
+                infoPanel.style.display = 'block';
+                infoPanel.innerHTML = `
+                    <h3 style="color: #FF6B35; margin-bottom: 10px;">🔍 交互响应验证</h3>
+                    <div style="font-size: 12px; line-height: 1.6;">
+                        <p><strong>点击响应:</strong> <span style="color: ${results.avgClick < 30 ? '#6BCF7F' : '#FF6B35'}">${results.avgClick.toFixed(2)}ms</span></p>
+                        <p><strong>拖拽响应:</strong> <span style="color: ${results.avgDrag < 40 ? '#6BCF7F' : '#FF6B35'}">${results.avgDrag.toFixed(2)}ms</span></p>
+                        <p><strong>滑块响应:</strong> <span style="color: ${results.avgSlider < 20 ? '#6BCF7F' : '#FF6B35'}">${results.avgSlider.toFixed(2)}ms</span></p>
+                        <p><strong>平均响应:</strong> <span style="color: ${results.responsive ? '#6BCF7F' : '#FF6B35'}">${results.overallScore.toFixed(2)}ms</span></p>
+                        <p><strong>响应状态:</strong> <span style="color: ${results.responsive ? '#6BCF7F' : '#FF6B35'}">${results.responsive ? '✅ 优秀' : '⚠️ 需要优化'}</span></p>
+                        <p style="margin-top: 10px; font-size: 11px; color: #888;">
+                            理想响应时间: &lt;50ms，50-100ms可接受，&gt;100ms需要优化
+                        </p>
+                    </div>
+                `;
+            }
+            
+            lorenzEquations(x, y, z) {
+                const dt = 0.01;
+                
+                // RK4 (Runge-Kutta 4th order) method for Lorenz equations
+                // dx/dt = σ(y - x)
+                // dy/dt = x(ρ - z) - y
+                // dz/dt = xy - βz
+                
+                function derivatives(x, y, z) {
+                    return {
+                        dx: this.sigma * (y - x),
+                        dy: x * (this.rho - z) - y,
+                        dz: x * y - this.beta * z
+                    };
+                }
+                
+                const k1 = derivatives.call(this, x, y, z);
+                const k2 = derivatives.call(this, x + k1.dx * dt/2, y + k1.dy * dt/2, z + k1.dz * dt/2);
+                const k3 = derivatives.call(this, x + k2.dx * dt/2, y + k2.dy * dt/2, z + k2.dz * dt/2);
+                const k4 = derivatives.call(this, x + k3.dx * dt, y + k3.dy * dt, z + k3.dz * dt);
+                
+                return {
+                    x: x + (k1.dx + 2*k2.dx + 2*k3.dx + k4.dx) * dt/6,
+                    y: y + (k1.dy + 2*k2.dy + 2*k3.dy + k4.dy) * dt/6,
+                    z: z + (k1.dz + 2*k2.dz + 2*k3.dz + k4.dz) * dt/6
+                };
+            }
+            
+            // 验证轨迹精度的方法
+            verifyTrajectoryAccuracy(testSteps = 1000) {
+                console.log('🔍 开始验证轨迹精度...');
+                
+                // 测试不同数值方法的精度对比
+                const results = {
+                    rk4: [],
+                    euler: [],
+                    analytical: null
+                };
+                
+                // 使用相同的初始条件
+                const initialX = 1;
+                const initialY = 1;
+                const initialZ = 1;
+                const dt = 0.01;
+                
+                // RK4方法
+                let x1 = initialX, y1 = initialY, z1 = initialZ;
+                for (let i = 0; i < testSteps; i++) {
+                    const result = this.lorenzEquations(x1, y1, z1);
+                    x1 = result.x;
+                    y1 = result.y;
+                    z1 = result.z;
+                    results.rk4.push({x: x1, y: y1, z: z1, step: i});
+                }
+                
+                // Euler方法（对比）
+                let x2 = initialX, y2 = initialY, z2 = initialZ;
+                for (let i = 0; i < testSteps; i++) {
+                    const deriv = {
+                        dx: this.sigma * (y2 - x2),
+                        dy: x2 * (this.rho - z2) - y2,
+                        dz: x2 * y2 - this.beta * z2
+                    };
+                    x2 += deriv.dx * dt;
+                    y2 += deriv.dy * dt;
+                    z2 += deriv.dz * dt;
+                    results.euler.push({x: x2, y: y2, z: z2, step: i});
+                }
+                
+                // 计算两种方法之间的差异
+                const differences = results.rk4.map((rk4Point, i) => {
+                    const eulerPoint = results.euler[i];
+                    const diff = Math.sqrt(
+                        Math.pow(rk4Point.x - eulerPoint.x, 2) +
+                        Math.pow(rk4Point.y - eulerPoint.y, 2) +
+                        Math.pow(rk4Point.z - eulerPoint.z, 2)
+                    );
+                    return {step: i, difference: diff};
+                });
+                
+                // 计算统计信息
+                const avgDifference = differences.reduce((sum, d) => sum + d.difference, 0) / differences.length;
+                const maxDifference = Math.max(...differences.map(d => d.difference));
+                
+                console.log(`✅ RK4 vs Euler 精度验证:`);
+                console.log(`   - 平均差异: ${avgDifference.toFixed(6)}`);
+                console.log(`   - 最大差异: ${maxDifference.toFixed(6)}`);
+                console.log(`   - 最终位置差异: ${Math.abs(results.rk4[testSteps-1].x - results.euler[testSteps-1].x).toFixed(6)}`);
+                
+                // 显示精度验证结果
+                this.showAccuracyResults({
+                    avgDiff: avgDifference,
+                    maxDiff: maxDifference,
+                    steps: testSteps,
+                    rk4Final: results.rk4[testSteps-1],
+                    eulerFinal: results.euler[testSteps-1]
+                });
+                
+                return {
+                    avgDifference: avgDifference,
+                    maxDifference: maxDifference,
+                    valid: avgDifference < 0.01 && maxDifference < 0.1
+                };
+            }
+            
+            showAccuracyResults(results) {
+                const infoPanel = document.getElementById('butterfly-info');
+                if (!infoPanel) return;
+                
+                infoPanel.style.display = 'block';
+                infoPanel.innerHTML = `
+                    <h3 style="color: #FF6B35; margin-bottom: 10px;">🔍 轨迹精度验证</h3>
+                    <div style="font-size: 12px; line-height: 1.6;">
+                        <p><strong>测试参数:</strong> ${results.steps} 步计算</p>
+                        <p><strong>平均差异:</strong> <span style="color: ${results.avgDiff < 0.01 ? '#6BCF7F' : '#FF6B35'}">${results.avgDiff.toFixed(6)}</span></p>
+                        <p><strong>最大差异:</strong> <span style="color: ${results.maxDiff < 0.1 ? '#6BCF7F' : '#FF6B35'}">${results.maxDiff.toFixed(6)}</span></p>
+                        <p><strong>RK4最终位置:</strong> (${results.rk4Final.x.toFixed(3)}, ${results.rk4Final.y.toFixed(3)}, ${results.rk4Final.z.toFixed(3)})</p>
+                        <p><strong>Euler最终位置:</strong> (${results.eulerFinal.x.toFixed(3)}, ${results.eulerFinal.y.toFixed(3)}, ${results.eulerFinal.z.toFixed(3)})</p>
+                        <p><strong>精度状态:</strong> <span style="color: ${results.valid ? '#6BCF7F' : '#FF6B35'}">${results.valid ? '✅ 优秀' : '⚠️ 需要改进'}</span></p>
+                        <p style="margin-top: 10px; font-size: 11px; color: #888;">
+                            RK4方法比Euler方法更精确，适合混沌系统长时间演化
+                        </p>
+                    </div>
+                `;
+            }
+            
+            project3DTo2D(x, y, z) {
+                // 简单的正交投影
+                const projX = this.offsetX + x * this.scale;
+                const projY = this.offsetY + y * this.scale;
+                
+                return {x: projX, y: projY};
+            }
+            
+            drawTrajectory(trajectory, color, alpha = 1) {
+                if (trajectory.length < 2) return;
+                
+                this.ctx.strokeStyle = color;
+                this.ctx.globalAlpha = alpha;
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                
+                for (let i = 0; i < trajectory.length - 1; i++) {
+                    const start = this.project3DTo2D(
+                        trajectory[i].x, trajectory[i].y, trajectory[i].z
+                    );
+                    const end = this.project3DTo2D(
+                        trajectory[i + 1].x, trajectory[i + 1].y, trajectory[i + 1].z
+                    );
+                    
+                    // 渐变透明度
+                    const segmentAlpha = (i / trajectory.length) * alpha;
+                    this.ctx.globalAlpha = segmentAlpha;
+                    
+                    this.ctx.moveTo(start.x, start.y);
+                    this.ctx.lineTo(end.x, end.y);
+                }
+                
+                this.ctx.stroke();
+                this.ctx.globalAlpha = 1;
+            }
+            
+            animate() {
+                if (!this.isRunning) return;
+                
+                // 更新当前轨迹
+                const currentPoint = this.currentTrajectory[this.currentTrajectory.length - 1];
+                if (currentPoint) {
+                    const nextPoint = this.lorenzEquations(currentPoint.x, currentPoint.y, currentPoint.z);
+                    this.currentTrajectory.push(nextPoint);
+                    
+                    // 限制轨迹长度
+                    if (this.currentTrajectory.length > 5000) {
+                        this.currentTrajectory.shift();
+                    }
+                }
+                
+                // 清空画布
+                this.ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制所有轨迹
+                this.trajectories.forEach((trajectory, index) => {
+                    const colors = ['#FF6B35', '#F7931E', '#FFD93D', '#6BCF7F', '#4D96FF'];
+                    const color = colors[index % colors.length];
+                    this.drawTrajectory(trajectory, color, 0.8);
+                });
+                
+                // 绘制当前轨迹
+                if (this.currentTrajectory.length > 0) {
+                    this.drawTrajectory(this.currentTrajectory, '#FF6B35', 1);
+                }
+                
+                this.updateInfo();
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+            
+            updateInfo() {
+                const totalTrajectories = this.trajectories.length + (this.currentTrajectory.length > 0 ? 1 : 0);
+                const totalPoints = this.trajectories.reduce((sum, traj) => sum + traj.length, 0) + this.currentTrajectory.length;
+                
+                document.getElementById('trajectory-count').textContent = totalTrajectories;
+                document.getElementById('point-count').textContent = totalPoints;
+            }
+            
+            multiTrajectoryComparison() {
+                this.clearTrajectories();
+                
+                // 创建多个不同初始条件的轨迹
+                const baseX = this.x;
+                const baseY = this.y;
+                const baseZ = this.z;
+                
+                const variations = [
+                    {name: '原始', color: '#FF6B35', offset: {x: 0, y: 0, z: 0}},
+                    {name: 'X+1', color: '#4D96FF', offset: {x: 1, y: 0, z: 0}},
+                    {name: 'Y+1', color: '#6BCF7F', offset: {x: 0, y: 1, z: 0}},
+                    {name: 'Z+1', color: '#FFD93D', offset: {x: 0, y: 0, z: 1}},
+                    {name: 'XY+1', color: '#FF69B4', offset: {x: 0.5, y: 0.5, z: 0}}
+                ];
+                
+                variations.forEach(variation => {
+                    this.x = baseX + variation.offset.x;
+                    this.y = baseY + variation.offset.y;
+                    this.z = baseZ + variation.offset.z;
+                    
+                    this.currentTrajectory = [{x: this.x, y: this.y, z: this.z}];
+                    this.trajectories.push([...this.currentTrajectory]);
+                });
+                
+                // 显示说明信息
+                const info = document.getElementById('butterfly-info');
+                info.style.display = 'block';
+                info.innerHTML = `
+                    <p style="font-size: 12px; line-height: 1.4; color: #ccc;">
+                        <strong>多轨迹对比：</strong><br>
+                        🔴 橙色：原始条件<br>
+                        🔵 蓝色：X坐标+1<br>
+                        🟢 绿色：Y坐标+1<br>
+                        🟡 黄色：Z坐标+1<br>
+                        🩷 粉色：X+Y坐标各+0.5<br><br>
+                        观察不同初始条件对轨迹的影响
+                    </p>
+                `;
+                
+                // 开始动画
+                this.isRunning = true;
+                this.animate();
+                this.updateInfo();
+            }
+            
+            butterflyEffect() {
+                // 创建两个非常接近的初始条件
+                const originalX = this.x;
+                const originalY = this.y;
+                const originalZ = this.z;
+                
+                // 轻微扰动
+                const epsilon = 0.001;
+                
+                // 清除现有轨迹
+                this.clearTrajectories();
+                
+                // 轨迹1 - 原始条件
+                this.x = originalX;
+                this.y = originalY;
+                this.z = originalZ;
+                this.currentTrajectory = [{x: this.x, y: this.y, z: this.z}];
+                this.trajectories.push([...this.currentTrajectory]);
+                
+                // 轨迹2 - 扰动条件
+                this.x = originalX + epsilon;
+                this.y = originalY + epsilon;
+                this.z = originalZ + epsilon;
+                this.currentTrajectory = [{x: this.x, y: this.y, z: this.z}];
+                this.trajectories.push([...this.currentTrajectory]);
+                
+                // 显示说明信息
+                const info = document.getElementById('butterfly-info');
+                info.style.display = 'block';
+                info.innerHTML = `
+                    <p style="font-size: 12px; line-height: 1.4; color: #ccc;">
+                        <strong>蝴蝶效应演示：</strong><br>
+                        🔴 <span style="color: #FF6B35;">红色轨迹：</span>原始条件<br>
+                        🔵 <span style="color: #4D96FF;">蓝色轨迹：</span>扰动条件（仅差0.001）<br>
+                        观察两条轨迹随时间的发散情况<br><br>
+                        <em>"一只蝴蝶在巴西扇动翅膀，可能会在德克萨斯引起龙卷风"</em>
+                    </p>
+                `;
+                
+                // 开始动画
+                this.isRunning = true;
+                this.animate();
+                this.updateInfo();
+            }
+        }
+        
+        // 全局变量
+        let currentSystem = 'pendulum'; // 'lorenz' 或 'pendulum'
+        let lorenz, pendulum;
+        let phaseSpace;
+        let comparisonMode = false;
+        
+        // 系统切换按钮
+        const systemToggle = document.createElement('div');
+        systemToggle.style.cssText = `
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        `;
+        systemToggle.innerHTML = `
+            <button class="button" id="system-toggle" style="background: linear-gradient(45deg, #6BCF7F, #4D96FF);">
+                🔄 切换到双摆系统
+            </button>
+        `;
+        
+        document.querySelector('.main-canvas').appendChild(systemToggle);
+        
+        // 系统切换功能
+        document.getElementById('system-toggle').addEventListener('click', () => {
+            const toggleBtn = document.getElementById('system-toggle');
+            
+            if (currentSystem === 'lorenz') {
+                // 切换到双摆系统
+                currentSystem = 'pendulum';
+                
+                // 显示/隐藏对应的控制面板
+                document.querySelector('.main-canvas .info-panel h2').textContent = '🎯 双摆系统';
+                document.querySelector('.main-canvas .info-panel p').textContent = '拖拽设置初始角度，观察混沌运动';
+                
+                // 停止洛伦兹系统
+                if (lorenz && lorenz.isRunning) {
+                    lorenz.isRunning = false;
+                }
+                
+                // 初始化双摆
+                const canvas = document.getElementById('lorenzCanvas');
+                pendulum = new DoublePendulum(canvas);
+                
+                // 更新按钮文本
+                toggleBtn.textContent = '🔄 切换到洛伦兹系统';
+                
+                // 隐藏洛伦兹控制面板，显示双摆控制面板
+                const lorenzControls = document.querySelector('.control-panel');
+                lorenzControls.style.display = 'none';
+                
+                // 创建双摆控制面板
+                const pendulumControls = createPendulumControls();
+                document.querySelector('.control-panel').replaceWith(pendulumControls);
+                
+                // 为双摆系统添加轨迹信息
+                addPendulumInfo();
+                
+            } else {
+                // 切换到洛伦兹系统
+                currentSystem = 'lorenz';
+                
+                // 显示/隐藏对应的控制面板
+                document.querySelector('.main-canvas .info-panel h2').textContent = '🦋 Lorenz Attractor';
+                document.querySelector('.main-canvas .info-panel p').textContent = '拖动设置初始点，调节参数观察混沌行为';
+                
+                // 停止双摆系统
+                if (pendulum && pendulum.isRunning) {
+                    pendulum.stop();
+                }
+                
+                // 初始化洛伦兹系统
+                const canvas = document.getElementById('lorenzCanvas');
+                lorenz = new LorenzAttractor(canvas);
+                
+                // 更新按钮文本
+                toggleBtn.textContent = '🔄 切换到双摆系统';
+                
+                // 恢复洛伦兹控制面板
+                const pendulumControls = document.querySelector('.control-panel');
+                pendulumControls.style.display = 'none';
+                
+                const lorenzControls = createLorenzControls();
+                document.querySelector('.control-panel').replaceWith(lorenzControls);
+            }
+        });
+        
+        // 创建双摆控制面板
+        function createPendulumControls() {
+            const controls = document.createElement('div');
+            controls.className = 'control-panel';
+            controls.innerHTML = `
+                <div class="control-section">
+                    <h3>🎯 双摆参数设置</h3>
+                    <div class="control-group">
+                        <label>摆杆长度 L1 (像素)</label>
+                        <div class="slider-container">
+                            <input type="range" id="pendulum-l1" min="50" max="200" step="5" value="100">
+                            <span class="value-display" id="pendulum-l1-value">100</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>摆杆长度 L2 (像素)</label>
+                        <div class="slider-container">
+                            <input type="range" id="pendulum-l2" min="50" max="200" step="5" value="100">
+                            <span class="value-display" id="pendulum-l2-value">100</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>摆球质量 m1</label>
+                        <div class="slider-container">
+                            <input type="range" id="pendulum-m1" min="1" max="10" step="0.1" value="1">
+                            <span class="value-display" id="pendulum-m1-value">1.0</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>摆球质量 m2</label>
+                        <div class="slider-container">
+                            <input type="range" id="pendulum-m2" min="1" max="10" step="0.1" value="1">
+                            <span class="value-display" id="pendulum-m2-value">1.0</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>重力加速度 g</label>
+                        <div class="slider-container">
+                            <input type="range" id="pendulum-g" min="1" max="20" step="0.1" value="9.8">
+                            <span class="value-display" id="pendulum-g-value">9.8</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>阻尼系数</label>
+                        <div class="slider-container">
+                            <input type="range" id="pendulum-damping" min="0" max="1" step="0.01" value="0.01">
+                            <span class="value-display" id="pendulum-damping-value">0.01</span>
+                        </div>
+                    </div>
+                    <button class="button" id="reset-pendulum" style="background: linear-gradient(45deg, #9C27B0, #E91E63);">🔄 重置双摆</button>
+                    <button class="button" id="pendulum-trace" style="background: linear-gradient(45deg, #00BCD4, #3F51B5);">🌊 轨迹追踪</button>
+                    <button class="button" id="pendulum-swing" style="background: linear-gradient(45deg, #FF9800, #FF5722);">⚡ 开始摆动</button>
+                    <button class="button" id="phase-space-toggle" style="background: linear-gradient(45deg, #9C27B0, #E91E63);">📊 相空间图</button>
+                    <button class="button" id="clear-phase-data" style="background: linear-gradient(45deg, #607D8B, #455A64);">🗑️ 清除数据</button>
+                </div>
+                
+                <div class="control-section">
+                    <h3>📊 实时信息</h3>
+                    <div class="control-group">
+                        <label>角度 θ1</label>
+                        <div class="value-display" id="angle1-display">0.00°</div>
+                    </div>
+                    <div class="control-group">
+                        <label>角度 θ2</label>
+                        <div class="value-display" id="angle2-display">0.00°</div>
+                    </div>
+                    <div class="control-group">
+                        <label>角速度 ω1</label>
+                        <div class="value-display" id="omega1-display">0.00</div>
+                    </div>
+                    <div class="control-group">
+                        <label>角速度 ω2</label>
+                        <div class="value-display" id="omega2-display">0.00</div>
+                    </div>
+                    <div class="control-group">
+                        <label>轨迹点数</label>
+                        <div class="value-display" id="pendulum-trace-count">0</div>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>🔍 物理验证</h3>
+                    <button class="button" id="verify-conservation" style="background: linear-gradient(45deg, #6BCF7F, #4D96FF);">⚡ 能量守恒验证</button>
+                    <button class="button" id="verify-chaos" style="background: linear-gradient(45deg, #FF9800, #F44336);">🌪️ 混沌特性验证</button>
+                </div>
+            `;
+            
+            return controls;
+        }
+        
+        // 创建洛伦兹控制面板
+        function createLorenzControls() {
+            const controls = document.createElement('div');
+            controls.className = 'control-panel';
+            // 这里添加原始洛伦兹控制面板的内容
+            // 由于原始内容较长，这里简化处理
+            controls.innerHTML = document.querySelector('.control-panel').innerHTML;
+            return controls;
+        }
+        
+        // 添加双摆信息面板
+        function addPendulumInfo() {
+            const infoPanel = document.createElement('div');
+            infoPanel.className = 'control-section';
+            infoPanel.style.cssText = 'margin-bottom: 15px;';
+            infoPanel.innerHTML = `
+                <h3>🎯 双摆说明</h3>
+                <div id="pendulum-info" style="display: none;">
+                    <p style="font-size: 12px; line-height: 1.4; color: #ccc;">
+                        <strong>双摆是一个典型的混沌系统：</strong><br>
+                        • 两个质量通过杆连接，第二个质量连接到第一个质量<br>
+                        • 微小的初始条件变化会导致完全不同的运动轨迹<br>
+                        • 对初始条件的敏感性体现了混沌特性<br>
+                        • 轨迹追踪可以展示复杂的运动模式
+                    </p>
+                </div>
+            `;
+            
+            document.querySelector('.control-panel').insertBefore(infoPanel, document.querySelector('.control-panel').firstChild);
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化双摆系统
+            const pendulumCanvas = document.getElementById('pendulumCanvas');
+            pendulum = new DoublePendulum(pendulumCanvas);
+            
+            // 初始化相空间图
+            const phaseCanvas = document.getElementById('phaseCanvas');
+            phaseSpace = new PhaseSpace(phaseCanvas, pendulum);
+            
+            // 开始相空间动画
+            function animatePhaseSpace() {
+                phaseSpace.animate();
+                requestAnimationFrame(animatePhaseSpace);
+            }
+            animatePhaseSpace();
+        });
+        
+        // 标签页切换函数
+        function switchTab(tabName) {
+            // 隐藏所有标签页
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                if (tab.id) {
+                    tab.style.display = 'none';
+                }
+            });
+            
+            // 移除所有标签按钮的激活状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 显示选中的标签页
+            const targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.style.display = 'flex';
+            }
+            
+            // 激活对应的标签按钮
+            event.target.classList.add('active');
+            
+            // 根据标签页初始化对应的系统
+            switch(tabName) {
+                case 'pendulum':
+                    initPendulumSystem();
+                    break;
+                case 'logistic':
+                    initLogisticMap();
+                    break;
+                case 'cellular':
+                    initCellularAutomata();
+                    break;
+                default:
+                    // 洛伦兹系统已经在页面加载时初始化
+                    break;
+            }
+        }
+        
+        // 初始化双摆系统
+        function initPendulumSystem() {
+            // 移除现有的洛伦兹画布
+            const lorenzCanvas = document.getElementById('lorenzCanvas');
+            if (lorenzCanvas) {
+                lorenzCanvas.style.display = 'none';
+            }
+            
+            // 显示双摆画布
+            const pendulumCanvas = document.getElementById('pendulumCanvas');
+            if (pendulumCanvas) {
+                pendulumCanvas.style.display = 'block';
+            }
+        }
+        
+        // 初始化逻辑映射系统
+        function initLogisticMap() {
+            // 隐藏其他画布
+            const lorenzCanvas = document.getElementById('lorenzCanvas');
+            const pendulumCanvas = document.getElementById('pendulumCanvas');
+            if (lorenzCanvas) lorenzCanvas.style.display = 'none';
+            if (pendulumCanvas) pendulumCanvas.style.display = 'none';
+            
+            // 这里可以添加逻辑映射画布
+            // 由于逻辑映射有独立的HTML页面，这里可以创建iframe或重定向
+            const logisticContainer = document.createElement('div');
+            logisticContainer.style.cssText = 'flex: 1; background: rgba(26, 26, 46, 0.95); border-radius: 8px; border: 1px solid rgba(255, 107, 53, 0.3); padding: 20px;';
+            logisticContainer.innerHTML = `
+                <h2 style="color: #FF6B35; margin-bottom: 15px;">🔢 逻辑映射模块</h2>
+                <p style="color: #ccc; margin-bottom: 20px;">点击下方按钮打开完整的逻辑映射可视化界面</p>
+                <button class="button" onclick="window.open('logistic-map.html', '_blank')">
+                    🌊 打开逻辑映射实验室
+                </button>
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border: 1px solid rgba(255, 107, 53, 0.3);">
+                    <h3 style="color: #FF6B35; margin-bottom: 10px;">📊 功能特性</h3>
+                    <ul style="color: #ccc; font-size: 14px; line-height: 1.6;">
+                        <li>🌊 分岔图可视化</li>
+                        <li>📈 迭代轨迹动画</li>
+                        <li>🔄 相空间映射</li>
+                        <li>📊 数据导出功能</li>
+                        <li>🔍 混沌特性验证</li>
+                    </ul>
+                </div>
+            `;
+            
+            // 添加到洛伦兹标签页的容器中
+            const lorenzTab = document.getElementById('lorenz-tab');
+            const existingContainer = lorenzTab.querySelector('.container');
+            if (existingContainer) {
+                existingContainer.appendChild(logisticContainer);
+            }
+        }
+        
+        // 初始化元细胞自动机系统
+        function initCellularAutomata() {
+            // 隐藏其他画布
+            const lorenzCanvas = document.getElementById('lorenzCanvas');
+            const pendulumCanvas = document.getElementById('pendulumCanvas');
+            if (lorenzCanvas) lorenzCanvas.style.display = 'none';
+            if (pendulumCanvas) pendulumCanvas.style.display = 'none';
+            
+            // 创建元细胞自动机容器
+            const cellularContainer = document.createElement('div');
+            cellularContainer.style.cssText = 'flex: 1; display: flex; flex-direction: column;';
+            cellularContainer.innerHTML = `
+                <div style="flex: 1; display: flex;">
+                    <div style="flex: 1; position: relative;">
+                        <canvas id="cellularCanvas" style="width: 100%; height: 100%; background: #0a0a0a;"></canvas>
+                        <div class="info-panel">
+                            <h2>🧬 元细胞自动机</h2>
+                            <p>点击细胞切换状态，设计规则，观察混沌演化</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 添加到cellular标签页
+            const cellularTab = document.getElementById('cellular-tab');
+            if (cellularTab) {
+                cellularTab.appendChild(cellularContainer);
+                
+                // 初始化元细胞自动机
+                setTimeout(() => {
+                    initCellularAutomataSystem();
+                }, 100);
+            }
+        }
+        
+        // 初始化元细胞自动机系统
+        function initCellularAutomataSystem() {
+            const canvas = document.getElementById('cellularCanvas');
+            if (!canvas) return;
+            
+            // 创建简化的元细胞自动机
+            const ctx = canvas.getContext('2d');
+            const cellSize = 8;
+            let grid = [];
+            let generation = 0;
+            let isRunning = false;
+            
+            function resizeCanvas() {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                initGrid();
+            }
+            
+            function initGrid() {
+                const cols = Math.floor(canvas.width / cellSize);
+                const rows = Math.floor(canvas.height / cellSize);
+                grid = Array(rows).fill().map(() => Array(cols).fill(0));
+                generation = 0;
+            }
+            
+            function draw() {
+                ctx.fillStyle = '#0a0a0a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制网格
+                for (let row = 0; row < grid.length; row++) {
+                    for (let col = 0; col < grid[row].length; col++) {
+                        if (grid[row][col]) {
+                            ctx.fillStyle = '#FF6B35';
+                            ctx.fillRect(col * cellSize, row * cellSize, cellSize - 1, cellSize - 1);
+                        }
+                    }
+                }
+                
+                // 绘制网格线
+                ctx.strokeStyle = '#222';
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i <= grid.length; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i * cellSize);
+                    ctx.lineTo(canvas.width, i * cellSize);
+                    ctx.stroke();
+                }
+                for (let i = 0; i <= grid[0].length; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * cellSize, 0);
+                    ctx.lineTo(i * cellSize, canvas.height);
+                    ctx.stroke();
+                }
+            }
+            
+            // 点击切换细胞状态
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const col = Math.floor(x / cellSize);
+                const row = Math.floor(y / cellSize);
+                
+                if (row >= 0 && row < grid.length && col >= 0 && col < grid[0].length) {
+                    grid[row][col] = grid[row][col] ? 0 : 1;
+                    draw();
+                }
+            });
+            
+            // 初始化
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            draw();
+        }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palette Shaker — PPT配色搭配器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Newsreader:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--bg2:#141414;--bg3:#1e1e1e;--fg:#e8e8e8;--muted:#777;--accent:#e8a630;--accent2:#f0c060;--border:#2a2a2a;--rlg:16px;--rmd:10px;--rsm:6px;--ft:'Archivo Black',sans-serif;--fb:'Newsreader',serif;--fm:'DM Mono',monospace;--tr:0.35s cubic-bezier(0.4,0,0.2,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--fb);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:.04;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;top:-40%;right:-20%;width:70vw;height:70vw;background:radial-gradient(circle,rgba(232,166,48,.03) 0%,transparent 60%);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:1.5rem 1.5rem 4rem}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:1rem 0 1.5rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
+.hd-l{display:flex;align-items:baseline;gap:.75rem}
+.hd h1{font-family:var(--ft);font-size:1.5rem;letter-spacing:-.02em;color:var(--accent)}
+.hd .sub{font-family:var(--fm);font-size:.65rem;color:var(--muted);letter-spacing:.05em}
+.tag{font-family:var(--fm);font-size:.65rem;color:var(--muted);border:1px solid var(--border);padding:.25rem .6rem;border-radius:var(--rsm)}
+.ctrl{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+.btn{font-family:var(--fm);font-size:.75rem;padding:.5rem 1rem;border-radius:var(--rsm);border:1px solid var(--border);background:var(--bg2);color:var(--fg);cursor:pointer;transition:var(--tr);white-space:nowrap;user-select:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}.btn:active{transform:scale(.96)}
+.btn-p{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:500}
+.btn-p:hover{background:var(--accent2);border-color:var(--accent2);color:var(--bg)}
+.btn-sm{font-size:.65rem;padding:.3rem .6rem}
+.sinp{font-family:var(--fm);font-size:.75rem;padding:.5rem .7rem;border-radius:var(--rsm);border:1px solid var(--border);background:var(--bg2);color:var(--fg);width:100px}
+.sinp::placeholder{color:#555}.sinp:focus{outline:none;border-color:var(--accent)}
+.dtoggle{position:relative;width:52px;height:28px;border-radius:14px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;transition:var(--tr);flex-shrink:0}
+.dtoggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:var(--tr)}
+.dtoggle.light{border-color:var(--accent);background:rgba(232,166,48,.15)}.dtoggle.light .knob{left:27px;background:var(--accent)}
+.dlabel{font-family:var(--fm);font-size:.65rem;color:var(--muted)}
+.presets{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.preset-pill{font-family:var(--fm);font-size:.65rem;padding:.3rem .65rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:var(--tr);white-space:nowrap}
+.preset-pill:hover{border-color:var(--accent);color:var(--accent)}.preset-pill.ac{border-color:var(--accent);color:var(--bg);background:var(--accent);font-weight:500}
+.tip-bar{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rmd);padding:.6rem 1rem;margin-bottom:1.5rem;font-family:var(--fb);font-size:.8rem;color:var(--muted);line-height:1.5;display:flex;align-items:center;gap:.5rem}
+.tip-bar .icon{font-size:1rem;flex-shrink:0}
+.scheme-row{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
+.scheme-row .s-label{font-family:var(--fm);font-size:.7rem;color:var(--muted);margin-right:.3rem}
+.scheme-card{display:flex;cursor:pointer;padding:.35rem;border-radius:var(--rsm);border:2px solid var(--border);transition:var(--tr);gap:3px;flex-shrink:0}
+.scheme-card:hover{border-color:var(--accent)}.scheme-card.ac{border-color:var(--accent);box-shadow:0 0 12px rgba(232,166,48,.2)}
+.scheme-card .sc-dot{width:22px;height:22px;border-radius:3px}.scheme-card .sc-num{font-family:var(--fm);font-size:.55rem;color:var(--muted);margin-left:.3rem;align-self:center}
+.slides-area{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.slides-area::before{content:'SLIDE PREVIEW';position:absolute;top:.8rem;right:1.2rem;font-family:var(--fm);font-size:.55rem;color:var(--border);letter-spacing:.15em;z-index:2}
+.slides-nav{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.sn{font-family:var(--fm);font-size:.65rem;padding:.3rem .7rem;border-radius:var(--rsm);border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:var(--tr)}
+.sn.ac{border-color:var(--accent);color:var(--accent);background:rgba(232,166,48,.1)}
+.slide-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1rem;justify-items:center}
+.slide{width:100%;max-width:820px;aspect-ratio:16/9;border-radius:6px;overflow:hidden;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.05);transition:all .6s ease}
+.slide-tag{position:absolute;top:6px;left:6px;font-family:var(--fm);font-size:.5rem;padding:.15rem .45rem;border-radius:3px;background:rgba(0,0,0,.55);color:rgba(255,255,255,.75);z-index:2;letter-spacing:.06em;backdrop-filter:blur(4px);pointer-events:none}
+.slide-inner{width:100%;height:100%;padding:8%;display:flex;flex-direction:column;position:relative}
+.slide-cover{justify-content:center;align-items:flex-start}.slide-cover .accent-bar{width:60px;height:4px;margin-bottom:1.5rem;border-radius:2px}
+.slide-cover h2{font-family:var(--ft);font-size:clamp(1.8rem,4vw,3rem);line-height:1.15;letter-spacing:-.02em;margin-bottom:.8rem}
+.slide-cover .subtitle{font-family:var(--fb);font-size:clamp(.9rem,1.5vw,1.2rem);font-style:italic;opacity:.7;margin-bottom:2rem}
+.slide-cover .meta{font-family:var(--fm);font-size:.65rem;opacity:.5}
+.slide-content h3{font-family:var(--ft);font-size:clamp(1.2rem,2.5vw,1.8rem);margin-bottom:1.5rem}
+.slide-content .bullets{flex:1;display:flex;flex-direction:column;gap:.7rem}
+.slide-content .bullet{display:flex;align-items:flex-start;gap:.7rem;font-size:clamp(.75rem,1.2vw,1rem);line-height:1.5}
+.slide-content .bullet .dot{width:8px;height:8px;border-radius:50%;margin-top:.35rem;flex-shrink:0}
+.slide-content .side-accent{position:absolute;right:0;top:0;bottom:0;width:8%;border-radius:6px 0 0 6px}
+.slide-data h3{font-family:var(--ft);font-size:clamp(1.1rem,2vw,1.6rem);margin-bottom:1rem}
+.slide-data .chart-area{flex:1;display:flex;align-items:end;gap:clamp(8px,2vw,20px);padding-bottom:2rem;position:relative}
+.slide-data .bar{flex:1;border-radius:4px 4px 0 0;position:relative;min-width:20px}
+.slide-data .bar .val{position:absolute;top:-1.5rem;left:50%;transform:translateX(-50%);font-family:var(--fm);font-size:clamp(.55rem,.8vw,.7rem);white-space:nowrap}
+.slide-data .bar .lbl{position:absolute;bottom:-1.8rem;left:50%;transform:translateX(-50%);font-family:var(--fm);font-size:clamp(.5rem,.7vw,.6rem);white-space:nowrap}
+.slide-data .legend{display:flex;gap:1rem;margin-top:.5rem;flex-wrap:wrap}
+.slide-data .legend-item{display:flex;align-items:center;gap:.4rem;font-family:var(--fm);font-size:clamp(.5rem,.7vw,.65rem)}
+.slide-data .legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.slide-end{justify-content:center;align-items:center;text-align:center}
+.slide-end h2{font-family:var(--ft);font-size:clamp(2rem,4vw,3.5rem);margin-bottom:.5rem}
+.slide-end .divider{width:60px;height:3px;border-radius:2px;margin:1rem 0}
+.slide-end .contact{font-family:var(--fm);font-size:clamp(.6rem,1vw,.8rem);opacity:.6;line-height:1.8}
+.slide-compare h3{font-family:var(--ft);font-size:clamp(1rem,2vw,1.5rem);margin-bottom:1rem;text-align:center}
+.slide-compare .cols{flex:1;display:flex;gap:1rem}
+.slide-compare .col{flex:1;padding:5%;border-radius:var(--rsm);display:flex;flex-direction:column;justify-content:center}
+.slide-compare .col h4{font-family:var(--ft);font-size:clamp(.9rem,1.5vw,1.2rem);margin-bottom:.6rem}
+.slide-compare .col p{font-size:clamp(.65rem,1vw,.85rem);line-height:1.5;opacity:.85}
+.slide-imgtxt{flex-direction:row!important;gap:0}
+.slide-imgtxt .img-half{width:50%;height:100%;display:flex;align-items:center;justify-content:center}
+.slide-imgtxt .img-half .img-icon{font-size:3rem;opacity:.2}.slide-imgtxt .img-half .img-placeholder{font-family:var(--fm);font-size:.7rem;opacity:.4}
+.slide-imgtxt .txt-half{width:50%;height:100%;display:flex;flex-direction:column;justify-content:center;padding:5%}
+.slide-imgtxt .txt-half h3{font-family:var(--ft);font-size:clamp(1.1rem,2.5vw,2rem);margin-bottom:.8rem}
+.slide-imgtxt .txt-half p{font-size:clamp(.7rem,1.1vw,.95rem);line-height:1.6;opacity:.8;margin-bottom:.5rem}
+.slide-timeline h3{font-family:var(--ft);font-size:clamp(1rem,2vw,1.5rem);margin-bottom:.8rem}
+.slide-timeline .tl-track{flex:1;display:flex;align-items:center;position:relative;padding:0 2rem}
+.slide-timeline .tl-line{position:absolute;top:50%;left:2rem;right:2rem;height:3px;border-radius:2px;transform:translateY(-50%)}
+.slide-timeline .tl-nodes{display:flex;width:100%;justify-content:space-between;position:relative;z-index:1}
+.slide-timeline .tl-node{display:flex;flex-direction:column;align-items:center;gap:.3rem;flex:1}
+.slide-timeline .tl-node .dot{width:14px;height:14px;border-radius:50%;border:3px solid;position:relative;z-index:1}
+.slide-timeline .tl-node .tl-date{font-family:var(--fm);font-size:clamp(.55rem,.8vw,.7rem);opacity:.7}
+.slide-timeline .tl-node .tl-title{font-family:var(--ft);font-size:clamp(.65rem,1vw,.85rem)}
+.slide-timeline .tl-node .tl-desc{font-size:clamp(.5rem,.7vw,.65rem);opacity:.6;text-align:center}
+.slide-team h3{font-family:var(--ft);font-size:clamp(1rem,2vw,1.5rem);margin-bottom:1rem;text-align:center}
+.slide-team .team-grid{flex:1;display:flex;flex-wrap:wrap;gap:1rem;align-content:center;justify-content:center}
+.slide-team .member{width:calc(50% - .5rem);display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .5rem;border-radius:var(--rsm)}
+.slide-team .member .avatar{width:clamp(40px,6vw,60px);height:clamp(40px,6vw,60px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(1rem,2vw,1.8rem);opacity:.6}
+.slide-team .member .m-name{font-family:var(--ft);font-size:clamp(.6rem,1vw,.85rem)}.slide-team .member .m-title{font-family:var(--fm);font-size:clamp(.5rem,.7vw,.6rem);opacity:.6}
+.palette-section,.harmony-section,.gradient-section,.export-section,.history-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:1.5rem;margin-bottom:1.5rem}
+.palette-section h2,.harmony-section h2,.gradient-section h2,.export-section h2,.history-section h2{font-family:var(--ft);font-size:1rem;color:var(--accent);margin-bottom:1rem}
+.palette-row{display:flex;gap:.6rem;flex-wrap:wrap}
+.p-chip{display:flex;flex-direction:column;align-items:center;gap:.4rem;cursor:pointer;position:relative;flex:1;min-width:100px;max-width:180px}
+.p-chip .swatch{width:100%;height:60px;border-radius:var(--rmd);transition:background-color .6s ease;position:relative;border:1px solid rgba(255,255,255,.06)}
+.p-chip .label{font-family:var(--fm);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.p-chip .hex-val{font-family:var(--fm);font-size:.75rem;color:var(--fg)}
+.p-chip .copy-toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-family:var(--fm);font-size:.65rem;background:rgba(0,0,0,.85);color:#fff;padding:.3rem .6rem;border-radius:4px;pointer-events:none;transition:transform .2s cubic-bezier(.34,1.56,.64,1);z-index:3;white-space:nowrap}
+.p-chip .copy-toast.show{transform:translate(-50%,-50%) scale(1)}
+.p-chip .lock-icon{position:absolute;top:4px;right:4px;font-size:.7rem;opacity:0;z-index:2;pointer-events:none}.p-chip.locked .lock-icon{opacity:1;color:var(--accent)}
+.contrast-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}
+.contrast-item{flex:1;min-width:150px;max-width:260px;display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;border-radius:var(--rsm);border:1px solid var(--border);font-family:var(--fm);font-size:.7rem}
+.contrast-item .ci-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.contrast-item.pass .ci-dot{background:#4caf50}.contrast-item.fail .ci-dot{background:#f44336}
+.contrast-item .ci-label{color:var(--muted)}.contrast-item .ci-ratio{margin-left:auto;font-weight:500}
+.contrast-item.pass .ci-ratio{color:#4caf50}.contrast-item.fail .ci-ratio{color:#f44336}.contrast-item.fail{border-color:rgba(244,67,54,.3);background:rgba(244,67,54,.05)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:1.5rem;width:90%;max-width:380px;transform:translateY(20px);transition:transform .3s}
+.modal-overlay.show .modal{transform:translateY(0)}
+.modal h3{font-family:var(--ft);font-size:.9rem;color:var(--accent);margin-bottom:1rem}
+.modal .slider-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem}
+.modal .slider-row label{font-family:var(--fm);font-size:.65rem;color:var(--muted);width:28px;flex-shrink:0}
+.modal .slider-row input[type=range]{flex:1;accent-color:var(--accent);height:4px}
+.modal .slider-row .sv{font-family:var(--fm);font-size:.65rem;color:var(--fg);width:40px;text-align:right;flex-shrink:0}
+.modal .preview-swatch{width:100%;height:50px;border-radius:var(--rmd);margin-bottom:1rem;border:1px solid rgba(255,255,255,.06)}
+.modal .modal-btns{display:flex;gap:.5rem;justify-content:flex-end}
+.harmony-grid{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start}
+.wheel-wrap{flex-shrink:0}.wheel-wrap canvas{display:block}
+.harmony-info{flex:1;min-width:200px}
+.harmony-info .hi-item{margin-bottom:.8rem}.harmony-info .hi-label{font-family:var(--fm);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.2rem}
+.harmony-info .hi-val{font-family:var(--ft);font-size:1.2rem;color:var(--fg)}
+.harmony-info .hi-val.good{color:#4caf50}.harmony-info .hi-val.great{color:#8bc34a}.harmony-info .hi-val.ok{color:#ff9800}.harmony-info .hi-val.poor{color:#f44336}
+.harmony-info .hi-strategy{font-family:var(--fm);font-size:.75rem;color:var(--accent);padding:.4rem .7rem;border:1px solid var(--accent);border-radius:var(--rsm);display:inline-block;margin-top:.5rem}
+.gradient-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}.gradient-preview{height:60px;border-radius:var(--rmd);flex:1;min-width:200px;border:1px solid rgba(255,255,255,.06)}
+.gradient-controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.gradient-controls label{font-family:var(--fm);font-size:.65rem;color:var(--muted)}
+.gradient-controls select{font-family:var(--fm);font-size:.7rem;padding:.3rem .5rem;border-radius:var(--rsm);border:1px solid var(--border);background:var(--bg);color:var(--fg)}
+.export-tabs{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.etab{font-family:var(--fm);font-size:.7rem;padding:.35rem .7rem;border-radius:var(--rsm);border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:var(--tr)}
+.etab.ac{border-color:var(--accent);color:var(--accent);background:rgba(232,166,48,.1)}
+.code-box{font-family:var(--fm);font-size:.7rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--rsm);padding:1rem;white-space:pre;overflow-x:auto;color:var(--muted);line-height:1.6;position:relative;max-height:300px;overflow-y:auto}
+.code-box .cp-btn{position:absolute;top:.4rem;right:.4rem;font-size:.6rem;padding:.2rem .5rem;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--muted);cursor:pointer;transition:var(--tr)}
+.code-box .cp-btn:hover{border-color:var(--accent);color:var(--accent)}
+.history-row{display:flex;gap:.5rem;flex-wrap:wrap}
+.hist-item{display:flex;cursor:pointer;padding:.4rem;border-radius:var(--rsm);border:1px solid var(--border);transition:var(--tr);gap:3px}
+.hist-item:hover{border-color:var(--accent)}.hist-item .hsw{width:24px;height:24px;border-radius:3px}
+.sh{text-align:center;padding:1rem 0}.sh .k{font-family:var(--fm);font-size:.65rem;color:var(--muted);background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:.15rem .4rem;margin:0 .1rem}.sh span{font-size:.65rem;color:#444;margin:0 .4rem}
+@keyframes shake{0%,100%{transform:translateX(0) rotate(0)}10%{transform:translateX(-4px) rotate(-.5deg)}20%{transform:translateX(4px) rotate(.5deg)}30%{transform:translateX(-6px) rotate(-1deg)}40%{transform:translateX(6px) rotate(1deg)}50%{transform:translateX(-4px) rotate(-.5deg)}60%{transform:translateX(4px) rotate(.5deg)}70%{transform:translateX(-2px) rotate(0)}80%{transform:translateX(2px) rotate(0)}}
+.shaking{animation:shake .5s ease}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeSlide .4s ease both}
+@media(max-width:768px){.wrap{padding:1rem}.hd h1{font-size:1.2rem}.ctrl{gap:.4rem}.palette-row{gap:.4rem}.p-chip{min-width:60px}.contrast-row{flex-direction:column}.slide{border-radius:4px}.slide-inner{padding:6%}.slide-wrap{grid-template-columns:1fr;max-width:820px;margin:0 auto}.slide-imgtxt{flex-direction:column!important}.slide-imgtxt .img-half,.slide-imgtxt .txt-half{width:100%;height:50%}.slide-compare .cols{flex-direction:column}.harmony-grid{flex-direction:column;align-items:center}.gradient-row{flex-direction:column}}
+@media(max-width:480px){.hd-l{flex-direction:column;gap:.2rem}.scheme-row{justify-content:center}.presets{justify-content:center}}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd"><div class="hd-l"><h1>PALETTE SHAKER</h1><span class="sub">PPT 配色搭配器 v2.0</span></div><span class="tag">PPT COLOR SCHEME GENERATOR</span></div>
+  <div class="presets" id="presets">
+    <div class="preset-pill ac" data-p="business">商务</div><div class="preset-pill" data-p="vibrant">活力</div><div class="preset-pill" data-p="academic">学术</div><div class="preset-pill" data-p="creative">创意</div>
+    <div class="preset-pill" data-p="mono">极简 Mono</div><div class="preset-pill" data-p="warm">暖色 Warm</div><div class="preset-pill" data-p="cool">冷色 Cool</div><div class="preset-pill" data-p="neon">霓虹 Neon</div>
+    <div class="preset-pill" data-p="earth">大地 Earth</div><div class="preset-pill" data-p="cyber">赛博 Cyberpunk</div><div class="preset-pill" data-p="vintage">复古 Vintage</div>
+    <div class="preset-pill" data-p="chinese">中国风</div><div class="preset-pill" data-p="japanese">日系</div>
+  </div>
+  <div class="ctrl">
+    <input type="text" class="sinp" id="seedInp" placeholder="#1a73e8" maxlength="7">
+    <button class="btn" id="seedBtn">Seed</button>
+    <button class="btn btn-p" id="shakeBtn"> Shake ⚡</button>
+    <div style="display:flex;align-items:center;gap:.4rem"><span class="dlabel">暗底</span><div class="dtoggle light" id="themeToggle"><div class="knob"></div></div><span class="dlabel">亮底</span></div>
+  </div>
+  <div class="tip-bar"><span class="icon">💡</span><span id="tipText">选一个主色或点击 Shake，自动生成多套PPT配色方案</span></div>
+  <div class="scheme-row" id="schemeRow"><span class="s-label">方案选择:</span></div>
+  <div class="slides-area">
+    <div class="slides-nav" id="slidesNav">
+      <button class="sn ac" data-s="0">封面</button><button class="sn" data-s="1">内容</button><button class="sn" data-s="2">数据</button><button class="sn" data-s="3">结束</button>
+      <button class="sn" data-s="4">对比</button><button class="sn" data-s="5">图文</button><button class="sn" data-s="6">时间轴</button><button class="sn" data-s="7">团队</button>
+    </div>
+    <div class="slide-wrap" id="slideWrap">
+      <div class="slide" id="slide0"><span class="slide-tag">封面</span></div>
+      <div class="slide" id="slide1"><span class="slide-tag">内容</span></div>
+    </div>
+  </div>
+  <div class="harmony-section"><h2>COLOR HARMONY ANALYSIS</h2><div class="harmony-grid"><div class="wheel-wrap"><canvas id="wheelCanvas" width="160" height="160"></canvas></div><div class="harmony-info" id="harmonyInfo"></div></div></div>
+  <div class="palette-section"><h2>COLOR SCHEME <span style="font-family:var(--fm);font-size:.65rem;color:var(--muted);font-weight:400">点击复制 · 双击微调 · 右键锁定</span></h2><div class="palette-row" id="palRow"></div><div class="contrast-row" id="contrastRow"></div></div>
+  <div class="gradient-section"><h2>GRADIENT PREVIEW</h2><div class="gradient-row"><div class="gradient-preview" id="grad1"></div><div class="gradient-preview" id="grad2"></div></div><div class="gradient-controls"><label>方向:</label><select id="gradDir"><option value="to right">→</option><option value="to bottom">↓</option><option value="135deg">↘</option><option value="to top right">↗</option></select><button class="btn btn-sm" id="gradRegen">重新生成渐变</button></div></div>
+  <div class="export-section"><h2>EXPORT</h2><div class="export-tabs" id="exportTabs"><button class="etab ac" data-e="hex">HEX</button><button class="etab" data-e="css">CSS</button><button class="etab" data-e="json">JSON</button><button class="etab" data-e="pptxml">PPT XML</button><button class="etab" data-e="vba">VBA宏</button><button class="etab" data-e="python">Python</button><button class="etab" data-e="r">R</button><button class="etab" data-e="figma">Figma</button><button class="etab" data-e="svg">SVG色板</button></div><div class="code-box" id="codeBox"><button class="cp-btn" id="cpBtn">Copy</button><code id="codeOut"></code></div></div>
+  <div class="history-section"><h2>HISTORY <span style="font-family:var(--fm);font-size:.65rem;color:var(--muted);font-weight:400">最近10个方案</span></h2><div class="history-row" id="histRow"><span style="font-family:var(--fm);font-size:.7rem;color:var(--muted)">暂无记录</span></div></div>
+  <div class="sh"><span class="k">Space</span> Shake <span class="k">T</span> 明暗 <span class="k">C</span> 复制HEX <span class="k">1-8</span> 切换幻灯片</div>
+</div>
+<div class="modal-overlay" id="modalOverlay"><div class="modal"><h3 id="modalTitle">调整颜色</h3><div class="preview-swatch" id="modalSwatch"></div><div class="slider-row"><label>H</label><input type="range" id="mH" min="0" max="359"><span class="sv" id="mHV">0</span></div><div class="slider-row"><label>S</label><input type="range" id="mS" min="0" max="100"><span class="sv" id="mSV">0%</span></div><div class="slider-row"><label>L</label><input type="range" id="mL" min="0" max="100"><span class="sv" id="mLV">0%</span></div><div class="modal-btns"><button class="btn btn-sm" id="modalCancel">取消</button><button class="btn btn-sm btn-p" id="modalApply">应用</button></div></div></div>
+<script>
+(function(){
+function hsl2rgb(h,s,l){h=((h%360)+360)%360;s=Math.max(0,Math.min(1,s));l=Math.max(0,Math.min(1,l));var c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2,r,g,b;if(h<60){r=c;g=x;b=0}else if(h<120){r=x;g=c;b=0}else if(h<180){r=0;g=c;b=x}else if(h<240){r=0;g=x;b=c}else if(h<300){r=x;g=0;b=c}else{r=c;g=0;b=x}return[Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255)]}
+function rgb2hsl(r,g,b){r/=255;g/=255;b/=255;var mx=Math.max(r,g,b),mn=Math.min(r,g,b),h,s,l=(mx+mn)/2;if(mx===mn){h=s=0}else{var d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);if(mx===r)h=((g-b)/d+(g<b?6:0))*60;else if(mx===g)h=((b-r)/d+2)*60;else h=((r-g)/d+4)*60}return[h,s,l]}
+function rgb2hex(r,g,b){return'#'+[r,g,b].map(function(v){return v.toString(16).padStart(2,'0')}).join('')}
+function hex2rgb(hex){hex=hex.replace('#','');if(hex.length===3)hex=hex.split('').map(function(c){return c+c}).join('');var n=parseInt(hex,16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function rr(a,b){return a+Math.random()*(b-a)}
+function cl(v,a,b){return Math.max(a,Math.min(b,v))}
+function lum(r,g,b){var a=[r,g,b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*a[0]+.7152*a[1]+.0722*a[2]}
+function cr(a,b){var l1=lum(a[0],a[1],a[2]),l2=lum(b[0],b[1],b[2]),lt=Math.max(l1,l2),dk=Math.min(l1,l2);return(lt+.05)/(dk+.05)}
+function hx(c){return rgb2hex(c.r,c.g,c.b)}
+function toC(c){var rgb=hsl2rgb(c.h,c.s,c.l);return{r:rgb[0],g:rgb[1],b:rgb[2],h:c.h,s:c.s,l:c.l}}
+var tips={business:'经典蓝/灰搭配，沉稳专业',vibrant:'高饱和亮色系，充满活力',academic:'低饱和中性色调，严谨克制',creative:'大胆撞色与渐变',mono:'单色调变化，极简克制',warm:'红橙黄暖色调，温馨热情',cool:'蓝绿紫冷色调，专业沉稳',neon:'高饱和霓虹色，赛博朋克风',earth:'棕/绿/米大地色系，自然质朴',cyber:'深色底+品红/青色霓虹',vintage:'低饱和复古色调，怀旧感',chinese:'朱红/金色/墨色中国风',japanese:'淡粉/靛蓝/白色日系风'};
+function genScheme(style,baseHex){var base=hex2rgb(baseHex),bh=rgb2hsl(base[0],base[1],base[2]),h=bh[0],s=bh[1],l=bh[2];var p,sc,bg,tx,ac;switch(style){case'business':p={h:h,s:cl(s,.4,.8),l:cl(l,.35,.55)};sc={h:(h+200)%360,s:cl(s,.15,.35),l:cl(l,.45,.6)};bg={h:h,s:.08,l:.96};tx={h:h,s:.05,l:.12};ac={h:(h+30)%360,s:cl(s,.6,.9),l:cl(l,.5,.65)};break;case'vibrant':p={h:h,s:cl(s,.7,1),l:cl(l,.45,.55)};sc={h:(h+150)%360,s:cl(s,.5,.8),l:cl(l,.45,.6)};bg={h:h,s:.06,l:.97};tx={h:h,s:.08,l:.12};ac={h:(h+60)%360,s:cl(s,.8,1),l:cl(l,.5,.6)};break;case'academic':p={h:h,s:cl(s,.25,.5),l:cl(l,.35,.5)};sc={h:(h+180)%360,s:cl(s,.2,.4),l:cl(l,.5,.65)};bg={h:h,s:.04,l:.96};tx={h:h,s:.06,l:.18};ac={h:(h+120)%360,s:cl(s,.3,.6),l:cl(l,.4,.55)};break;case'creative':p={h:h,s:cl(s,.6,1),l:cl(l,.4,.55)};sc={h:(h+120)%360,s:cl(s,.5,.85),l:cl(l,.45,.6)};bg={h:h,s:.08,l:.97};tx={h:h,s:.1,l:.1};ac={h:(h+240)%360,s:cl(s,.7,1),l:cl(l,.45,.6)};break;case'mono':p={h:h,s:.05,l:cl(l,.25,.4)};sc={h:h,s:.03,l:cl(l,.55,.7)};bg={h:h,s:.02,l:.98};tx={h:h,s:.02,l:.08};ac={h:h,s:.1,l:cl(l,.15,.25)};break;case'warm':p={h:cl(h,0,60),s:cl(s,.6,.9),l:cl(l,.45,.55)};sc={h:(h+30)%360,s:cl(s,.4,.7),l:cl(l,.6,.75)};bg={h:40,s:.08,l:.98};tx={h:20,s:.1,l:.15};ac={h:(h+330)%360,s:cl(s,.7,.95),l:cl(l,.5,.6)};break;case'cool':p={h:cl(h,180,260),s:cl(s,.5,.8),l:cl(l,.35,.5)};sc={h:(h+40)%360,s:cl(s,.3,.6),l:cl(l,.5,.65)};bg={h:210,s:.06,l:.97};tx={h:220,s:.05,l:.12};ac={h:(h+60)%360,s:cl(s,.6,.9),l:cl(l,.45,.6)};break;case'neon':p={h:h,s:1,l:.5};sc={h:(h+120)%360,s:1,l:.5};bg={h:h,s:.05,l:.05};tx={h:h,s:.1,l:.95};ac={h:(h+240)%360,s:1,l:.5};break;case'earth':p={h:cl(h,20,50),s:cl(s,.4,.7),l:cl(l,.35,.5)};sc={h:120,s:cl(s,.3,.5),l:cl(l,.4,.55)};bg={h:35,s:.08,l:.96};tx={h:25,s:.1,l:.18};ac={h:15,s:cl(s,.5,.8),l:cl(l,.45,.55)};break;case'cyber':p={h:300,s:1,l:.5};sc={h:180,s:1,l:.5};bg={h:240,s:.15,l:.06};tx={h:0,s:0,l:.9};ac={h:60,s:1,l:.5};break;case'vintage':p={h:cl(h,15,45),s:cl(s,.35,.6),l:cl(l,.4,.55)};sc={h:cl(h+20,30,60),s:cl(s,.25,.5),l:cl(l,.6,.75)};bg={h:40,s:.1,l:.95};tx={h:30,s:.15,l:.2};ac={h:cl(h-10,0,30),s:cl(s,.4,.65),l:cl(l,.5,.6)};break;case'chinese':p={h:5,s:cl(s,.7,.9),l:cl(l,.4,.5)};sc={h:45,s:cl(s,.6,.85),l:cl(l,.5,.65)};bg={h:0,s:.02,l:.96};tx={h:0,s:.05,l:.15};ac={h:270,s:cl(s,.4,.7),l:cl(l,.3,.45)};break;case'japanese':p={h:340,s:cl(s,.3,.55),l:cl(l,.55,.7)};sc={h:220,s:cl(s,.4,.65),l:cl(l,.4,.55)};bg={h:0,s:.02,l:.97};tx={h:220,s:.08,l:.15};ac={h:170,s:cl(s,.3,.55),l:cl(l,.5,.65)};break}return{primary:toC(p),secondary:toC(sc),background:toC(bg),text:toC(tx),accent:toC(ac)}}
+function addVar(sch,idx){var j=[{h:0,s:.05,l:.05},{h:0,s:.08,l:.03},{h:20,s:.05,l:.05}][idx%3];var s={primary:{h:((sch.primary.h+j.h*(idx+1))%360+360)%360,s:cl(sch.primary.s+j.s*(idx%2?1:-1),0,1),l:cl(sch.primary.l+j.l*(idx%2?1:-1),0,1)},secondary:{h:((sch.secondary.h+j.h*(idx+1))%360+360)%360,s:cl(sch.secondary.s+j.s*(idx%2?1:-1),0,1),l:cl(sch.secondary.l+j.l*(idx%2?1:-1),0,1)},background:{...sch.background},text:{...sch.text},accent:{h:((sch.accent.h+j.h*(idx+1))%360+360)%360,s:cl(sch.accent.s+j.s*(idx%2?1:-1),0,1),l:cl(sch.accent.l+j.l*(idx%2?1:-1),0,1)}};['primary','secondary','accent'].forEach(function(k){var c=s[k],rgb=hsl2rgb(c.h,c.s,c.l);s[k]={r:rgb[0],g:rgb[1],b:rgb[2],h:c.h,s:c.s,l:c.l}});return s}
+function darkScheme(s){return{primary:s.primary,secondary:s.secondary,background:{r:18,g:18,b:22,h:s.background.h,s:s.background.s,l:.07},text:{r:232,g:232,b:238,h:s.text.h,s:.04,l:.91},accent:s.accent}}
+var curSch=null,allSch=[],curIdx=0,isDark=false,curStyle='business',curSlide=0,expFmt='hex',hist=[];
+var seedInp=document.getElementById('seedInp'),shakeBtn=document.getElementById('shakeBtn'),themeToggle=document.getElementById('themeToggle');
+var locks={primary:false,secondary:false,background:false,text:false,accent:false},modalKey=null;
+function rSeed(){return rgb2hex(Math.round(rr(30,220)),Math.round(rr(30,220)),Math.round(rr(30,220)))}
+function generate(seedHex){var base=genScheme(curStyle,seedHex);var v1=addVar(base,0),v2=addVar(base,1),v3=addVar(base,2);if(isDark){base=darkScheme(base);v1=darkScheme(v1);v2=darkScheme(v2);v3=darkScheme(v3)}allSch=[base,v1,v2,v3];if(curSch){allSch.forEach(function(s){['primary','secondary','background','text','accent'].forEach(function(k){if(locks[k])s[k]={...curSch[k]}})})}curIdx=0;curSch=allSch[0];shakeBtn.classList.remove('shaking');void shakeBtn.offsetWidth;shakeBtn.classList.add('shaking');setTimeout(function(){shakeBtn.classList.remove('shaking')},500);saveHist(curSch);renderAll()}
+function shake(){var seed=seedInp.value.trim();if(!seed||!/^#[0-9a-f]{6}$/i.test(seed)){seed=rSeed();seedInp.value=seed}generate(seed)}
+function applySeed(){var v=seedInp.value.trim();if(!v)return;if(!v.startsWith('#'))v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v))generate(v)}
+function saveHist(s){var e={style:curStyle,dark:isDark,p:hx(s.primary),sc:hx(s.secondary),bg:hx(s.background),tx:hx(s.text),ac:hx(s.accent)};hist.unshift(e);if(hist.length>10)hist.pop();renderHist()}
+function renderHist(){var el=document.getElementById('histRow');if(!hist.length){el.innerHTML='<span style="font-family:var(--fm);font-size:.7rem;color:var(--muted)">暂无记录</span>';return}el.innerHTML='';hist.forEach(function(e){var d=document.createElement('div');d.className='hist-item';d.innerHTML='<div class="hsw" style="background:'+e.p+'"></div><div class="hsw" style="background:'+e.sc+'"></div><div class="hsw" style="background:'+e.bg+'"></div><div class="hsw" style="background:'+e.ac+'"></div>';d.addEventListener('click',function(){setStyle(e.style);isDark=e.dark;updateToggle();seedInp.value=e.p;generate(e.p)});el.appendChild(d)})}
+function setStyle(s){curStyle=s;document.querySelectorAll('.preset-pill').forEach(function(p){p.classList.toggle('ac',p.dataset.p===s)})}
+function renderSchemeCards(){var row=document.getElementById('schemeRow');row.innerHTML='<span class="s-label">方案选择:</span>';allSch.forEach(function(s,i){var card=document.createElement('div');card.className='scheme-card'+(i===curIdx?' ac':'');card.innerHTML=['primary','secondary','background','text','accent'].map(function(k){return'<div class="sc-dot" style="background:'+hx(s[k])+'"></div>'}).join('')+'<span class="sc-num">#'+(i+1)+'</span>';card.addEventListener('click',function(){curIdx=i;curSch=allSch[i];renderAll()});row.appendChild(card)})}
+var slideNames=['封面','内容','数据','结束','对比','图文','时间轴','团队'];
+function slideHTML(idx,s){var p=hx(s.primary),bg=hx(s.background),t=hx(s.text),a=hx(s.accent),sc=hx(s.secondary);switch(idx){case 0:return'<div class="slide-inner slide-cover" style="background:'+bg+';color:'+t+'"><div class="accent-bar" style="background:'+a+'"></div><h2 style="color:'+p+'">2025年度业绩报告</h2><div class="subtitle" style="color:'+sc+'">用数据驱动增长 · 创造可持续价值</div><div class="meta" style="color:'+t+';opacity:.5">张三 · 市场部 · 2025.06</div></div>';case 1:var items=['季度营收同比增长 23%，超出年度目标 8 个百分点','用户活跃度提升至 4,200 万 MAU，创历史新高','新产品线贡献总收入的 35%，成为第二增长曲线','海外市场拓展至 12 个国家，本地化策略成效显著'];var bullets=items.map(function(item,i){return'<div class="bullet"><div class="dot" style="background:'+(i===0?a:i%2===0?p:sc)+'"></div><div>'+item+'</div></div>'}).join('');return'<div class="slide-inner slide-content" style="background:'+bg+';color:'+t+'"><div class="side-accent" style="background:'+p+';opacity:.15"></div><h3 style="color:'+p+'">核心业务亮点</h3><div class="bullets">'+bullets+'</div></div>';case 2:var bars=[{v:65,l:'Q1'},{v:82,l:'Q2'},{v:48,l:'Q3'},{v:91,l:'Q4'}];var colors=[p,a,sc,p];var bh=bars.map(function(b,i){return'<div class="bar" style="height:'+b.v+'%;background:'+colors[i]+'"><div class="val" style="color:'+t+'">'+(b.v*3.2).toFixed(0)+'%</div><div class="lbl" style="color:'+t+';opacity:.6">'+b.l+'</div></div>'}).join('');return'<div class="slide-inner slide-data" style="background:'+bg+';color:'+t+'"><h3 style="color:'+p+'">季度营收趋势</h3><div class="chart-area">'+bh+'</div><div class="legend"><div class="legend-item"><div class="legend-dot" style="background:'+p+'"></div><span>主营收入</span></div><div class="legend-item"><div class="legend-dot" style="background:'+a+'"></div><span>增长业务</span></div><div class="legend-item"><div class="legend-dot" style="background:'+sc+'"></div><span>新兴业务</span></div></div></div>';case 3:return'<div class="slide-inner slide-end" style="background:'+bg+';color:'+t+'"><h2 style="color:'+p+'">THANK YOU</h2><div class="subtitle" style="color:'+sc+';font-style:italic">感谢聆听</div><div class="divider" style="background:'+a+'"></div><div class="contact">zhangsan@company.com<br>+86 138 0000 0000<br>www.company.com</div></div>';case 4:return'<div class="slide-inner slide-compare" style="background:'+bg+';color:'+t+'"><h3 style="color:'+p+'">方案A vs 方案B</h3><div class="cols"><div class="col" style="background:'+p+';color:'+bg+'"><h4>方案 A</h4><p>传统线下推广渠道<br>覆盖 5 个城市<br>预计投入 120 万<br>ROI 约 2.3x</p></div><div class="col" style="background:'+sc+';color:'+bg+'"><h4>方案 B</h4><p>全链路数字营销<br>覆盖全国<br>预计投入 80 万<br>ROI 约 3.8x</p></div></div></div>';case 5:return'<div class="slide-inner slide-imgtxt" style="color:'+t+'"><div class="img-half" style="background:'+sc+'"><div style="text-align:center"><div class="img-icon">🖼</div><div class="img-placeholder">IMAGE PLACEHOLDER</div></div></div><div class="txt-half" style="background:'+bg+'"><h3 style="color:'+p+'">产品核心卖点</h3><p>革命性的交互设计，重新定义用户体验。</p><p>AI驱动的智能推荐，精准匹配每一个需求。</p></div></div>';case 6:return'<div class="slide-inner slide-timeline" style="background:'+bg+';color:'+t+'"><h3 style="color:'+p+'">项目里程碑</h3><div class="tl-track"><div class="tl-line" style="background:'+sc+'"></div><div class="tl-nodes"><div class="tl-node"><div class="dot" style="border-color:'+p+';background:'+p+'"></div><div class="tl-date">Q1 2025</div><div class="tl-title" style="color:'+p+'">立项启动</div><div class="tl-desc">需求分析完成</div></div><div class="tl-node"><div class="dot" style="border-color:'+a+';background:'+a+'"></div><div class="tl-date">Q2 2025</div><div class="tl-title" style="color:'+a+'">开发阶段</div><div class="tl-desc">核心功能上线</div></div><div class="tl-node"><div class="dot" style="border-color:'+sc+';background:'+sc+'"></div><div class="tl-date">Q3 2025</div><div class="tl-title" style="color:'+sc+'">公测优化</div><div class="tl-desc">用户反馈迭代</div></div><div class="tl-node"><div class="dot" style="border-color:'+p+';background:'+p+'"></div><div class="tl-date">Q4 2025</div><div class="tl-title" style="color:'+p+'">正式发布</div><div class="tl-desc">全面推向市场</div></div></div></div></div>';case 7:return'<div class="slide-inner slide-team" style="background:'+bg+';color:'+t+'"><h3 style="color:'+p+'">核心团队</h3><div class="team-grid"><div class="member" style="background:'+p+'22"><div class="avatar" style="background:'+p+'">👤</div><div class="m-name" style="color:'+p+'">张三</div><div class="m-title">CEO · 创始人</div></div><div class="member" style="background:'+a+'22"><div class="avatar" style="background:'+a+'">👤</div><div class="m-name" style="color:'+a+'">李四</div><div class="m-title">CTO · 技术负责人</div></div><div class="member" style="background:'+sc+'22"><div class="avatar" style="background:'+sc+'">👤</div><div class="m-name" style="color:'+sc+'">王五</div><div class="m-title">设计总监</div></div><div class="member" style="background:'+p+'22"><div class="avatar" style="background:'+p+'">👤</div><div class="m-name" style="color:'+p+'">赵六</div><div class="m-title">市场VP</div></div></div></div>'}return''}
+/* Harmony Analysis */
+function drawWheel(sch){var canvas=document.getElementById('wheelCanvas'),ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,r=65;ctx.clearRect(0,0,w,h);for(var angle=0;angle<360;angle+=1){var sa=(angle-90)*Math.PI/180,ea=(angle-89)*Math.PI/180;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,sa,ea);ctx.closePath();var rgb=hsl2rgb(angle,.75,.55);ctx.fillStyle='rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';ctx.fill()}ctx.beginPath();ctx.arc(cx,cy,r-18,0,Math.PI*2);ctx.closePath();ctx.fillStyle=isDark?'#121216':'#f4f4f4';ctx.fill();
+var colors=[sch.primary,sch.secondary,sch.accent],labels=['P','S','A'];colors.forEach(function(c,i){var hr=(c.h-90)*Math.PI/180,px=cx+Math.cos(hr)*(r-9),py=cy+Math.sin(hr)*(r-9);ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.closePath();ctx.fillStyle=hx(c);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 8px DM Mono';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(labels[i],px,py)})}
+function analyzeHarmony(sch){var hues=[sch.primary.h,sch.secondary.h,sch.accent.h].map(function(h){return((h%360)+360)%360});hues.sort(function(a,b){return a-b});var diffs=[];for(var i=0;i<3;i++){var d=hues[(i+1)%3]-hues[i];if(d<=0)d+=360;diffs.push(d)}
+var strat='单色',score=0;
+var allClose=diffs.every(function(d){return d<25||d>335});var spread=Math.max.apply(null,diffs);
+if(allClose){strat='单色 Monochromatic';score=85}
+else if(diffs.some(function(d){return d>155&&d<205})){strat='互补色 Complementary';score=90}
+else{var triOk=diffs.every(function(d){return d>70&&d<150});if(triOk){strat='三色 Triadic';score=92}
+else{var hasSplit=diffs.filter(function(d){return d>140&&d<180}).length;if(hasSplit>=2){strat='分裂互补 Split-Complementary';score=88}
+else{var hasAna=diffs.filter(function(d){return d<50}).length;if(hasAna>=2){strat='类似色 Analogous';score=80}
+else{strat='自由配色 Free';score=65}}}}
+var cls=score>=85?'great':score>=75?'good':score>=65?'ok':'poor';
+drawWheel(sch);
+var info=document.getElementById('harmonyInfo');
+info.innerHTML='<div class="hi-item"><div class="hi-label">和谐度评分</div><div class="hi-val '+cls+'">'+score+'/100</div></div>'
++'<div class="hi-item"><div class="hi-label">配色策略</div><div class="hi-strategy">'+strat+'</div></div>'
++'<div class="hi-item"><div class="hi-label">色相分布</div><div style="font-family:var(--fm);font-size:.75rem;color:var(--fg)">'+hues.map(function(h,i){return'Primary: '+Math.round(h)+'°'+(i<2?' · Secondary: '+Math.round(hues[(i+1)%3])+'°':'')}).slice(0,1).join('')+'<br>Primary '+Math.round(hues[0])+'° · Secondary '+Math.round(hues[1])+'° · Accent '+Math.round(hues[2])+'°</div></div>'}
+
+/* Render */
+function renderAll(){if(!curSch)return;renderSchemeCards();renderSlide();renderPalette();renderContrast();renderHarmony();renderGradient();renderExport();document.getElementById('tipText').textContent=tips[curStyle]||'Shake生成多套方案供选择'}
+function renderSlide(){var wrap=document.getElementById('slideWrap');wrap.innerHTML='';var pair=[curSlide,Math.min(curSlide+1,7)];pair.forEach(function(idx){var el=document.createElement('div');el.className='slide';el.innerHTML='<span class="slide-tag">'+slideNames[idx]+'</span>'+slideHTML(idx,curSch);el.classList.add('fade-in');wrap.appendChild(el)})}
+function renderPalette(){var s=curSch,row=document.getElementById('palRow');row.innerHTML='';var names=['Primary 主色','Secondary 辅色','Background 背景','Text 正文','Accent 强调'];var keys=['primary','secondary','background','text','accent'];keys.forEach(function(k,i){var c=s[k],h=hx(c);var chip=document.createElement('div');chip.className='p-chip'+(locks[k]?' locked':'');chip.innerHTML='<div class="swatch" style="background:'+h+'"></div><div class="label">'+names[i]+'</div><div class="hex-val">'+h.toUpperCase()+'</div><div class="copy-toast">Copied!</div><div class="lock-icon">🔒</div>';chip.addEventListener('click',function(e){if(e.detail===1)setTimeout(function(){if(!modalKey)try{navigator.clipboard.writeText(h)}catch(ex){}},250)});chip.addEventListener('dblclick',function(e){e.preventDefault();openModal(k)});chip.addEventListener('contextmenu',function(e){e.preventDefault();locks[k]=!locks[k];chip.classList.toggle('locked',locks[k])});row.appendChild(chip)})}
+function renderContrast(){var s=curSch,row=document.getElementById('contrastRow');row.innerHTML='';[{label:'主色/背景',a:s.primary,b:s.background},{label:'正文/背景',a:s.text,b:s.background},{label:'强调/背景',a:s.accent,b:s.background},{label:'辅色/背景',a:s.secondary,b:s.background}].forEach(function(ch){var ratio=cr([ch.a.r,ch.a.g,ch.a.b],[ch.b.r,ch.b.g,ch.b.b]);var pass=ratio>=4.5;var item=document.createElement('div');item.className='contrast-item'+(pass?' pass':' fail');item.innerHTML='<div class="ci-dot"></div><span class="ci-label">'+ch.label+'</span><span class="ci-ratio">'+ratio.toFixed(1)+':1'+(pass?' ✓':' ⚠')+'</span>';row.appendChild(item)})}
+function renderHarmony(){analyzeHarmony(curSch)}
+function renderGradient(){var s=curSch,dir=document.getElementById('gradDir').value;var p=hx(s.primary),sc=hx(s.secondary),a=hx(s.accent);document.getElementById('grad1').style.background='linear-gradient('+dir+','+p+','+a+')';document.getElementById('grad2').style.background='linear-gradient('+dir+','+sc+','+a+')'}
+
+/* Modal */
+function openModal(key){modalKey=key;var c=curSch[key];document.getElementById('modalTitle').textContent='调整 '+key.charAt(0).toUpperCase()+key.slice(1);document.getElementById('mH').value=Math.round(c.h);document.getElementById('mS').value=Math.round(c.s*100);document.getElementById('mL').value=Math.round(c.l*100);updateModalPreview();document.getElementById('modalOverlay').classList.add('show')}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show');modalKey=null}
+function updateModalPreview(){var h=+document.getElementById('mH').value,s=+document.getElementById('mS').value/100,l=+document.getElementById('mL').value/100;document.getElementById('mHV').textContent=h+'°';document.getElementById('mSV').textContent=Math.round(s*100)+'%';document.getElementById('mLV').textContent=Math.round(l*100)+'%';var rgb=hsl2rgb(h,s,l);document.getElementById('modalSwatch').style.background=rgb2hex(rgb[0],rgb[1],rgb[2])}
+function applyModal(){if(!modalKey||!curSch)return;var h=+document.getElementById('mH').value,s=+document.getElementById('mS').value/100,l=+document.getElementById('mL').value/100;var rgb=hsl2rgb(h,s,l);curSch[modalKey]={r:rgb[0],g:rgb[1],b:rgb[2],h:h,s:s,l:l};closeModal();renderAll()}
+
+/* Export */
+function getExportCode(){var s=curSch,p=hx(s.primary).toUpperCase(),sc=hx(s.secondary).toUpperCase(),bg=hx(s.background).toUpperCase(),tx=hx(s.text).toUpperCase(),a=hx(s.accent).toUpperCase();
+switch(expFmt){case'hex':return'Primary:   '+p+'\nSecondary: '+sc+'\nBackground:'+bg+'\nText:      '+tx+'\nAccent:    '+a;
+case'css':return':root {\n  --ppt-primary: '+p+';\n  --ppt-secondary: '+sc+';\n  --ppt-background: '+bg+';\n  --ppt-text: '+tx+';\n  --ppt-accent: '+a+';\n}';
+case'json':return JSON.stringify({name:"PPT Color Scheme",style:curStyle,colors:{primary:p,secondary:sc,background:bg,text:tx,accent:a},gradients:{primaryAccent:"linear-gradient(to right,"+p+","+a+")",secondaryAccent:"linear-gradient(to right,"+sc+","+a+")"}},null,2);
+case'pptxml':return'<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">\n  <a:themeElements>\n    <a:clrScheme name="Custom">\n      <a:dk1><a:srgbClr val="'+tx+'"/></a:dk1>\n      <a:lt1><a:srgbClr val="'+bg+'"/></a:lt1>\n      <a:dk2><a:srgbClr val="'+sc+'"/></a:dk2>\n      <a:lt2><a:srgbClr val="'+bg+'"/></a:lt2>\n      <a:accent1><a:srgbClr val="'+p+'"/></a:accent1>\n      <a:accent2><a:srgbClr val="'+a+'"/></a:accent2>\n      <a:accent3><a:srgbClr val="'+sc+'"/></a:accent3>\n    </a:clrScheme>\n  </a:themeElements>\n</a:theme>';
+case'vba':return"Sub ApplyColorScheme()\n' Palette Shaker - Auto Generated VBA\n' Run this macro in PowerPoint to apply colors\n\n  Dim sld As Slide\n  Dim shp As Shape\n  \n  ' Colors\n  Const PRIMARY = &H"+p.slice(5,3)+p.slice(3,1)+"  ' "+p+"\n  Const SECONDARY = &H"+sc.slice(5,3)+sc.slice(3,1)+"  ' "+sc+"\n  Const BG_COLOR = &H"+bg.slice(5,3)+bg.slice(3,1)+"  ' "+bg+"\n  Const TEXT_COLOR = &H"+tx.slice(5,3)+tx.slice(3,1)+"  ' "+tx+"\n  Const ACCENT = &H"+a.slice(5,3)+a.slice(3,1)+"  ' "+a+"\n  \n  ' Apply background to all slides\n  For Each sld In ActivePresentation.Slides\n    sld.FollowMasterBackground = False\n    sld.Background.Fill.Solid\n    sld.Background.Fill.ForeColor.RGB = BG_COLOR\n    \n    For Each shp In sld.Shapes\n      If shp.HasTextFrame Then\n        shp.TextFrame.TextRange.Font.Color.RGB = TEXT_COLOR\n      End If\n    Next shp\n  Next sld\n  \n  MsgBox \"Color scheme applied!\", vbInformation\nEnd Sub";
+case'python':return"# PPT Color Palette\nppt_colors = {\n    \"primary\":    \""+p+"\",\n    \"secondary\":  \""+sc+"\",\n    \"background\": \""+bg+"\",\n    \"text\":       \""+tx+"\",\n    \"accent\":     \""+a+"\"\n}\n\n# For matplotlib\nimport matplotlib.pyplot as plt\nplt.rcParams.update({\n    \"figure.facecolor\": \""+bg+"\",\n    \"axes.facecolor\":   \""+bg+"\",\n    \"text.color\":       \""+tx+"\",\n    \"axes.labelcolor\":  \""+tx+"\",\n    \"xtick.color\":      \""+tx+"\",\n    \"ytick.color\":      \""+tx+"\"\n})";
+case'r':return'# PPT Color Palette\nppt_colors <- c(\n  primary    = "'+p+'",\n  secondary  = "'+sc+'",\n  background = "'+bg+'",\n  text       = "'+tx+'",\n  accent     = "'+a+'"\n)\n\n# For ggplot2\nlibrary(ggplot2)\ntheme_ppt <- theme(\n  plot.background = element_rect(fill = "'+bg+'"),\n  panel.background = element_rect(fill = "'+bg+'"),\n  text = element_text(color = "'+tx+'"),\n  axis.text = element_text(color = "'+tx+'")\n)';
+case'figma':return JSON.stringify([{name:"PPT Primary",color:{r:s.primary.r/255,g:s.primary.g/255,b:s.primary.b/255}},{name:"PPT Secondary",color:{r:s.secondary.r/255,g:s.secondary.g/255,b:s.secondary.b/255}},{name:"PPT Background",color:{r:s.background.r/255,g:s.background.g/255,b:s.background.b/255}},{name:"PPT Text",color:{r:s.text.r/255,g:s.text.g/255,b:s.text.b/255}},{name:"PPT Accent",color:{r:s.accent.r/255,g:s.accent.g/255,b:s.accent.b/255}}],null,2);
+case'svg':return'<svg xmlns="http://www.w3.org/2000/svg" width="800" height="300" viewBox="0 0 800 300">\n  <defs><style>.t{font-family:monospace;font-size:12px;fill:#fff;text-anchor:middle}</style></defs>\n  <rect x="0" y="0" width="160" height="300" fill="'+p+'"/>\n  <rect x="160" y="0" width="160" height="300" fill="'+sc+'"/>\n  <rect x="320" y="0" width="160" height="300" fill="'+bg+'"/>\n  <rect x="480" y="0" width="160" height="300" fill="'+tx+'"/>\n  <rect x="640" y="0" width="160" height="300" fill="'+a+'"/>\n  <text x="80" y="160" class="t" fill="'+(s.primary.l>.5?'#000':'#fff')+'">Primary\n'+p+'</text>\n  <text x="240" y="160" class="t" fill="'+(s.secondary.l>.5?'#000':'#fff')+'">Secondary\n'+sc+'</text>\n  <text x="400" y="160" class="t" fill="'+(s.background.l>.5?'#000':'#fff')+'">Background\n'+bg+'</text>\n  <text x="560" y="160" class="t" fill="'+(s.text.l>.5?'#000':'#fff')+'">Text\n'+tx+'</text>\n  <text x="720" y="160" class="t" fill="'+(s.accent.l>.5?'#000':'#fff')+'">Accent\n'+a+'</text>\n</svg>'}return''}
+function renderExport(){document.getElementById('codeOut').textContent=getExportCode()}
+function updateToggle(){if(isDark)themeToggle.classList.remove('light');else themeToggle.classList.add('light')}
+
+/* Events */
+shakeBtn.addEventListener('click',shake);
+document.getElementById('seedBtn').addEventListener('click',applySeed);
+seedInp.addEventListener('keydown',function(e){if(e.key==='Enter')applySeed()});
+themeToggle.addEventListener('click',function(){isDark=!isDark;updateToggle();if(curSch)generate(hx(curSch.primary))});
+document.getElementById('presets').addEventListener('click',function(e){var pill=e.target.closest('.preset-pill');if(!pill)return;setStyle(pill.dataset.p);shake()});
+document.getElementById('slidesNav').addEventListener('click',function(e){var btn=e.target.closest('.sn');if(!btn)return;curSlide=parseInt(btn.dataset.s);document.querySelectorAll('.sn').forEach(function(b){b.classList.toggle('ac',b===btn)});renderSlide()});
+document.getElementById('exportTabs').addEventListener('click',function(e){var btn=e.target.closest('.etab');if(!btn)return;document.querySelectorAll('.etab').forEach(function(b){b.classList.remove('ac')});btn.classList.add('ac');expFmt=btn.dataset.e;renderExport()});
+document.getElementById('cpBtn').addEventListener('click',function(){try{navigator.clipboard.writeText(getExportCode());var b=this;b.textContent='Done!';setTimeout(function(){b.textContent='Copy'},1000)}catch(e){}});
+document.getElementById('gradDir').addEventListener('change',renderGradient);
+document.getElementById('gradRegen').addEventListener('click',function(){if(curSch)renderGradient()});
+document.getElementById('mH').addEventListener('input',updateModalPreview);
+document.getElementById('mS').addEventListener('input',updateModalPreview);
+document.getElementById('mL').addEventListener('input',updateModalPreview);
+document.getElementById('modalCancel').addEventListener('click',closeModal);
+document.getElementById('modalApply').addEventListener('click',applyModal);
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal()});
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA')return;if(e.code==='Space'){e.preventDefault();shake()}else if(e.key==='t'||e.key==='T'){isDark=!isDark;updateToggle();if(curSch)generate(hx(curSch.primary))}else if(e.key==='c'||e.key==='C'){if(!curSch)return;try{navigator.clipboard.writeText([hx(curSch.primary),hx(curSch.secondary),hx(curSch.background),hx(curSch.text),hx(curSch.accent)].join('\n'))}catch(ex){}}else if(e.key==='Escape'){closeModal()}else if(e.key>='1'&&e.key<='8'){curSlide=parseInt(e.key)-1;document.querySelectorAll('.sn').forEach(function(b){b.classList.toggle('ac',parseInt(b.dataset.s)===curSlide)});renderSlide()}});
+
+/* Init */
+seedInp.value=rSeed();generate(seedInp.value);
+})();
+</script>
+</body>
+</html>

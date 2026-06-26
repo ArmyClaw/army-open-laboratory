@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>逻辑映射实验室 - Logistic Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background: rgba(26, 26, 46, 0.95);
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #FF6B35;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            flex: 1;
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-container h2 {
+            color: #FF6B35;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        canvas {
+            flex: 1;
+            width: 100%;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+            border-radius: 4px;
+            min-height: 300px;
+        }
+
+        .control-panel {
+            width: 300px;
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .control-section h3 {
+            color: #FF6B35;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #FF6B35;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .value-display {
+            min-width: 50px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            color: #FF6B35;
+        }
+
+        .button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.secondary {
+            background: linear-gradient(45deg, #4D96FF, #6BCF7F);
+        }
+
+        .button.danger {
+            background: linear-gradient(45deg, #FF4343, #FF6B35);
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(26, 26, 46, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            min-width: 200px;
+        }
+
+        .info-panel h3 {
+            color: #FF6B35;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            font-size: 12px;
+            color: #ccc;
+            line-height: 1.4;
+        }
+
+        .tab-container {
+            display: flex;
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .tab.active {
+            background: rgba(255, 107, 53, 0.2);
+            color: #FF6B35;
+            border-bottom: 2px solid #FF6B35;
+        }
+
+        .tab:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .bifurcation-canvas {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+            border-radius: 4px;
+        }
+
+        .trajectory-canvas {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+            border-radius: 4px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #FF6B35;
+        }
+
+        .formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            color: #FFD93D;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 107, 53, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
+        }
+
+        .animating {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦋 逻辑映射实验室</h1>
+            <p>探索种群增长的逻辑映射模型与混沌分岔现象</p>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab active" onclick="switchTab('bifurcation')">🌊 分岔图</button>
+            <button class="tab" onclick="switchTab('trajectory')">📈 迭代轨迹</button>
+            <button class="tab" onclick="switchTab('cobweb')">🕸️ 轨道图</button>
+            <button class="tab" onclick="switchTab('phase')">🔄 相空间</button>
+        </div>
+
+        <div class="main-content">
+            <!-- 分岔图标签页 -->
+            <div id="bifurcation-tab" class="tab-content active">
+                <div class="canvas-container">
+                    <h2>🌊 分岔图可视化</h2>
+                    <canvas id="bifurcationCanvas" class="bifurcation-canvas"></canvas>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #FF6B35;"></span> 周期1
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #4D96FF;"></span> 周期2
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #6BCF7F;"></span> 周期4
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #FFD93D;"></span> 混沌
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 迭代轨迹标签页 -->
+            <div id="trajectory-tab" class="tab-content">
+                <div class="canvas-container">
+                    <h2>📈 迭代轨迹</h2>
+                    <canvas id="trajectoryCanvas" class="trajectory-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- 轨道图标签页 -->
+            <div id="cobweb-tab" class="tab-content">
+                <div class="canvas-container">
+                    <h2>🕸️ 轨道图 (Cobweb Diagram)</h2>
+                    <canvas id="cobwebCanvas" class="cobweb-canvas"></canvas>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #4D96FF;"></span> 函数曲线
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #FFD93D;"></span> 对角线 y=x
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #FF6B35;"></span> 迭代路径
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #6BCF7F;"></span> 初始值
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 相空间标签页 -->
+            <div id="phase-tab" class="tab-content">
+                <div class="canvas-container">
+                    <h2>🔄 相空间映射</h2>
+                    <canvas id="phaseCanvas" class="phase-canvas"></canvas>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="control-section">
+                    <h3>🔢 逻辑映射参数</h3>
+                    <div class="control-group">
+                        <label>增长率 r</label>
+                        <div class="slider-container">
+                            <input type="range" id="logistic-r" min="1" max="4" step="0.01" value="2.5">
+                            <span class="value-display" id="logistic-r-value">2.50</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>初始值 x₀</label>
+                        <div class="slider-container">
+                            <input type="range" id="logistic-x0" min="0" max="1" step="0.01" value="0.5">
+                            <span class="value-display" id="logistic-x0-value">0.50</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>迭代次数</label>
+                        <div class="slider-container">
+                            <input type="range" id="logistic-iterations" min="10" max="200" step="10" value="100">
+                            <span class="value-display" id="logistic-iterations-value">100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>🎬 动画控制</h3>
+                    <button class="button" id="animate-bifurcation">🌊 动画生成分岔图</button>
+                    <button class="button secondary" id="animate-trajectory">📈 动画演示迭代</button>
+                    <button class="button" id="animate-cobweb">🕸️ 轨道图动画</button>
+                    <button class="button danger" id="clear-all">🗑️ 清除所有</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>📊 数据导出</h3>
+                    <button class="button secondary" id="export-bifurcation">📥 导出分岔图数据</button>
+                    <button class="button secondary" id="export-trajectory">📥 导出轨迹数据</button>
+                    <button class="button secondary" id="export-cobweb">📥 导出轨道图数据</button>
+                    <button class="button secondary" id="export-all">📥 导出全部数据</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>🔍 验证测试</h3>
+                    <button class="button" id="verify-accuracy" style="background: linear-gradient(45deg, #6BCF7F, #4D96FF);">🔍 验证轨迹精度</button>
+                    <button class="button" id="verify-chaos" style="background: linear-gradient(45deg, #FFD93D, #FF6B35);">⚡ 验证混沌特性</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>📚 说明文档</h3>
+                    <button class="button secondary" id="show-info">📖 查看说明</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 信息模态框 -->
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>🦋 逻辑映射说明</h2>
+            <div class="formula">
+                xₙ₊₁ = r × xₙ × (1 - xₙ)
+            </div>
+            <p><strong>逻辑映射</strong>是一个简单的数学模型，用于描述种群在有限资源环境中的增长规律。</p>
+            
+            <h3>关键特性：</h3>
+            <ul style="color: #ccc; margin: 10px 0; padding-left: 20px;">
+                <li>当 r < 1 时：种群灭绝</li>
+                <li>当 1 ≤ r < 3 时：种群稳定</li>
+                <li>当 3 ≤ r < 1+√6 时：周期倍增</li>
+                <li>当 r > 1+√6 时：进入混沌状态</li>
+            </ul>
+            
+            <h3>应用领域：</h3>
+            <p style="color: #ccc; line-height: 1.4;">
+                生态学、经济学、物理学、计算机科学等多个领域，
+                用于研究复杂系统的行为模式。
+            </p>
+        </div>
+    </div>
+
+    <script src="logistic-map.js"></script>
+    <script>
+        // 全局变量
+        let logisticMap = null;
+        let currentTab = 'bifurcation';
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeLogisticMap('bifurcationCanvas');
+            initializeTrajectoryCanvas();
+            initializePhaseCanvas();
+            bindEvents();
+        });
+        
+        // 标签页切换
+        function switchTab(tabName) {
+            // 隐藏所有标签页
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的标签页
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // 找到对应的标签按钮并激活
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(button => {
+                if (button.textContent.includes(getTabIcon(tabName))) {
+                    button.classList.add('active');
+                }
+            });
+            
+            // 更新当前标签页
+            setCurrentTab(tabName);
+            
+            // 根据标签页重新初始化对应的canvas
+            if (logisticMap) {
+                switch (tabName) {
+                    case 'bifurcation':
+                        logisticMap.drawBifurcationDiagram();
+                        break;
+                    case 'trajectory':
+                        logisticMap.drawTrajectory();
+                        break;
+                    case 'cobweb':
+                        const cobwebCanvas = document.getElementById('cobwebCanvas');
+                        if (cobwebCanvas) {
+                            const originalCanvas = logisticMap.canvas;
+                            logisticMap.canvas = cobwebCanvas;
+                            logisticMap.drawCobwebDiagram();
+                            logisticMap.canvas = originalCanvas;
+                        }
+                        break;
+                }
+            }
+        }
+        
+        // 获取标签页图标
+        function getTabIcon(tabName) {
+            switch (tabName) {
+                case 'bifurcation': return '🌊';
+                case 'trajectory': return '📈';
+                case 'cobweb': return '🕸️';
+                case 'phase': return '🔄';
+                default: return '';
+            }
+        }
+        
+        // 初始化轨迹画布
+        function initializeTrajectoryCanvas() {
+            const canvas = document.getElementById('trajectoryCanvas');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        // 初始化相空间画布
+        function initializePhaseCanvas() {
+            const canvas = document.getElementById('phaseCanvas');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            // 参数控制
+            const rSlider = document.getElementById('logistic-r');
+            const rValue = document.getElementById('logistic-r-value');
+            rSlider.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                rValue.textContent = value.toFixed(2);
+                updateParameters();
+            });
+            
+            const x0Slider = document.getElementById('logistic-x0');
+            const x0Value = document.getElementById('logistic-x0-value');
+            x0Slider.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                x0Value.textContent = value.toFixed(2);
+                updateParameters();
+            });
+            
+            const iterSlider = document.getElementById('logistic-iterations');
+            const iterValue = document.getElementById('logistic-iterations-value');
+            iterSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                iterValue.textContent = value;
+                updateParameters();
+            });
+            
+            // 动画控制
+            document.getElementById('animate-bifurcation').addEventListener('click', animateBifurcation);
+            document.getElementById('animate-trajectory').addEventListener('click', animateTrajectory);
+            document.getElementById('animate-cobweb').addEventListener('click', animateCobweb);
+            document.getElementById('clear-all').addEventListener('click', clearAll);
+            
+            // 数据导出
+            document.getElementById('export-bifurcation').addEventListener('click', exportBifurcationData);
+            document.getElementById('export-trajectory').addEventListener('click', exportTrajectoryData);
+            document.getElementById('export-cobweb').addEventListener('click', exportCobwebData);
+            document.getElementById('export-all').addEventListener('click', exportAllData);
+            
+            // 验证测试
+            document.getElementById('verify-accuracy').addEventListener('click', verifyTrajectoryAccuracy);
+            document.getElementById('verify-chaos').addEventListener('click', verifyChaosProperties);
+            
+            // 说明文档
+            document.getElementById('show-info').addEventListener('click', showInfoModal);
+            
+            // 模态框关闭
+            document.querySelector('.close').addEventListener('click', closeModal);
+            window.addEventListener('click', (e) => {
+                if (e.target === document.getElementById('info-modal')) {
+                    closeModal();
+                }
+            });
+        }
+        
+        // 更新参数
+        function updateParameters() {
+            if (!logisticMap) return;
+            
+            const r = parseFloat(document.getElementById('logistic-r').value);
+            const x0 = parseFloat(document.getElementById('logistic-x0').value);
+            const iterations = parseInt(document.getElementById('logistic-iterations').value);
+            
+            logisticMap.r = r;
+            logisticMap.x0 = x0;
+            logisticMap.maxIterations = iterations;
+            
+            // 触发实时动画更新
+            if (currentTab === 'bifurcation') {
+                logisticMap.drawBifurcationDiagram();
+            } else {
+                // 在轨迹页面时展示实时动画效果
+                logisticMap.realTimeTrajectoryAnimation();
+            }
+        }
+        
+        // 动画生成分岔图
+        function animateBifurcation() {
+            if (logisticMap) {
+                logisticMap.animateBifurcation();
+            }
+        }
+        
+        // 动画演示迭代
+        function animateTrajectory() {
+            if (logisticMap) {
+                logisticMap.startTrajectory();
+            }
+        }
+        
+        // 轨道图动画
+        function animateCobweb() {
+            if (logisticMap) {
+                // 计算轨道图点
+                logisticMap.calculateCobwebPoints();
+                logisticMap.currentCobwebStep = 0;
+                logisticMap.animateCobwebSteps();
+            }
+        }
+        
+        // 清除所有
+        function clearAll() {
+            if (logisticMap) {
+                logisticMap.clearTrajectory();
+                logisticMap.drawBifurcationDiagram();
+            }
+            
+            // 清除其他画布
+            const canvases = ['trajectoryCanvas', 'phaseCanvas'];
+            canvases.forEach(canvasId => {
+                const canvas = document.getElementById(canvasId);
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+        }
+        
+        // 导出数据
+        function exportBifurcationData() {
+            if (!logisticMap) return;
+            
+            const data = logisticMap.bifurcationData.map(point => ({
+                r: point.r,
+                values: point.values
+            }));
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'logistic-map-bifurcation.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function exportTrajectoryData() {
+            if (!logisticMap) return;
+            
+            const data = {
+                parameters: {
+                    r: logisticMap.r,
+                    x0: logisticMap.x0,
+                    iterations: logisticMap.maxIterations
+                },
+                trajectory: logisticMap.trajectory
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'logistic-map-trajectory.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function exportCobwebData() {
+            if (!logisticMap) return;
+            
+            const data = {
+                parameters: {
+                    r: logisticMap.r,
+                    x0: logisticMap.x0,
+                    iterations: logisticMap.maxIterations
+                },
+                cobwebPoints: logisticMap.cobwebPoints,
+                trajectory: logisticMap.trajectory
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'logistic-map-cobweb.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function exportAllData() {
+            if (!logisticMap) return;
+            
+            const data = {
+                parameters: {
+                    r: logisticMap.r,
+                    x0: logisticMap.x0,
+                    iterations: logisticMap.maxIterations
+                },
+                trajectory: logisticMap.trajectory,
+                bifurcationData: logisticMap.bifurcationData,
+                cobwebPoints: logisticMap.cobwebPoints
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'logistic-map-complete.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // 验证功能
+        function verifyTrajectoryAccuracy() {
+            if (logisticMap && verifyLogisticMapImplementation()) {
+                showNotification('✅ 轨迹精度验证通过！逻辑映射实现正确。', 'success');
+            } else {
+                showNotification('❌ 轨迹精度验证失败！请检查实现。', 'error');
+            }
+        }
+        
+        function verifyChaosProperties() {
+            if (logisticMap) {
+                const r = logisticMap.r;
+                let result = '';
+                
+                if (r < 1) {
+                    result = '种群灭绝 (r < 1)';
+                } else if (r < 3) {
+                    result = '稳定收敛 (1 ≤ r < 3)';
+                } else if (r < 1 + Math.sqrt(6)) {
+                    result = '周期倍增 (3 ≤ r < 3.45)';
+                } else {
+                    result = '混沌状态 (r ≥ 3.45)';
+                }
+                
+                showNotification(`🔍 当前 r=${r.toFixed(2)}: ${result}`, 'info');
+            }
+        }
+        
+        // 显示模态框
+        function showInfoModal() {
+            document.getElementById('info-modal').style.display = 'block';
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('info-modal').style.display = 'none';
+        }
+        
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 1001;
+                max-width: 300px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            // 根据类型设置颜色
+            switch (type) {
+                case 'success':
+                    notification.style.background = 'linear-gradient(45deg, #6BCF7F, #4D96FF)';
+                    break;
+                case 'error':
+                    notification.style.background = 'linear-gradient(45deg, #FF4343, #FF6B35)';
+                    break;
+                default:
+                    notification.style.background = 'linear-gradient(45deg, #FF6B35, #F7931E)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
