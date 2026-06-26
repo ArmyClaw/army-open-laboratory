@@ -486,7 +486,14 @@
       border-top: 1px solid rgba(139,109,70,0.2);
       margin: 1rem 0;
     }
-  </style>
+  .fade-in {
+  animation: sectionFadeIn 0.4s ease-out;
+}
+@keyframes sectionFadeIn {
+  from { opacity:0; transform:translateY(12px); }
+  to { opacity:1; transform:translateY(0); }
+}
+</style>
 </head>
 <body>
 
@@ -671,36 +678,32 @@
       container.innerHTML = '';
 
       let sectionIdx = 0;
-      let charIdx = 0;
-      let currentSectionEl = null;
-      let currentText = '';
-      let allSectionsText = [];
+      let allSectionsHtml = [];
 
-      // Pre-build section HTML
-      data.sections.forEach((s, i) => {
-        allSectionsText.push({
+      // Pre-build section HTML (rendered markdown)
+      data.sections.forEach((s) => {
+        allSectionsHtml.push({
           header: s.icon + ' ' + s.title,
-          body: renderMarkdown(s.content)
+          html: renderMarkdown(s.content)
         });
       });
 
       function renderNextSection() {
-        if (sectionIdx >= allSectionsText.length) {
-          // Done — remove cursor, show collapse buttons
+        if (sectionIdx >= allSectionsHtml.length) {
           const cursor = container.querySelector('.typewriter-cursor');
           if (cursor) cursor.remove();
           return;
         }
 
-        const s = allSectionsText[sectionIdx];
+        const s = allSectionsHtml[sectionIdx];
         const sectionDiv = document.createElement('div');
-        sectionDiv.className = 'section';
+        sectionDiv.className = 'section fade-in';
         sectionDiv.innerHTML = `
           <div class="section-header">
             <span>${s.header}</span>
             <span class="toggle">▼</span>
           </div>
-          <div class="section-body" style="max-height:9999px;opacity:1;"></div>`;
+          <div class="section-body">${s.html}</div>`;
 
         sectionDiv.querySelector('.section-header').addEventListener('click', () => {
           sectionDiv.classList.toggle('collapsed');
@@ -713,51 +716,29 @@
         });
 
         container.appendChild(sectionDiv);
-        currentSectionEl = sectionDiv.querySelector('.section-body');
-        currentText = s.body;
-        charIdx = 0;
-
-        // Add cursor
-        if (container.querySelector('.typewriter-cursor')) {
-          container.querySelector('.typewriter-cursor').remove();
-        }
-        const cursor = document.createElement('span');
-        cursor.className = 'typewriter-cursor';
-        currentSectionEl.appendChild(cursor);
-
-        // Typewrite body
-        typewriterTimer = setInterval(() => {
-          if (charIdx < currentText.length) {
-            const chunk = currentText.substring(0, charIdx + 1);
-            // Insert before cursor
-            const cursorEl = currentSectionEl.querySelector('.typewriter-cursor');
-            const textNode = document.createTextNode(currentText[charIdx]);
-            currentSectionEl.insertBefore(textNode, cursorEl);
-            charIdx++;
-
-            // Auto-scroll
-            currentSectionEl.scrollTop = currentSectionEl.scrollHeight;
-          } else {
-            clearInterval(typewriterTimer);
-            typewriterTimer = null;
-            sectionIdx++;
-            setTimeout(renderNextSection, 150);
-          }
-        }, 5); // Fast typing
+        sectionIdx++;
+        setTimeout(renderNextSection, 200);
       }
 
       renderNextSection();
     }
 
-    // Simple markdown to HTML (inline)
+    // Markdown to HTML
     function renderMarkdown(text) {
       if (typeof text !== 'string') text = String(text || '');
       return text
+        .replace(/^### (.+)$/gm, '<h4>$1</h4>')
+        .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^# (.+)$/gm, '<h2>$1</h2>')
         .replace(/^>\s*(.+)/gm, '<blockquote>$1</blockquote>')
-        .replace(/^(\*\*[^*]+\*\*)\s*[:：]?(.*)/gm, '<strong>$1</strong>$2')
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/^- (.+)$/gm, '• $1')
-        .replace(/\n{2,}/g, '\n');
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+        .replace(/\n{2,}/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/^(?!<[hluodbpc])/gm, function(m) { return m; });
     }
 
     // ═══════ Merge Mode ═══════
