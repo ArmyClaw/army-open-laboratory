@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sonic Fingerprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+
+/* ===== VARIABLES ===== */
+:root{
+  --bg:#0a0a0f;
+  --bg2:#12121a;
+  --cyan:#00f0ff;
+  --magenta:#ff00aa;
+  --amber:#ffaa00;
+  --text:#e0e0f0;
+  --dim:#555568;
+  --radius:12px;
+}
+
+/* ===== GLOBAL ===== */
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Space Mono',monospace;
+  font-size:14px;
+  display:flex;
+  flex-direction:column;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+/* Noise overlay */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ===== HEADER ===== */
+.header{
+  text-align:center;
+  padding:12px 16px 6px;
+  flex-shrink:0;
+}
+.header h1{
+  font-family:'Major Mono Display',monospace;
+  font-size:clamp(18px,4vw,28px);
+  letter-spacing:0.15em;
+  background:linear-gradient(90deg,var(--cyan),var(--magenta));
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-transform:lowercase;
+}
+.header .hint{
+  font-size:11px;
+  color:var(--dim);
+  margin-top:2px;
+  letter-spacing:0.05em;
+  min-height:14px;
+  transition:opacity .3s;
+}
+
+/* ===== MAIN STAGE ===== */
+.stage{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  padding:0 12px;
+  gap:8px;
+}
+
+/* Canvas wrapper holds the draw canvas */
+.canvas-wrap{
+  position:relative;
+  flex:1;
+  min-height:0;
+  border-radius:var(--radius);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.05);
+}
+#drawCanvas{
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  cursor:crosshair;
+  touch-action:none;
+  display:block;
+}
+
+/* Scale labels */
+.scale-labels{
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:36px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-around;
+  align-items:center;
+  font-size:9px;
+  color:var(--dim);
+  pointer-events:none;
+  z-index:5;
+}
+.scale-labels span{
+  background:rgba(10,10,15,0.7);
+  padding:1px 4px;
+  border-radius:3px;
+}
+
+/* Playhead overlay canvas */
+#fxCanvas{
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  pointer-events:none;
+}
+
+/* ===== SPECTRUM ===== */
+.spectrum-wrap{
+  height:54px;
+  flex-shrink:0;
+  border-radius:var(--radius);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.05);
+  position:relative;
+}
+#spectrumCanvas{
+  width:100%;height:100%;
+  display:block;
+}
+
+/* ===== CONTROLS ===== */
+.controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:8px 4px 12px;
+  flex-shrink:0;
+}
+
+.btn{
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+  font-weight:700;
+  color:var(--text);
+  background:var(--bg2);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;
+  padding:8px 16px;
+  cursor:pointer;
+  letter-spacing:0.05em;
+  transition:all .15s ease;
+  white-space:nowrap;
+}
+.btn:hover{
+  border-color:var(--cyan);
+  box-shadow:0 0 12px rgba(0,240,255,0.15);
+  color:var(--cyan);
+}
+.btn:active{
+  transform:scale(0.96);
+}
+.btn.primary{
+  border-color:var(--cyan);
+  color:var(--cyan);
+  box-shadow:0 0 10px rgba(0,240,255,0.1);
+}
+.btn.primary:hover{
+  box-shadow:0 0 20px rgba(0,240,255,0.3);
+  background:rgba(0,240,255,0.05);
+}
+.btn.primary.playing{
+  border-color:var(--amber);
+  color:var(--amber);
+  box-shadow:0 0 20px rgba(255,170,0,0.25);
+}
+.btn.magenta{
+  border-color:var(--magenta);
+  color:var(--magenta);
+}
+.btn.magenta:hover{
+  box-shadow:0 0 16px rgba(255,0,170,0.2);
+  background:rgba(255,0,170,0.05);
+}
+
+.speed-group{
+  display:flex;
+  gap:2px;
+  border-radius:8px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.speed-btn{
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  font-weight:700;
+  color:var(--dim);
+  background:var(--bg2);
+  border:none;
+  padding:8px 10px;
+  cursor:pointer;
+  transition:all .15s;
+}
+.speed-btn:hover{
+  color:var(--text);
+}
+.speed-btn.active{
+  color:var(--amber);
+  background:rgba(255,170,0,0.08);
+}
+
+/* Waveform selector */
+.wave-group{
+  display:flex;
+  gap:2px;
+  border-radius:8px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.wave-btn{
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  font-weight:700;
+  color:var(--dim);
+  background:var(--bg2);
+  border:none;
+  padding:8px 10px;
+  cursor:pointer;
+  transition:all .15s;
+}
+.wave-btn:hover{color:var(--text)}
+.wave-btn.active{
+  color:var(--cyan);
+  background:rgba(0,240,255,0.06);
+}
+
+/* Divider */
+.divider{
+  width:1px;
+  height:24px;
+  background:rgba(255,255,255,0.08);
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+  .controls{gap:6px}
+  .btn{padding:7px 12px;font-size:11px}
+  .speed-btn,.wave-btn{padding:7px 8px;font-size:10px}
+  .scale-labels span{font-size:8px}
+  .spectrum-wrap{height:44px}
+}
+
+/* Hidden audio for nothing — pure web audio */
+.hidden{display:none!important}
+
+/* Tooltip pulse on hint */
+.hint.glow{
+  animation:hintPulse 2s ease-in-out infinite;
+}
+@keyframes hintPulse{
+  0%,100%{opacity:0.5}
+  50%{opacity:1}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>sonic fingerprint</h1>
+  <div class="hint glow" id="hint">Draw your sonic signature</div>
+</div>
+
+<div class="stage">
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="drawCanvas"></canvas>
+    <canvas id="fxCanvas"></canvas>
+    <div class="scale-labels" id="scaleLabels"></div>
+  </div>
+  <div class="spectrum-wrap">
+    <canvas id="spectrumCanvas"></canvas>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn primary" id="playBtn" disabled style="opacity:0.4">▶ Play</button>
+  <div class="divider"></div>
+  <div class="speed-group" id="speedGroup">
+    <button class="speed-btn" data-speed="0.5">0.5×</button>
+    <button class="speed-btn active" data-speed="1">1×</button>
+    <button class="speed-btn" data-speed="1.5">1.5×</button>
+    <button class="speed-btn" data-speed="2">2×</button>
+  </div>
+  <div class="divider"></div>
+  <div class="wave-group" id="waveGroup">
+    <button class="wave-btn active" data-wave="sine">sine</button>
+    <button class="wave-btn" data-wave="triangle">tri</button>
+    <button class="wave-btn" data-wave="sawtooth">saw</button>
+  </div>
+  <div class="divider"></div>
+  <button class="btn magenta" id="layerBtn" disabled style="opacity:0.4">+ Layer</button>
+  <button class="btn" id="clearBtn">Clear</button>
+  <button class="btn" id="exportWavBtn">WAV</button>
+  <button class="btn" id="exportPngBtn">PNG</button>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   CONFIG
+   ================================================================ */
+const PENTATONIC = [130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00]; // C3-A4 two octave pentatonic
+const NOTE_NAMES = ['A4','G4','E4','D4','C4','A3','G3','E3','D3','C3'];
+const BG_COLOR = '#0a0a0f';
+const LAYER_COLORS = ['#00f0ff', '#ff00aa'];
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let layers = [[]];        // array of stroke layers; each layer = array of {x,y,t,v}
+let currentLayer = 0;     // 0 or 1
+let isDrawing = false;
+let drawStartTime = 0;
+let lastPoint = null;
+let particles = [];
+let isPlaying = false;
+let playSpeed = 1;
+let waveType = 'sine';
+let audioCtx = null;
+let analyser = null;
+let playRafId = null;
+
+/* ================================================================
+   DOM
+   ================================================================ */
+const drawCanvas = document.getElementById('drawCanvas');
+const fxCanvas   = document.getElementById('fxCanvas');
+const specCanvas = document.getElementById('spectrumCanvas');
+const dctx = drawCanvas.getContext('2d');
+const fctx = fxCanvas.getContext('2d');
+const sctx = specCanvas.getContext('2d');
+const hintEl = document.getElementById('hint');
+const playBtn = document.getElementById('playBtn');
+const clearBtn = document.getElementById('clearBtn');
+const layerBtn = document.getElementById('layerBtn');
+const exportWavBtn = document.getElementById('exportWavBtn');
+const exportPngBtn = document.getElementById('exportPngBtn');
+const speedGroup = document.getElementById('speedGroup');
+const waveGroup = document.getElementById('waveGroup');
+const scaleLabels = document.getElementById('scaleLabels');
+
+/* ================================================================
+   CANVAS SIZING
+   ================================================================ */
+function resizeCanvases(){
+  const wrap = document.getElementById('canvasWrap');
+  const w = wrap.clientWidth;
+  const h = wrap.clientHeight;
+  const dpr = window.devicePixelRatio || 1;
+  [drawCanvas, fxCanvas].forEach(function(c){
+    c.width = w * dpr;
+    c.height = h * dpr;
+  });
+  dctx.scale(dpr,dpr);
+  fctx.scale(dpr,dpr);
+  // spectrum
+  const sw = specCanvas.clientWidth;
+  const sh = specCanvas.clientHeight;
+  specCanvas.width = sw * dpr;
+  specCanvas.height = sh * dpr;
+  sctx.scale(dpr,dpr);
+  redrawAll();
+}
+
+/* ================================================================
+   SCALE LABELS
+   ================================================================ */
+(function buildScaleLabels(){
+  // top = C5, bottom = C4
+  for(var i = NOTE_NAMES.length - 1; i >= 0; i--){
+    var s = document.createElement('span');
+    s.textContent = NOTE_NAMES[i];
+    scaleLabels.appendChild(s);
+  }
+})();
+
+/* ================================================================
+   DRAWING
+   ================================================================ */
+function getPos(e){
+  var rect = drawCanvas.getBoundingClientRect();
+  var cx, cy;
+  if(e.touches && e.touches.length){
+    cx = e.touches[0].clientX;
+    cy = e.touches[0].clientY;
+  } else {
+    cx = e.clientX;
+    cy = e.clientY;
+  }
+  return { x: cx - rect.left, y: cy - rect.top, t: performance.now() };
+}
+
+function yToNoteIndex(y){
+  var h = drawCanvas.clientHeight;
+  var idx = Math.floor((1 - y / h) * PENTATONIC.length);
+  if(idx < 0) idx = 0;
+  if(idx >= PENTATONIC.length) idx = PENTATONIC.length - 1;
+  return idx;
+}
+
+function startDraw(e){
+  e.preventDefault();
+  if(!audioCtx) initAudio();
+  // resume context on user gesture
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+
+  isDrawing = true;
+  drawStartTime = performance.now();
+  var p = getPos(e);
+  p.v = 0;
+  layers[currentLayer] = [p];
+  lastPoint = p;
+  setHint('Keep drawing...');
+}
+
+function continueDraw(e){
+  if(!isDrawing) return;
+  e.preventDefault();
+  var p = getPos(e);
+  // velocity
+  var dt = p.t - lastPoint.t;
+  var dx = p.x - lastPoint.x;
+  var dy = p.y - lastPoint.y;
+  var dist = Math.sqrt(dx*dx + dy*dy);
+  var speed = dt > 0 ? dist / dt : 0; // px per ms
+  p.v = Math.min(speed, 3); // clamp
+
+  // Add point
+  layers[currentLayer].push(p);
+
+  // Real-time audio in record mode — throttle to avoid machine-gun effect
+  if(isDrawing && audioCtx){
+    var idx = yToNoteIndex(p.y);
+    var freq = PENTATONIC[idx];
+    var vel = 0.12 + Math.min(p.v, 1.5) * 0.2;
+    // Only play if last note was >80ms ago (throttle)
+    if(!continueDraw._lastNote || p.t - continueDraw._lastNote > 80){
+      playNote(freq, vel, 0.3, waveType);
+      continueDraw._lastNote = p.t;
+    }
+  }
+
+  // Spawn particles
+  for(var i=0;i<3;i++){
+    particles.push({
+      x: p.x,
+      y: p.y,
+      vx: (Math.random()-0.5)*2,
+      vy: (Math.random()-0.5)*2,
+      life: 1,
+      color: LAYER_COLORS[currentLayer]
+    });
+  }
+
+  lastPoint = p;
+  redrawAll();
+}
+
+function endDraw(e){
+  if(!isDrawing) return;
+  isDrawing = false;
+  var pts = layers[currentLayer];
+  if(pts.length > 2){
+    // playable
+    playBtn.disabled = false;
+    playBtn.style.opacity = '1';
+    if(currentLayer === 0){
+      layerBtn.disabled = false;
+      layerBtn.style.opacity = '1';
+      setHint('Press play to hear your fingerprint');
+    } else {
+      setHint('Duet ready — press play');
+    }
+  } else {
+    layers[currentLayer] = [];
+    setHint('Draw your sonic signature');
+  }
+}
+
+/* Stroke drawing helpers */
+function strokePath(ctx, points, color){
+  if(points.length < 2) return;
+  ctx.save();
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 12;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  // quadratic curve interpolation
+  for(var i=1; i<points.length-1; i++){
+    var xc = (points[i].x + points[i+1].x)/2;
+    var yc = (points[i].y + points[i+1].y)/2;
+    ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+  }
+  ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
+  ctx.stroke();
+  // second pass for more glow
+  ctx.shadowBlur = 24;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function redrawAll(){
+  var w = drawCanvas.clientWidth;
+  var h = drawCanvas.clientHeight;
+  dctx.clearRect(0,0,w,h);
+  // subtle grid
+  drawGrid(w,h);
+  // draw layers
+  for(var li=0; li<layers.length; li++){
+    if(layers[li] && layers[li].length > 1){
+      // color based on velocity segments
+      drawVelocityLayer(layers[li], LAYER_COLORS[li] || LAYER_COLORS[0]);
+    }
+  }
+}
+
+function drawGrid(w,h){
+  dctx.save();
+  dctx.strokeStyle = 'rgba(255,255,255,0.02)';
+  dctx.lineWidth = 1;
+  var rows = PENTATONIC.length;
+  for(var i=1;i<rows;i++){
+    var y = (i/rows)*h;
+    dctx.beginPath();
+    dctx.moveTo(0,y);
+    dctx.lineTo(w,y);
+    dctx.stroke();
+  }
+  dctx.restore();
+}
+
+function drawVelocityLayer(points, baseColor){
+  if(points.length < 2) return;
+  // Draw with velocity-based color blend: slow=baseColor(cyan/magenta), fast→amber
+  for(var i=1; i<points.length; i++){
+    var p0 = points[i-1];
+    var p1 = points[i];
+    var speed = p1.v || 0;
+    var color = blendSpeedColor(speed, baseColor);
+    dctx.save();
+    dctx.shadowColor = color;
+    dctx.shadowBlur = 14;
+    dctx.strokeStyle = color;
+    dctx.lineWidth = 3 + speed * 1.5;
+    dctx.lineCap = 'round';
+    dctx.beginPath();
+    dctx.moveTo(p0.x, p0.y);
+    if(i < points.length - 1){
+      var p2 = points[i+1];
+      var xc = (p1.x + p2.x)/2;
+      var yc = (p1.y + p2.y)/2;
+      dctx.quadraticCurveTo(p1.x, p1.y, xc, yc);
+    } else {
+      dctx.lineTo(p1.x, p1.y);
+    }
+    dctx.stroke();
+    dctx.restore();
+  }
+}
+
+function blendSpeedColor(speed, baseHex){
+  // speed 0 = baseHex, speed>1.5 → amber
+  var base = hexToRgb(baseHex);
+  var amber = {r:255,g:170,b:0};
+  var t = Math.min(speed / 1.5, 1);
+  var r = Math.round(base.r + (amber.r - base.r)*t);
+  var g = Math.round(base.g + (amber.g - base.g)*t);
+  var b = Math.round(base.b + (amber.b - base.b)*t);
+  return 'rgb('+r+','+g+','+b+')';
+}
+
+function hexToRgb(hex){
+  var h = hex.replace('#','');
+  return {
+    r: parseInt(h.substring(0,2),16),
+    g: parseInt(h.substring(2,4),16),
+    b: parseInt(h.substring(4,6),16)
+  };
+}
+
+/* ================================================================
+   PARTICLES (draw on fxCanvas)
+   ================================================================ */
+function updateParticles(){
+  var w = fxCanvas.clientWidth;
+  var h = fxCanvas.clientHeight;
+  fctx.clearRect(0,0,w,h);
+  for(var i=particles.length-1; i>=0; i--){
+    var p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= 0.02;
+    if(p.life <= 0){
+      particles.splice(i,1);
+      continue;
+    }
+    fctx.save();
+    fctx.globalAlpha = p.life;
+    fctx.shadowColor = p.color;
+    fctx.shadowBlur = 8;
+    fctx.fillStyle = p.color;
+    fctx.beginPath();
+    fctx.arc(p.x, p.y, 2*p.life, 0, Math.PI*2);
+    fctx.fill();
+    fctx.restore();
+  }
+  // playhead
+  if(isPlaying){
+    drawPlayhead();
+  }
+  requestAnimationFrame(updateParticles);
+}
+
+/* ================================================================
+   AUDIO ENGINE
+   ================================================================ */
+function initAudio(){
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 1024;
+  analyser.connect(audioCtx.destination);
+  startSpectrum();
+}
+
+function playNote(freq, velocity, duration, type){
+  if(!audioCtx) return;
+  var now = audioCtx.currentTime;
+  var osc = audioCtx.createOscillator();
+  var gain = audioCtx.createGain();
+  var filter = audioCtx.createBiquadFilter();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+
+  // Lowpass filter to soften harsh harmonics
+  filter.type = 'lowpass';
+  filter.frequency.value = freq * 4;
+  filter.Q.value = 0.7;
+
+  // Envelope: attack 30ms, sustain, release 80ms (gentler)
+  var attack = 0.03;
+  var release = Math.max(0.08, duration * 0.5);
+  var sustainEnd = now + duration;
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(velocity, now + attack);
+  gain.gain.setValueAtTime(velocity, sustainEnd);
+  gain.gain.exponentialRampToValueAtTime(0.0001, sustainEnd + release);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(analyser);
+  osc.start(now);
+  osc.stop(sustainEnd + release + 0.01);
+}
+
+/* ================================================================
+   PLAYBACK
+   ================================================================ */
+var playState = null;
+
+function startPlayback(){
+  if(isPlaying) return;
+  // check if any layer has points
+  var hasData = layers.some(function(l){ return l && l.length > 2; });
+  if(!hasData) return;
+
+  if(!audioCtx) initAudio();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+
+  isPlaying = true;
+  playBtn.textContent = '■ Stop';
+  playBtn.classList.add('playing');
+  setHint('Playing...');
+
+  // Merge all layer points into a timeline
+  // Each layer plays independently but we track a global start time
+  var now = audioCtx.currentTime;
+  // For simplicity, schedule all notes from all layers
+  layers.forEach(function(points, layerIdx){
+    if(!points || points.length < 2) return;
+    var t0 = points[0].t;
+    var color = LAYER_COLORS[layerIdx] || LAYER_COLORS[0];
+    for(var i=1; i<points.length; i++){
+      var dt = (points[i].t - t0) / playSpeed / 1000; // seconds
+      if(dt < 0) dt = 0;
+      var idx = yToNoteIndex(points[i].y);
+      var freq = PENTATONIC[idx];
+      var vel = 0.1 + Math.min(points[i].v || 0.3, 1.5) * 0.2;
+      var noteDur = 0.15;
+      // schedule with lowpass filter and gentler envelope
+      (function(f, v, d, ty, time){
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        var filter = audioCtx.createBiquadFilter();
+        osc.type = ty;
+        osc.frequency.value = f;
+        filter.type = 'lowpass';
+        filter.frequency.value = f * 4;
+        filter.Q.value = 0.7;
+        var attack = 0.03;
+        var release = Math.max(0.08, d * 0.6);
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(v, time + attack);
+        gain.gain.setValueAtTime(v, time + d);
+        gain.gain.exponentialRampToValueAtTime(0.0001, time + d + release);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(analyser);
+        osc.start(time);
+        osc.stop(time + d + release + 0.01);
+      })(freq, vel, noteDur, waveType, now + dt);
+    }
+  });
+
+  // Visual playhead — find total duration
+  var maxT = 0;
+  layers.forEach(function(points){
+    if(!points || !points.length) return;
+    var dur = (points[points.length-1].t - points[0].t) / playSpeed;
+    if(dur > maxT) maxT = dur;
+  });
+
+  playState = {
+    startWall: performance.now(),
+    duration: maxT,
+    layerColors: layers.map(function(_,i){ return LAYER_COLORS[i] || LAYER_COLORS[0]; })
+  };
+
+  // Stop after duration + tail
+  setTimeout(function(){
+    stopPlayback();
+  }, maxT + 800);
+}
+
+function stopPlayback(){
+  isPlaying = false;
+  playBtn.textContent = '▶ Play';
+  playBtn.classList.remove('playing');
+  playState = null;
+  var hasData = layers.some(function(l){ return l && l.length > 2; });
+  if(hasData){
+    setHint(currentLayer === 0 ? 'Press play to hear your fingerprint' : 'Duet ready — press play');
+  }
+}
+
+function drawPlayhead(){
+  if(!playState) return;
+  var elapsed = performance.now() - playState.startWall;
+  var progress = elapsed / playState.duration;
+  if(progress > 1) progress = 1;
+
+  // For each layer, draw a glowing dot at the current position
+  layers.forEach(function(points, layerIdx){
+    if(!points || points.length < 2) return;
+    var t0 = points[0].t;
+    var targetT = t0 + elapsed * playSpeed;
+    // find point
+    var pos = null;
+    for(var i=1; i<points.length; i++){
+      if(points[i].t >= targetT){
+        // interpolate
+        var p0 = points[i-1], p1 = points[i];
+        var ratio = (targetT - p0.t) / (p1.t - p0.t || 1);
+        pos = {
+          x: p0.x + (p1.x - p0.x) * ratio,
+          y: p0.y + (p1.y - p0.y) * ratio
+        };
+        break;
+      }
+    }
+    if(!pos && points.length){
+      pos = points[points.length-1];
+    }
+    if(pos){
+      var color = LAYER_COLORS[layerIdx] || LAYER_COLORS[0];
+      fctx.save();
+      fctx.shadowColor = color;
+      fctx.shadowBlur = 20;
+      fctx.fillStyle = '#fff';
+      fctx.beginPath();
+      fctx.arc(pos.x, pos.y, 6, 0, Math.PI*2);
+      fctx.fill();
+      fctx.shadowBlur = 30;
+      fctx.fillStyle = color;
+      fctx.beginPath();
+      fctx.arc(pos.x, pos.y, 3, 0, Math.PI*2);
+      fctx.fill();
+      fctx.restore();
+    }
+  });
+}
+
+/* ================================================================
+   SPECTRUM
+   ================================================================ */
+function startSpectrum(){
+  var bufLen = analyser.frequencyBinCount;
+  var data = new Uint8Array(bufLen);
+  var waveData = new Uint8Array(bufLen);
+
+  function draw(){
+    var w = specCanvas.clientWidth;
+    var h = specCanvas.clientHeight;
+    sctx.clearRect(0,0,w,h);
+
+    analyser.getByteFrequencyData(data);
+    analyser.getByteTimeDomainData(waveData);
+
+    // Frequency bars
+    var bars = 64;
+    var barW = w / bars;
+    for(var i=0; i<bars; i++){
+      var v = data[i * 2] / 255;
+      var bh = v * h * 0.7;
+      var hue = i < bars/2 ? 180 + i*2 : 320 - (i-bars/2)*2;
+      sctx.fillStyle = 'hsla('+hue+',100%,50%,0.15)';
+      sctx.fillRect(i*barW, h-bh, barW-1, bh);
+    }
+
+    // Waveform
+    sctx.strokeStyle = 'rgba(0,240,255,0.4)';
+    sctx.lineWidth = 1;
+    sctx.beginPath();
+    var slice = w / bufLen;
+    for(var j=0; j<bufLen; j++){
+      var yv = waveData[j]/128 * h/2;
+      var x = j * slice;
+      if(j===0) sctx.moveTo(x, yv);
+      else sctx.lineTo(x, yv);
+    }
+    sctx.stroke();
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* ================================================================
+   WAV EXPORT
+   ================================================================ */
+function exportWav(){
+  var hasData = layers.some(function(l){ return l && l.length > 2; });
+  if(!hasData){ setHint('Draw something first!'); return; }
+
+  // Calculate total duration in seconds
+  var maxDur = 0;
+  layers.forEach(function(points){
+    if(!points || points.length < 2) return;
+    var dur = (points[points.length-1].t - points[0].t) / playSpeed / 1000;
+    if(dur > maxDur) maxDur = dur;
+  });
+  maxDur += 0.5; // tail
+  if(maxDur < 0.5) maxDur = 1;
+
+  var sampleRate = 44100;
+  var numSamples = Math.ceil(maxDur * sampleRate);
+  var offline = new OfflineAudioContext(2, numSamples, sampleRate);
+
+  // Re-create analyser chain manually
+  layers.forEach(function(points, layerIdx){
+    if(!points || points.length < 2) return;
+    var t0 = points[0].t;
+    for(var i=1; i<points.length; i++){
+      var dt = (points[i].t - t0) / playSpeed / 1000;
+      if(dt < 0) dt = 0;
+      var idx = yToNoteIndex(points[i].y);
+      var freq = PENTATONIC[idx];
+      var vel = 0.1 + Math.min(points[i].v || 0.3, 1.5) * 0.2;
+      var noteDur = 0.15;
+      var osc = offline.createOscillator();
+      var gain = offline.createGain();
+      osc.type = waveType;
+      osc.frequency.value = freq;
+      var time = dt;
+      var filter = offline.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = freq * 4;
+      filter.Q.value = 0.7;
+      var attack = 0.03;
+      var release = Math.max(0.08, noteDur * 0.6);
+      gain.gain.setValueAtTime(0, time);
+      gain.gain.linearRampToValueAtTime(vel, time + attack);
+      gain.gain.setValueAtTime(vel, time + noteDur);
+      gain.gain.exponentialRampToValueAtTime(0.0001, time + noteDur + release);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(offline.destination);
+      osc.start(time);
+      osc.stop(time + noteDur + release + 0.01);
+    }
+  });
+
+  setHint('Rendering WAV...');
+  offline.startRendering().then(function(buffer){
+    var wav = audioBufferToWav(buffer);
+    var blob = new Blob([wav], {type:'audio/wav'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'sonic-fingerprint.wav';
+    a.click();
+    URL.revokeObjectURL(url);
+    setHint('WAV exported!');
+    setTimeout(function(){
+      setHint(currentLayer === 0 ? 'Press play to hear your fingerprint' : 'Duet ready — press play');
+    }, 2000);
+  });
+}
+
+function audioBufferToWav(buffer){
+  var numCh = buffer.numberOfChannels;
+  var sampleRate = buffer.sampleRate;
+  var numSamples = buffer.length;
+  var bytesPerSample = 2;
+  var blockAlign = numCh * bytesPerSample;
+  var dataSize = numSamples * blockAlign;
+  var bufferSize = 44 + dataSize;
+  var arr = new ArrayBuffer(bufferSize);
+  var view = new DataView(arr);
+
+  function writeStr(off, str){
+    for(var i=0;i<str.length;i++) view.setUint8(off+i, str.charCodeAt(i));
+  }
+  writeStr(0,'RIFF');
+  view.setUint32(4, 36+dataSize, true);
+  writeStr(8,'WAVE');
+  writeStr(12,'fmt ');
+  view.setUint32(16,16,true);
+  view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true);
+  view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*blockAlign,true);
+  view.setUint16(32,blockAlign,true);
+  view.setUint16(34,16,true);
+  writeStr(36,'data');
+  view.setUint32(40,dataSize,true);
+
+  var offset = 44;
+  for(var i=0; i<numSamples; i++){
+    for(var ch=0; ch<numCh; ch++){
+      var sample = Math.max(-1, Math.min(1, buffer.getChannelData(ch)[i]));
+      sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+      view.setInt16(offset, sample, true);
+      offset += 2;
+    }
+  }
+  return arr;
+}
+
+/* ================================================================
+   PNG EXPORT
+   ================================================================ */
+function exportPng(){
+  var hasData = layers.some(function(l){ return l && l.length > 2; });
+  if(!hasData){ setHint('Draw something first!'); return; }
+  // Create a temp canvas with solid background
+  var w = drawCanvas.width;
+  var h = drawCanvas.height;
+  var tmp = document.createElement('canvas');
+  tmp.width = w;
+  tmp.height = h;
+  var tctx = tmp.getContext('2d');
+  tctx.fillStyle = BG_COLOR;
+  tctx.fillRect(0,0,w,h);
+  tctx.drawImage(drawCanvas, 0, 0);
+  var url = tmp.toDataURL('image/png');
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'sonic-fingerprint.png';
+  a.click();
+  setHint('PNG exported!');
+  setTimeout(function(){
+    setHint(currentLayer === 0 ? 'Press play to hear your fingerprint' : 'Duet ready — press play');
+  }, 2000);
+}
+
+/* ================================================================
+   LAYER MANAGEMENT
+   ================================================================ */
+function addLayer(){
+  if(currentLayer >= 1) return; // max 2 layers
+  if(layers[0].length < 3) return;
+  currentLayer = 1;
+  layers[1] = [];
+  layerBtn.disabled = true;
+  layerBtn.style.opacity = '0.4';
+  setHint('Add a second voice — draw in magenta');
+}
+
+function clearAll(){
+  stopPlayback();
+  layers = [[]];
+  currentLayer = 0;
+  particles = [];
+  playBtn.disabled = true;
+  playBtn.style.opacity = '0.4';
+  layerBtn.disabled = true;
+  layerBtn.style.opacity = '0.4';
+  redrawAll();
+  setHint('Draw your sonic signature');
+}
+
+/* ================================================================
+   HINTS
+   ================================================================ */
+function setHint(text){
+  hintEl.textContent = text;
+}
+
+/* ================================================================
+   EVENT BINDING
+   ================================================================ */
+// Drawing — mouse
+drawCanvas.addEventListener('mousedown', startDraw);
+drawCanvas.addEventListener('mousemove', continueDraw);
+window.addEventListener('mouseup', endDraw);
+
+// Drawing — touch
+drawCanvas.addEventListener('touchstart', startDraw, {passive:false});
+drawCanvas.addEventListener('touchmove', continueDraw, {passive:false});
+window.addEventListener('touchend', endDraw);
+window.addEventListener('touchcancel', endDraw);
+
+// Play
+playBtn.addEventListener('click', function(){
+  if(isPlaying) stopPlayback();
+  else startPlayback();
+});
+
+// Clear
+clearBtn.addEventListener('click', clearAll);
+
+// Layer
+layerBtn.addEventListener('click', addLayer);
+
+// Export
+exportWavBtn.addEventListener('click', exportWav);
+exportPngBtn.addEventListener('click', exportPng);
+
+// Speed
+speedGroup.addEventListener('click', function(e){
+  var btn = e.target.closest('.speed-btn');
+  if(!btn) return;
+  document.querySelectorAll('.speed-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  playSpeed = parseFloat(btn.dataset.speed);
+});
+
+// Waveform
+waveGroup.addEventListener('click', function(e){
+  var btn = e.target.closest('.wave-btn');
+  if(!btn) return;
+  document.querySelectorAll('.wave-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  waveType = btn.dataset.wave;
+});
+
+// Resize
+window.addEventListener('resize', function(){
+  clearTimeout(window._rt);
+  window._rt = setTimeout(resizeCanvases, 100);
+});
+
+// Prevent scroll on touch within canvas
+document.addEventListener('touchmove', function(e){
+  if(e.target === drawCanvas) e.preventDefault();
+}, {passive:false});
+
+/* ================================================================
+   INIT
+   ================================================================ */
+requestAnimationFrame(function(){
+  resizeCanvases();
+  updateParticles();
+});
+
+})();
+</script>
+</body>
+</html>

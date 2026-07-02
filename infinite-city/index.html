@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>无限城市图鉴 · Infinite City Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ========== RESET & BASE ========== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --parchment:#f0e0c0;
+  --parchment-dark:#d4c498;
+  --parchment-light:#faf2dc;
+  --ink:#3a2817;
+  --ink-light:#5c4424;
+  --ink-faded:#8a7050;
+  --sepia:#8b6914;
+  --crimson:#a02020;
+  --crimson-dark:#6b1414;
+  --blue-ink:#1a3a5c;
+  --gold:#b8860b;
+  --gold-light:#d4a838;
+  --shadow:rgba(58,40,23,0.25);
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:'Crimson Text',Georgia,serif;
+  background:var(--parchment);
+  color:var(--ink);
+  min-height:100vh;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+/* parchment texture overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 20% 30%,rgba(139,105,20,0.08) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 70%,rgba(107,20,20,0.05) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 50%,rgba(180,150,80,0.06) 0%,transparent 70%);
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.4;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 0 0.1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.container{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:20px}
+
+/* ========== HEADER ========== */
+.header{text-align:center;padding:30px 0 20px}
+.header h1{
+  font-family:'Cinzel',serif;font-weight:900;font-size:clamp(1.8rem,5vw,3rem);
+  color:var(--ink);letter-spacing:3px;text-transform:uppercase;
+  text-shadow:1px 1px 0 var(--parchment-dark),2px 2px 4px var(--shadow);
+}
+.header .subtitle{
+  font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:4px;
+  color:var(--ink-faded);text-transform:uppercase;margin-top:4px;
+}
+.header .ornament{
+  display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0;
+  color:var(--gold);font-size:1.2rem;
+}
+.header .ornament::before,.header .ornament::after{
+  content:'';height:1px;width:80px;
+  background:linear-gradient(to right,transparent,var(--gold),transparent);
+}
+
+/* ========== CITY CARD ========== */
+.city-card{
+  background:var(--parchment-light);
+  border:1px solid var(--parchment-dark);
+  border-radius:4px;
+  padding:0;
+  box-shadow:0 2px 20px var(--shadow),inset 0 0 60px rgba(180,150,80,0.1);
+  position:relative;
+  overflow:hidden;
+}
+/* corner decorations */
+.city-card::before,.city-card::after{
+  content:'';position:absolute;width:30px;height:30px;
+  border:2px solid var(--gold);opacity:0.4;
+}
+.city-card::before{top:10px;left:10px;border-right:none;border-bottom:none}
+.city-card::after{bottom:10px;right:10px;border-left:none;border-top:none}
+
+.skyline-section{
+  position:relative;width:100%;height:200px;
+  background:linear-gradient(to bottom,#2a1a0e 0%,#4a3520 30%,#7a5c34 60%,#a08050 85%,#c4a468 100%);
+  overflow:hidden;
+}
+@media(max-width:600px){.skyline-section{height:160px}}
+
+.skyline-section svg{width:100%;height:100%;display:block}
+
+.city-name-section{padding:20px 30px;text-align:center}
+.city-name{
+  font-family:'Cinzel',serif;font-weight:700;
+  font-size:clamp(1.6rem,5vw,2.8rem);
+  color:var(--ink);
+  letter-spacing:2px;
+}
+.city-seed{
+  font-family:'JetBrains Mono',monospace;font-size:0.8rem;
+  color:var(--ink-faded);margin-top:4px;
+}
+
+/* ========== INFO GRID ========== */
+.info-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--parchment-dark);margin:0;
+}
+@media(max-width:600px){.info-grid{grid-template-columns:1fr}}
+.info-cell{
+  background:var(--parchment-light);padding:14px 20px;
+}
+.info-label{
+  font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:2px;
+  color:var(--sepia);margin-bottom:4px;
+}
+.info-value{
+  font-family:'Crimson Text',serif;font-size:1.05rem;
+  color:var(--ink);font-weight:600;
+}
+
+/* ========== LORE SECTION ========== */
+.lore-section{padding:20px 30px}
+.lore-block{margin-bottom:16px}
+.lore-label{
+  font-family:'Cinzel',serif;font-size:0.75rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:2px;
+  color:var(--crimson);margin-bottom:4px;
+  display:flex;align-items:center;gap:8px;
+}
+.lore-label .icon{font-style:normal;font-size:0.9rem}
+.lore-text{
+  font-family:'Crimson Text',serif;font-size:1rem;
+  color:var(--ink-light);font-style:italic;
+  padding-left:16px;border-left:2px solid var(--gold);
+}
+.motto{
+  text-align:center;font-family:'Cinzel',serif;font-size:1.1rem;
+  font-style:italic;color:var(--blue-ink);padding:10px 20px;
+  border-top:1px solid var(--parchment-dark);
+  border-bottom:1px solid var(--parchment-dark);
+  margin:16px 0;
+}
+
+/* ========== CONTROLS ========== */
+.controls{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+  padding:20px 30px;
+}
+.btn{
+  font-family:'Cinzel',serif;font-size:0.8rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:1.5px;
+  padding:10px 22px;border:1px solid var(--ink-light);
+  background:transparent;color:var(--ink);
+  cursor:pointer;transition:all 0.3s ease;
+  position:relative;overflow:hidden;
+}
+.btn:hover{
+  background:var(--ink);color:var(--parchment-light);
+  box-shadow:0 2px 8px var(--shadow);
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{
+  background:var(--crimson);color:var(--parchment-light);
+  border-color:var(--crimson-dark);
+}
+.btn-primary:hover{background:var(--crimson-dark)}
+.btn-fav.active{
+  background:var(--gold);color:var(--ink);
+  border-color:var(--gold);
+}
+
+.seed-input-wrap{
+  display:flex;align-items:center;gap:8px;
+  border:1px solid var(--ink-light);padding:4px 8px;
+  background:var(--parchment-light);
+}
+.seed-input{
+  font-family:'JetBrains Mono',monospace;font-size:0.85rem;
+  border:none;background:transparent;color:var(--ink);
+  width:120px;outline:none;
+}
+
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--parchment-light);
+  padding:10px 24px;border-radius:2px;
+  font-family:'Crimson Text',serif;font-size:0.9rem;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  opacity:0;transition:opacity 0.3s,transform 0.3s;
+  z-index:1000;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+/* ========== FAVORITES ========== */
+.favorites-section{margin-top:30px}
+.favorites-title{
+  font-family:'Cinzel',serif;font-weight:600;font-size:1.1rem;
+  color:var(--ink);text-align:center;margin-bottom:14px;
+  letter-spacing:2px;text-transform:uppercase;
+}
+.favorites-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px;
+}
+.fav-card{
+  background:var(--parchment-light);
+  border:1px solid var(--parchment-dark);
+  border-radius:3px;padding:10px 14px;
+  cursor:pointer;transition:all 0.2s ease;
+  position:relative;
+}
+.fav-card:hover{
+  box-shadow:0 2px 12px var(--shadow);
+  transform:translateY(-2px);
+  border-color:var(--gold);
+}
+.fav-card .fav-name{
+  font-family:'Cinzel',serif;font-weight:600;font-size:0.85rem;
+  color:var(--ink);line-height:1.3;
+}
+.fav-card .fav-seed{
+  font-family:'JetBrains Mono',monospace;font-size:0.7rem;
+  color:var(--ink-faded);margin-top:2px;
+}
+.fav-card .fav-climate{font-size:0.7rem;color:var(--sepia)}
+.fav-card .fav-remove{
+  position:absolute;top:4px;right:6px;
+  font-size:0.9rem;color:var(--crimson);
+  cursor:pointer;opacity:0.4;transition:opacity 0.2s;
+  background:none;border:none;font-family:serif;
+}
+.fav-card .fav-remove:hover{opacity:1}
+.empty-fav{
+  text-align:center;color:var(--ink-faded);
+  font-style:italic;padding:20px;font-size:0.9rem;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes drawLine{
+  from{stroke-dashoffset:3000}
+  to{stroke-dashoffset:0}
+}
+@keyframes pageTurn{
+  0%{opacity:1;transform:rotateY(0deg)}
+  50%{opacity:0.3;transform:rotateY(15deg)}
+  100%{opacity:1;transform:rotateY(0deg)}
+}
+.fade-in{animation:fadeUp 0.5s ease forwards;opacity:0}
+.page-transition{animation:pageTurn 0.5s ease}
+.draw-anim{
+  stroke-dasharray:3000;stroke-dashoffset:3000;
+  animation:drawLine 1.5s ease-out forwards;
+}
+
+/* ========== CITY EXPLORATION MODE ========== */
+.city-explorer{display:none;position:fixed;inset:0;z-index:9000;background:#1a0e06;color:var(--parchment);overflow:hidden;flex-direction:column}
+.city-explorer.active{display:flex;animation:gateOpen 0.7s ease forwards}
+@keyframes gateOpen{
+  0%{opacity:0;clip-path:polygon(47% 35%,53% 35%,53% 65%,47% 65%)}
+  40%{opacity:1;clip-path:polygon(35% 20%,65% 20%,65% 80%,35% 80%)}
+  100%{opacity:1;clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+}
+@keyframes explorerFadeOut{
+  from{opacity:1}
+  to{opacity:0}
+}
+.explorer-header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);z-index:10;flex-shrink:0}
+.explorer-title{font-family:'Cinzel',serif;font-weight:700;font-size:1.2rem;color:var(--gold-light);letter-spacing:2px;text-shadow:0 0 12px rgba(212,168,56,0.5)}
+.btn-leave{font-family:'Cinzel',serif;font-size:0.8rem;background:rgba(160,32,32,0.3);border:1px solid var(--crimson);color:var(--parchment-light);padding:8px 18px;cursor:pointer;letter-spacing:1px;transition:all 0.3s;border-radius:2px}
+.btn-leave:hover{background:var(--crimson);box-shadow:0 0 10px rgba(160,32,32,0.5)}
+.explorer-body{display:flex;flex:1;overflow:hidden}
+.explorer-map{flex:1;position:relative;overflow:auto;background:radial-gradient(ellipse at center,#2a1a0e 0%,#0e0804 100%)}
+.explorer-map svg{display:block;margin:0 auto}
+.explorer-panel{width:360px;background:linear-gradient(to bottom,#1e1208,#160c04);border-left:1px solid rgba(180,150,80,0.2);padding:20px;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0}
+.panel-content{animation:panelFade 0.4s ease}
+@keyframes panelFade{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.panel-title{font-family:'Cinzel',serif;font-weight:700;font-size:1.2rem;color:var(--gold-light);margin-bottom:12px;text-shadow:0 0 8px rgba(212,168,56,0.3)}
+.panel-overview{font-family:'Crimson Text',serif;font-size:0.95rem;color:#c4a878;line-height:1.7;margin-bottom:8px}
+.panel-desc{font-family:'Crimson Text',serif;font-size:1rem;color:#c4a878;line-height:1.7;margin-bottom:16px}
+.panel-interact-btn{font-family:'Cinzel',serif;font-size:0.8rem;background:rgba(180,150,80,0.15);border:1px solid var(--gold);color:var(--gold-light);padding:10px 20px;cursor:pointer;letter-spacing:1px;transition:all 0.3s;width:100%;border-radius:2px}
+.panel-interact-btn:hover{background:rgba(180,150,80,0.35);box-shadow:0 0 12px rgba(212,168,56,0.3)}
+.panel-interact-btn:active{transform:translateY(1px)}
+.panel-interact-result{margin-top:12px;padding:12px 14px;background:rgba(0,0,0,0.35);border-left:2px solid var(--gold);font-style:italic;color:#b89858;font-size:0.92rem;animation:panelFade 0.5s ease;line-height:1.6;border-radius:0 2px 2px 0}
+.bldg-group{cursor:pointer;transition:filter 0.3s}
+.bldg-group:hover{filter:drop-shadow(0 0 8px rgba(255,180,60,0.8)) brightness(1.3)}
+.bldg-label{font-family:'Cinzel',serif;font-size:10px;fill:#d4a838;text-anchor:middle;pointer-events:none;text-shadow:0 0 4px rgba(0,0,0,0.8)}
+.npc-group{cursor:pointer;transition:filter 0.2s}
+.npc-group:hover{filter:drop-shadow(0 0 6px rgba(212,168,56,0.6)) brightness(1.2)}
+.torch-light{animation:torchFlicker 2.5s ease-in-out infinite}
+@keyframes torchFlicker{0%,100%{opacity:0.6}25%{opacity:0.9}50%{opacity:0.7}75%{opacity:1}}
+.btn-enter-city{display:block;width:100%;font-family:'Cinzel',serif;font-size:1rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;padding:16px;border:1px solid var(--gold);background:linear-gradient(to bottom,#2a1a0e,#1a100a);color:var(--gold-light);cursor:pointer;transition:all 0.3s ease;border-radius:2px}
+.btn-enter-city:hover{background:linear-gradient(to bottom,#3a2a1e,#2a1a0e);box-shadow:0 0 20px rgba(212,168,56,0.3),inset 0 0 20px rgba(212,168,56,0.1)}
+.btn-enter-city:active{transform:translateY(1px)}
+.enter-city-wrap{padding:0 30px 20px}
+@media(max-width:768px){
+  .explorer-body{flex-direction:column}
+  .explorer-map{flex:none;height:45vh;overflow-x:auto;overflow-y:hidden}
+  .explorer-panel{width:100%;border-left:none;border-top:1px solid rgba(180,150,80,0.2);flex:1}
+  .explorer-title{font-size:0.95rem}
+  .btn-leave{padding:6px 14px;font-size:0.75rem}
+}
+
+/* footer */
+.footer{
+  text-align:center;padding:20px;font-size:0.75rem;
+  color:var(--ink-faded);font-family:'JetBrains Mono',monospace;
+}
+.footer a{color:var(--blue-ink);text-decoration:none}
+
+/* responsive */
+@media(max-width:600px){
+  .controls{flex-direction:column;align-items:stretch}
+  .btn{width:100%;text-align:center}
+  .seed-input-wrap{width:100%}
+  .city-name-section,.lore-section{padding:16px}
+  .info-cell{padding:10px 14px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <h1>无限城市图鉴</h1>
+    <div class="ornament">✦ ❖ ✦</div>
+    <div class="subtitle">Infinite City Atlas</div>
+  </header>
+
+  <main id="cityMain">
+    <div class="city-card" id="cityCard">
+      <!-- Skyline -->
+      <div class="skyline-section" id="skylineSection"></div>
+
+      <!-- Name -->
+      <div class="city-name-section">
+        <div class="city-name" id="cityName">...</div>
+        <div class="city-seed" id="citySeed">№ 000000</div>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="info-grid">
+        <div class="info-cell">
+          <div class="info-label">人口 · Population</div>
+          <div class="info-value" id="cityPop">—</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-label">气候 · Climate</div>
+          <div class="info-value" id="cityClimate">—</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-label">特产 · Export</div>
+          <div class="info-value" id="cityExport">—</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-label">别名 · Also Known As</div>
+          <div class="info-value" id="cityAlias">—</div>
+        </div>
+      </div>
+
+      <!-- Lore -->
+      <div class="lore-section">
+        <div class="motto" id="cityMotto">"..."</div>
+        <div class="lore-block">
+          <div class="lore-label"><span class="icon">⚖</span> 奇葩法令</div>
+          <div class="lore-text" id="cityLaw">...</div>
+        </div>
+        <div class="lore-block">
+          <div class="lore-label"><span class="icon">🕯</span> 都市传说</div>
+          <div class="lore-text" id="cityLegend">...</div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn btn-primary" id="exploreBtn">🎲 探索新城市</button>
+        <div class="seed-input-wrap">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--ink-faded)">№</span>
+          <input type="number" class="seed-input" id="seedInput" placeholder="输入种子号" min="0">
+          <button class="btn" style="padding:6px 14px;font-size:0.75rem" id="goSeedBtn">前往</button>
+        </div>
+        <button class="btn btn-fav" id="favBtn">★ 收藏</button>
+        <button class="btn" id="shareBtn">⤴ 分享</button>
+      </div>
+      <!-- Enter City Gate -->
+      <div class="enter-city-wrap">
+        <button class="btn-enter-city" id="enterCityBtn">🚪 进入城门</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Favorites -->
+  <section class="favorites-section" id="favSection">
+    <div class="favorites-title">✦ 收藏的城市 ✦</div>
+    <div class="favorites-grid" id="favGrid"></div>
+  </section>
+
+  <footer class="footer">
+    每座城市都只属于一个种子 · Each city is unique to its seed<br>
+    种子空间：0 – 999,999
+  </footer>
+</div>
+
+<!-- City Exploration Overlay -->
+<div class="city-explorer" id="cityExplorer">
+  <div class="explorer-header">
+    <div class="explorer-title" id="explorerTitle">🗺 探索城市</div>
+    <button class="btn-leave" id="leaveCityBtn">← 离开城市</button>
+  </div>
+  <div class="explorer-body">
+    <div class="explorer-map" id="explorerMap"></div>
+    <div class="explorer-panel" id="explorerPanel"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========================================================================
+//  SEEDED PRNG (mulberry32)
+// ========================================================================
+function hashSeed(str){
+  let h=1779033703^str.length;
+  for(let i=0;i<str.length;i++){
+    h=Math.imul(h^str.charCodeAt(i),3432918353);
+    h=h<<13|h>>>19;
+  }
+  return (h>>>0)%1000000;
+}
+function mulberry32(a){
+  return function(){
+    a|=0;a=a+0x6D2B79F5|0;
+    let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296;
+  }
+}
+function makeRNG(seedNum){
+  return mulberry32(seedNum);
+}
+function pick(rng,arr){return arr[Math.floor(rng()*arr.length)]}
+function pickU(rng,arr,used){
+  let v;
+  let tries=0;
+  do{v=pick(rng,arr);tries++}while(used.has(v)&&tries<20);
+  used.add(v);
+  return v;
+}
+function range(rng,min,max){return Math.floor(rng()*(max-min+1))+min}
+
+// ========================================================================
+//  CONTENT POOLS
+// ========================================================================
+const SYL_PRE=['Vel','Mor','Kor','Ast','Bel','Dun','Fen','Gri','Hal','Ith','Jor','Kel','Lus','Mir','Nyx','Os','Per','Quel','Ryn','Sel','Tor','Ul','Vor','Wyn','Xan','Yar','Zel','Bra','Cae','Dra','Eld','Fae','Gar','Hes','Ira','Jha','Kry','Lae','Myr','Nar','Oth','Pyr','Rha','Syl','Tae','Uly','Vry','Wra','Zha'];
+const SYL_MID=['ka','thi','ria','sun','del','mor','wen','gyr','sha','nu','vol','kra','myr','dus','pyr','lir','sor','tar','vel','wyn','xes','aha','ero','ina','oth','uma','zir'];
+const SYL_SUF=['ria','del','mor','gard','holm','burg','thal','mere','spire','reach','fall','wick','crest','hold','march','haven','dell','shore','gate','keep','blaze','song','crow','rune'];
+
+const CLIMATES=[
+  {name:'极地冻原',en:'Arctic Tundra',sky:'polar',icon:'❄'},
+  {name:'温带森林',en:'Temperate Forest',sky:'temperate',icon:'🌲'},
+  {name:'热带雨林',en:'Tropical Jungle',sky:'tropical',icon:'🌴'},
+  {name:'灼热沙漠',en:'Scorching Desert',sky:'desert',icon:'🏜'},
+  {name:'海洋性气候',en:'Maritime Coast',sky:'ocean',icon:'⚓'},
+  {name:'高原山地',en:'Highland Plateau',sky:'highland',icon:'⛰'},
+  {name:'火山地带',en:'Volcanic Region',sky:'volcanic',icon:'🌋'},
+  {name:'湿地沼泽',en:'Wetland Marsh',sky:'marsh',icon:'🌊'},
+];
+
+const EXPORTS=['黑盐','星图石','风干鳗','月光丝','琥珀酒','铁树花','雾绒','火泥','冰晶蜜','低语贝','影木炭','梦叶茶','血藤蔓','雷石粉','幽冥油','日炎椒','深海珠','石化木','歌颂草','虚空晶'];
+
+const ALIASES=['千塔之城','寂静之港','雾中明珠','断桥之都','不眠城','盐与诗之城','齿轮之心的故里','被遗忘的皇冠','旧神码头','钟声共和国','铜钥之城','飞鸟圣地','第三次日落的见证者','回声之城','蛛网之都','红月之都','白塔盟约','万门之城','沉没图书馆','炼金术士的摇篮'];
+
+const LAW_PLACES=['主喷泉广场','旧码头','钟楼台阶','城门桥上','地下集市','神庙回廊','总督府门前','灯塔下','墓园小径','护城河边'];
+const LAW_ANIMALS=['鸽子','流浪猫','水母','螳螂','乌鸦','山羊','发光鱼','蝙蝠','机械鼠','壁虎'];
+const LAW_CURRENCIES=['铜便士','琥珀珠','星尘币','盐块','歌颂草卷','空白诗签','铁钉','陶土筹码'];
+const LAW_SEASONS=['春分','夏至','秋收节','霜降','冬至','花月节','鬼月','丰收祭'];
+const LAW_ACTIONS=['戴上面具','倒着走路','用古语问候','手提灯笼','保持沉默','跳一种古老的舞','在门口点蜡烛','互换身份'];
+const LAW_DURATIONS=['整整一天','三天三夜','一周','从日出到日落','从月升到月落','直到钟响十二下'];
+const LAW_JOBS=['铁匠','面包师','渡船人','理发师','书吏','炼金术士','裁缝','酒馆老板','守夜人','驯兽师'];
+const LAW_ITEMS=['铁砧','烤箱','渡船','剃刀','羽毛笔','坩埚','织布机','酒杯','提灯','兽笼'];
+const LAW_TEMPLATES=[
+  p=>`禁止在${p.place}喂${p.animal}，违者罚${p.amount}${p.currency}`,
+  p=>`每年${p.season}，全城必须${p.action}持续${p.duration}`,
+  p=>`${p.job}必须在${p.item}上签名才能执业`,
+  p=>`所有${p.animal}必须登记姓名，未命名者将被没收`,
+  p=>`在${p.place}唱歌需要预先提交歌词，违者罚${p.amount}${p.currency}`,
+  p=>`${p.season}之后，${p.item}只能用左手触碰`,
+  p=>`禁止向${p.animal}透露城门密码`,
+];
+
+const LEG_PLACES=['旧灯塔顶层','废弃水渠','钟楼的影子下方','地下墓穴第七层','断桥遗址','旧剧院后台','护城河底','城墙裂隙'];
+const LEG_TIMES=['满月午夜','黄昏最后一刻','冬至前三小时','雷雨夜','涨潮时分','花月节黎明','日食期间','雾最浓的时候'];
+const LEG_SOUNDS=['编钟的回响','孩子的笑声','铁锤敲打声','古老的船歌','玻璃碎裂声','低沉的吟诵','牧笛声','链锁拖地声'];
+const LEG_BUILDINGS=['总督府','大教堂','旧造币厂','灯塔','剧院','公会大厅','钟楼','渡桥'];
+const LEG_PARTS=['地下室','穹顶','烟囱','回廊','台阶','钟室','地基','天窗'];
+const LEG_PHENOMENA=['潮湿的','温热的','发出微光的','布满裂痕的','发出低频嗡鸣的','结满蛛网的','覆盖青苔的','有字迹的'];
+const LEG_TEMPLATES=[
+  p=>`据说在${p.place}，每到${p.time}就能听到${p.sound}……从未有人找到声音的来源。`,
+  p=>`没有人知道为什么${p.building}的${p.part}总是${p.phenomena}——直到一位老守夜人留下一本日记……`,
+  p=>`有人说，如果站在${p.place}，在${p.time}闭眼许愿，你会闻到${p.sound}的气味，然后愿望就会成真。`,
+  p=>`三百年来，${p.building}的${p.part}每天午夜都会自己打开。守卫换了一批又一批，无人敢调查。`,
+];
+
+const MOTTOS=[
+  'Per Aspera ad Astra','Lux in Tenebris','Aqua Vitae','Tempus Omnia Revelat',
+  'Ferrum et Ignis','Silentium est Aureum','Fortuna Audaces Iuvat',
+  'Memento Mori','Veni Vidi Vici','Ars Longa Vita Brevis',
+  'Carpe Noctem','Ignis Aurum Probant','Ex Machina Lux',
+  'Ubi Bene Ibi Patria','Vox Populi Vox Dei','Amor Fati',
+  'Labor Omnia Vincit','Ad Astra per Ignis','Semper Vigilans',
+  'Caveat Viator','Sapientia et Virtus','Tenebras Lumen Vincit',
+  'Sanguis et Cinis',' mare Nostrum','Aenigma Aeternum'
+];
+
+// ========================================================================
+//  CITY GENERATOR
+// ========================================================================
+function generateCity(seedStr){
+  const seedNum=hashSeed(seedStr);
+  const rng=makeRNG(seedNum);
+  const used=new Set();
+
+  // Name
+  const useMid=rng()>0.4;
+  const name=useMid
+    ?`${pick(rng,SYL_PRE)}-${pick(rng,SYL_MID)}${pick(rng,SYL_SUF)}`
+    :`${pick(rng,SYL_PRE)}${pick(rng,SYL_SUF)}`;
+
+  // Population
+  const popExp=Math.floor(rng()*4); // 0-3
+  const popBase=range(rng,1,9)*Math.pow(10,4+popExp);
+  const popStr=formatPop(popBase);
+
+  // Climate
+  const climate=pick(rng,CLIMATES);
+
+  // Exports (1-3)
+  const exportCount=range(rng,1,3);
+  const exportList=[];
+  for(let i=0;i<exportCount;i++) exportList.push(pickU(rng,EXPORTS,used));
+
+  // Alias
+  const alias=pick(rng,ALIASES);
+
+  // Law
+  const lawTpl=pick(rng,LAW_TEMPLATES);
+  const law=lawTpl({
+    place:pick(rng,LAW_PLACES),
+    animal:pick(rng,LAW_ANIMALS),
+    amount:range(rng,3,500),
+    currency:pick(rng,LAW_CURRENCIES),
+    season:pick(rng,LAW_SEASONS),
+    action:pick(rng,LAW_ACTIONS),
+    duration:pick(rng,LAW_DURATIONS),
+    job:pick(rng,LAW_JOBS),
+    item:pick(rng,LAW_ITEMS),
+  });
+
+  // Legend
+  const legTpl=pick(rng,LEG_TEMPLATES);
+  const legend=legTpl({
+    place:pick(rng,LEG_PLACES),
+    time:pick(rng,LEG_TIMES),
+    sound:pick(rng,LEG_SOUNDS),
+    building:pick(rng,LEG_BUILDINGS),
+    part:pick(rng,LEG_PARTS),
+    phenomenon:pick(rng,LEG_PHENOMENA),
+  });
+
+  // Motto
+  const motto=pick(rng,MOTTOS);
+
+  return {
+    seed:seedNum,seedStr,
+    name,pop:popStr,popRaw:popBase,
+    climate,exports:exportList,alias,
+    law,legend,motto
+  };
+}
+
+function formatPop(n){
+  if(n>=1e8)return `${(n/1e8).toFixed(1)}亿`;
+  if(n>=1e6)return `${(n/1e6).toFixed(1)}百万`;
+  if(n>=1e4)return `${(n/1e4).toFixed(1)}万`;
+  return `${n}`;
+}
+
+// ========================================================================
+//  SVG SKYLINE GENERATOR
+// ========================================================================
+function buildSkyline(city){
+  const rng=makeRNG(city.seed+7);
+  const w=860,h=200;
+  const climate=city.climate.sky;
+
+  // Sky gradient based on climate
+  let skyTop,skyMid,skyBottom;
+  switch(climate){
+    case'polar':skyTop='#0a0a2a';skyMid='#1a2040';skyBottom='#3a4060';break;
+    case'temperate':skyTop='#2a1a0e';skyMid='#5a3a20';skyBottom='#9a7540';break;
+    case'tropical':skyTop='#1a1a3a';skyMid='#3a3a60';skyBottom='#6a6080';break;
+    case'desert':skyTop='#4a2010';skyMid='#8a5030';skyBottom='#c48040';break;
+    case'ocean':skyTop='#0a1a2a';skyMid='#1a3a5a';skyBottom='#4a6a8a';break;
+    case'highland':skyTop='#1a0a1a';skyMid='#3a2040';skyBottom='#6a5070';break;
+    case'volcanic':skyTop='#2a0a0a';skyMid='#5a1a10';skyBottom='#8a3020';break;
+    case'marsh':skyTop='#0a1a0a';skyMid='#1a2a1a';skyBottom='#3a4a3a';break;
+    default:skyTop='#2a1a0e';skyMid='#5a3a20';skyBottom='#9a7540';
+  }
+
+  let svg=`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMax slice">`;
+  // Defs
+  svg+=`<defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${skyTop}"/>
+      <stop offset="50%" stop-color="${skyMid}"/>
+      <stop offset="100%" stop-color="${skyBottom}"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>`;
+  // Sky
+  svg+=`<rect width="${w}" height="${h}" fill="url(#sky)"/>`;
+
+  // Celestial body
+  const sunX=range(rng,100,760);
+  const sunY=range(rng,20,80);
+  const sunR=range(rng,20,35);
+  const isMoon=rng()>0.5;
+  const celestialColor=isMoon?'#e8e0c0':(climate==='desert'||climate==='volcanic'?'#ff8030':'#ffd060');
+  svg+=`<circle cx="${sunX}" cy="${sunY}" r="${sunR}" fill="${celestialColor}" opacity="0.8" filter="url(#glow)"/>`;
+  if(isMoon){
+    svg+=`<circle cx="${sunX-sunR*0.3}" cy="${sunY-sunR*0.3}" r="${sunR*0.9}" fill="${skyMid}" opacity="0.5"/>`;
+  }
+
+  // Stars
+  if(climate==='polar'||climate==='highland'||rng()>0.5){
+    const starCount=range(rng,20,60);
+    for(let i=0;i<starCount;i++){
+      const sx=range(rng,0,w);
+      const sy=range(rng,0,h*0.5);
+      const sr=(rng()*1.5+0.3).toFixed(1);
+      svg+=`<circle cx="${sx}" cy="${sy}" r="${sr}" fill="#fff" opacity="${(rng()*0.6+0.2).toFixed(2)}"/>`;
+    }
+  }
+
+  // Distant mountains
+  let mtPath=`M 0 ${h}`;
+  let mx=0;
+  while(mx<w){
+    mx+=range(rng,40,80);
+    const my=h-range(rng,40,90);
+    mtPath+=` L ${mx} ${my}`;
+  }
+  mtPath+=` L ${w} ${h} Z`;
+  svg+=`<path d="${mtPath}" fill="${skyBottom}" opacity="0.5"/>`;
+
+  // Buildings
+  let bldPath=`M 0 ${h}`;
+  let bx=0;
+  let buildingColor=`rgba(20,12,6,0.95)`;
+  switch(climate){
+    case'desert':buildingColor='rgba(40,25,15,0.92)';break;
+    case'polar':buildingColor='rgba(15,15,30,0.95)';break;
+    case'ocean':buildingColor='rgba(10,20,35,0.92)';break;
+    case'volcanic':buildingColor='rgba(25,8,5,0.95)';break;
+    case'marsh':buildingColor='rgba(8,15,8,0.93)';break;
+  }
+
+  // Generate building clusters
+  const buildings=[];
+  while(bx<w-20){
+    const bw=range(rng,20,55);
+    const bh=range(rng,30,130);
+    // Tower chance
+    const isTower=rng()>0.75;
+    const hasSpire=rng()>0.82;
+    const hasDome=rng()>0.85;
+    buildings.push({x:bx,w:bw,h:bh,tower:isTower,spire:hasSpire,dome:hasDome});
+    bx+=bw+range(rng,0,8);
+  }
+
+  // Draw buildings via path
+  for(const b of buildings){
+    const by=h-b.h;
+    bldPath+=` L ${b.x} ${by}`;
+    if(b.dome){
+      bldPath+=` Q ${b.x+b.w/2} ${by-b.w*0.4} ${b.x+b.w} ${by}`;
+    }else if(b.spire){
+      bldPath+=` L ${b.x+b.w*0.3} ${by}`;
+      bldPath+=` L ${b.x+b.w*0.5} ${by-range(rng,15,30)}`;
+      bldPath+=` L ${b.x+b.w*0.7} ${by}`;
+      bldPath+=` L ${b.x+b.w} ${by}`;
+    }else if(b.tower){
+      bldPath+=` L ${b.x+b.w*0.2} ${by-range(rng,5,15)}`;
+      bldPath+=` L ${b.x+b.w*0.8} ${by-range(rng,5,15)}`;
+      bldPath+=` L ${b.x+b.w} ${by}`;
+    }else{
+      bldPath+=` L ${b.x+b.w} ${by}`;
+    }
+    bldPath+=` L ${b.x+b.w} ${h}`;
+    bldPath+=` L ${b.x+b.w} ${h}`;
+  }
+  bldPath+=` Z`;
+
+  svg+=`<path class="draw-anim" d="${bldPath}" fill="${buildingColor}" stroke="rgba(180,150,80,0.3)" stroke-width="0.5"/>`;
+
+  // Windows (small glowing dots)
+  for(const b of buildings){
+    const by=h-b.h;
+    const winCount=Math.floor(b.w/6);
+    for(let wy=by+8;wy<h-10;wy+=range(rng,10,16)){
+      for(let wi=0;wi<winCount;wi++){
+        if(rng()>0.55){
+          const wx=b.x+4+wi*6;
+          const ww=2;
+          const wh=range(rng,3,6);
+          svg+=`<rect x="${wx}" y="${wy}" width="${ww}" height="${wh}" fill="${rng()>0.3?'#d4a838':'#e8c060'}" opacity="${(rng()*0.4+0.3).toFixed(2)}"/>`;
+        }
+      }
+    }
+  }
+
+  // Foreground birds / bats
+  if(rng()>0.5){
+    for(let i=0;i<range(rng,3,6);i++){
+      const birdX=range(rng,100,w-100);
+      const birdY=range(rng,30,h*0.5);
+      const birdS=range(rng,4,8);
+      svg+=`<path d="M ${birdX} ${birdY} q ${birdS/2} ${-birdS/2} ${birdS} 0 q ${birdS/2} ${-birdS/2} ${birdS} 0" fill="none" stroke="rgba(20,12,6,0.6)" stroke-width="1"/>`;
+    }
+  }
+
+  svg+=`</svg>`;
+  return svg;
+}
+
+// ========================================================================
+//  RENDERING
+// ========================================================================
+let currentCity=null;
+
+function renderCity(seedStr,animate=true){
+  const city=generateCity(seedStr);
+  currentCity=city;
+
+  const card=document.getElementById('cityCard');
+
+  if(animate){
+    card.classList.add('page-transition');
+    setTimeout(()=>card.classList.remove('page-transition'),500);
+  }
+
+  // Skyline
+  document.getElementById('skylineSection').innerHTML=buildSkyline(city);
+
+  // Name
+  document.getElementById('cityName').textContent=city.name;
+  document.getElementById('citySeed').textContent=`№ ${String(city.seed).padStart(6,'0')}`;
+
+  // Info grid
+  document.getElementById('cityPop').textContent=city.pop;
+  document.getElementById('cityClimate').textContent=`${city.climate.icon} ${city.climate.name}`;
+  document.getElementById('cityExport').textContent=city.exports.join('、');
+  document.getElementById('cityAlias').textContent=city.alias;
+
+  // Lore
+  document.getElementById('cityMotto').textContent=`"${city.motto}"`;
+  document.getElementById('cityLaw').textContent=city.law;
+  document.getElementById('cityLegend').textContent=city.legend;
+
+  // Animate info
+  if(animate){
+    const cells=document.querySelectorAll('.info-cell,.lore-block,.motto,.city-name-section');
+    cells.forEach((el,i)=>{
+      el.classList.remove('fade-in');
+      void el.offsetWidth; // reflow
+      el.style.animationDelay=(i*0.08)+'s';
+      el.classList.add('fade-in');
+    });
+  }
+
+  // Update fav button
+  updateFavButton();
+  // Update seed input
+  document.getElementById('seedInput').value=city.seed;
+}
+
+// ========================================================================
+//  FAVORITES
+// ========================================================================
+const FAV_KEY='infinite-city-favs';
+
+function getFavs(){
+  try{return JSON.parse(localStorage.getItem(FAV_KEY)||'[]')}catch{return []}
+}
+function setFavs(arr){localStorage.setItem(FAV_KEY,JSON.stringify(arr))}
+
+function isFav(seed){
+  return getFavs().some(f=>f.seed===seed);
+}
+function toggleFav(){
+  if(!currentCity)return;
+  const favs=getFavs();
+  const idx=favs.findIndex(f=>f.seed===currentCity.seed);
+  if(idx>=0){
+    favs.splice(idx,1);
+    toast('已取消收藏');
+  }else{
+    favs.push({
+      seed:currentCity.seed,
+      name:currentCity.name,
+      climate:currentCity.climate.icon+' '+currentCity.climate.name,
+      pop:currentCity.pop
+    });
+    toast('★ 已收藏 '+currentCity.name);
+  }
+  setFavs(favs);
+  updateFavButton();
+  renderFavs();
+}
+function updateFavButton(){
+  const btn=document.getElementById('favBtn');
+  if(currentCity&&isFav(currentCity.seed)){
+    btn.classList.add('active');
+    btn.textContent='★ 已收藏';
+  }else{
+    btn.classList.remove('active');
+    btn.textContent='★ 收藏';
+  }
+}
+function renderFavs(){
+  const favs=getFavs();
+  const grid=document.getElementById('favGrid');
+  if(favs.length===0){
+    grid.innerHTML='<div class="empty-fav">尚未收藏任何城市 · 点击「收藏」保存你喜欢的城市</div>';
+    return;
+  }
+  grid.innerHTML=favs.map(f=>`
+    <div class="fav-card" data-seed="${f.seed}">
+      <button class="fav-remove" data-seed="${f.seed}" title="移除">✕</button>
+      <div class="fav-name">${f.name}</div>
+      <div class="fav-seed">№ ${String(f.seed).padStart(6,'0')}</div>
+      <div class="fav-climate">${f.climate||''}</div>
+    </div>
+  `).join('');
+  // Bind clicks
+  grid.querySelectorAll('.fav-card').forEach(card=>{
+    card.addEventListener('click',e=>{
+      if(e.target.classList.contains('fav-remove')){
+        e.stopPropagation();
+        const seed=parseInt(e.target.dataset.seed);
+        let favs=getFavs();
+        favs=favs.filter(f=>f.seed!==seed);
+        setFavs(favs);
+        renderFavs();
+        updateFavButton();
+        toast('已移除收藏');
+        return;
+      }
+      const seed=parseInt(card.dataset.seed);
+      renderCity(String(seed));
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+}
+
+// ========================================================================
+//  TOAST
+// ========================================================================
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ========================================================================
+//  EVENT BINDINGS
+// ========================================================================
+document.getElementById('exploreBtn').addEventListener('click',()=>{
+  const seed=Math.floor(Math.random()*1000000);
+  renderCity(String(seed));
+});
+
+document.getElementById('goSeedBtn').addEventListener('click',()=>{
+  const val=parseInt(document.getElementById('seedInput').value);
+  if(isNaN(val)||val<0||val>999999){
+    toast('请输入 0-999999 之间的数字');
+    return;
+  }
+  renderCity(String(val));
+});
+
+document.getElementById('seedInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    document.getElementById('goSeedBtn').click();
+  }
+});
+
+document.getElementById('favBtn').addEventListener('click',toggleFav);
+document.getElementById('enterCityBtn').addEventListener('click',showExplorer);
+document.getElementById('leaveCityBtn').addEventListener('click',hideExplorer);
+
+document.getElementById('shareBtn').addEventListener('click',()=>{
+  if(!currentCity)return;
+  const text=`无限城市图鉴 №${String(currentCity.seed).padStart(6,'0')} — ${currentCity.name}（${currentCity.climate.name}，人口${currentCity.pop}）`;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      toast('已复制到剪贴板：'+currentCity.name);
+    }).catch(()=>{
+      fallbackCopy(text);
+    });
+  }else{
+    fallbackCopy(text);
+  }
+});
+
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{document.execCommand('copy');toast('已复制：'+currentCity.name)}
+  catch{toast('复制失败，请手动复制')}
+  document.body.removeChild(ta);
+}
+
+// ========================================================================
+//  CITY EXPLORATION MODE
+// ========================================================================
+const BLDG_TYPES=[
+  {id:'fountain',icon:'⛲',name:'中央喷泉',center:true},
+  {id:'hall',icon:'🏛',name:'城市大厅'},
+  {id:'tavern',icon:'🍺',name:'酒馆'},
+  {id:'temple',icon:'⛩',name:'神庙'},
+  {id:'market',icon:'🏪',name:'集市'},
+  {id:'library',icon:'📚',name:'图书馆'},
+  {id:'fortress',icon:'⚔',name:'军事要塞'},
+  {id:'garden',icon:'🌿',name:'花园'},
+  {id:'residential',icon:'🏠',name:'民居区'},
+  {id:'ruins',icon:'⚰',name:'墓地遗迹'},
+];
+const E_ADJ=['厚重','斑驳','虫蛀','雕刻精美','低矮','歪斜','锈迹斑斑','古老','风化','褪色'];
+const E_SMELL=['麦酒','烤肉','劣质烟草','陈年木桶','汗水和香料','潮湿麦秆','陈年乳酪','松木烟'];
+const E_DRINK=['蜜酒','黑啤','精灵甘露','矮人威士忌','火焰龙舌兰','月光白兰地','冰原伏特加','苦艾酒'];
+const E_GOD=['晨星之主','潮汐之母','铁砧之神','低语者','苍白骑士','万钥之主','织梦者','永燃者'];
+const E_MAT=['白石','黑曜石','红砖','青铜','巨木','水晶','花岗岩','珊瑚石'];
+const E_TOPIC=['远方的宝藏','失踪的商队','一场即将到来的风暴','旧神的诅咒','城墙外的异象','地下集市的秘密','一个新来的神秘旅人','去年的瘟疫'];
+const E_HIST=['建城之初的契约','一场被遗忘的战争','某位英雄的陨落','一次大地震的记录','旧王朝的法令','一个关于星辰的预言','古代魔法的兴衰','一封从未寄出的信'];
+const E_MYST=['当最后一颗星熄灭，门将会开启','唯有真名能唤醒沉睡者','第七个黎明，蛇将吞食自己的尾巴','钥匙在影子里，影子里有钥匙','勿念旧神，旧神已死','地面之下，另有一座城','血的代价，血的归还','一切始于一个谎言'];
+const E_GOODS=['黑盐','月光丝','琥珀酒','铁树花','雾绒','火泥','冰晶蜜','低语贝','影木炭','梦叶茶'];
+const E_MIL=['城邦骑士团','雇佣兵公会','皇家禁卫军','暗影刺客团','狮鹫骑兵团','铁壁方阵'];
+const E_FLOWER=['血瓣花','月光兰','低语藤','星辰苔','幽灵菊','铁荆棘'];
+const E_LIFE=['以捕鱼为生','以牧羊为生','以锻造兵器闻名','以酿造美酒自豪','世代经商','以采药和治病为业'];
+const E_GRAVE=['墓碑上刻着早已无人能读的古文','地上散落着枯萎的花瓣','最近的墓志铭写着：「我终于知道了答案」','雾气从地缝中渗出，带着微弱的叹息','石棺上有一道新鲜的抓痕'];
+const E_SOUND=['编钟的回响','孩子的笑声','铁锤敲打声','古老的船歌','玻璃碎裂声','低沉的吟诵','牧笛声','链锁拖地声'];
+const E_CUR=['铜便士','琥珀珠','星尘币','盐块','歌颂草卷','铁钉'];
+const E_TIME=['满月午夜','黄昏最后一刻','冬至前三小时','雷雨夜','涨潮时分'];
+const E_PLACE=['旧灯塔','废弃水渠','钟楼下方','地下墓穴','断桥遗址','旧剧院','护城河底','城墙裂隙'];
+const E_ACT=['去集市闲逛','到酒馆坐坐','去城墙上看日落','在喷泉边发呆','去图书馆翻翻旧书'];
+const E_DANGER=['迷雾中有什么东西在等待','地面的石板会自己移动','听到呼唤声但千万不能回应','有影子会模仿你的动作'];
+const E_RUMOR=['市长其实已经死了三年了','地下有一座更古老的城市','城外来的商队从来没人见过他们离开','钟楼里住着一个不老的人'];
+function fillTpl(tpl,rng,city){
+  const pools={adj:E_ADJ,smell:E_SMELL,drink:E_DRINK,god:E_GOD,material:E_MAT,topic:E_TOPIC,history:E_HIST,mystic:E_MYST,goods:E_GOODS,military:E_MIL,flower:E_FLOWER,lifestyle:E_LIFE,grave:E_GRAVE,sound:E_SOUND,currency:E_CUR,time:E_TIME,place:E_PLACE,activity:E_ACT,danger:E_DANGER,rumor:E_RUMOR,num:String(range(rng,3,20)),count:String(range(rng,2,12)),year:String(range(rng,100,2000)),city:city.name,motto:city.motto};
+  return tpl.replace(/\{(\w+)\}/g,(_,k)=>{const p=pools[k];return Array.isArray(p)?pick(rng,p):p||`{${k}}`});
+}
+const BLDG_DESC={
+  hall:'这座{material}建造的宏伟建筑是城市权力的中心。门前的台阶被无数脚步磨得光滑，走廊里回荡着书记官匆忙的脚步声。',
+  tavern:'推开{adj}的木门，一股{smell}的气味扑面而来。{count}个旅人围坐在炉火旁，低声谈论着{topic}。',
+  temple:'这座供奉{god}的{material}殿堂已有{year}年历史。墙壁上刻满了古老的{flower}图案，空气中弥漫着淡淡的熏香。',
+  market:'摊位上摆满了{goods}、{goods}和各种稀奇古怪的小玩意。商贩的叫卖声此起彼伏，混合着远处传来的{sound}。',
+  library:'积满灰尘的书架上，你发现了一本关于{history}的古籍。高高的穹顶下，光线穿过彩色玻璃窗，投下斑驳的影。',
+  fortress:'高耸的{material}城墙环绕着军事要塞。{military}的旗帜在风中猎猎作响，操场上传来整齐的脚步声。',
+  garden:'一片宁静的绿洲。{flower}的香气沁人心脾，小径两旁种满了各种奇异的植物。远处传来{sound}。',
+  residential:'窄窄的巷子两旁是密密麻麻的民居。这里的人们{lifestyle}，门口晾着的衣服和嬉闹的孩子们让这条街充满了烟火气。',
+  ruins:'杂草丛生的古老遗迹。{grave}空气中弥漫着一股说不清的寒意，仿佛有什么东西在暗处注视着你。',
+  fountain:'城市的心脏。清澈的泉水从{material}雕刻的喷泉中涌出，池底散落着无数{currency}。喷泉边的石碑上刻着城市的格言：「{motto}」。',
+};
+const BLDG_INT={
+  hall:{label:'查阅档案',results:['一位书记官正在整理档案。你瞥见一份文件，上面写着关于{topic}的机密记录。','大厅里在召开会议。你听到一个议员说：「{mystic}」全场哗然。','墙上挂着历代统治者的画像。最后一幅画的脸上被人涂掉了，画框上刻着「等待归来」。','你在大厅地板上发现了一块松动的石板。下面是一个深邃的黑暗。','一位老吏告诉你："这座城市名义上归{god}管辖，但真正的权力……"他突然闭嘴了。']},
+  tavern:{label:'喝一杯',results:['酒保递给你一杯{drink}，说："第一杯免费，外地人。"你喝了一口，耳边的喧嚣突然变得清晰……','一个醉汉撞了你一下，嘴里嘟囔着："{topic}……都是真的……"然后倒在了桌上。','角落里的吟游诗人唱起了一首关于{topic}的歌，调子诡异地悲伤。','你刚端起酒杯，就发现杯底刻着一行小字：「{mystic}」','一个戴兜帽的人在暗处注视着你。当你看向那个方向时，那里只剩一把空椅子和一杯还冒热气的{drink}。']},
+  temple:{label:'祈祷',results:['你跪在神像前，耳边传来一个声音：「{mystic}」你猛然抬头，殿内空无一人。','祭司告诉你，供奉{god}需要{goods}作为祭品。你环顾四周，发现神台上的供品正在发光。','当你触碰祭坛时，脑海中闪过一个画面——{topic}。画面一闪即逝。','殿内突然暗了下来，墙上的{material}花纹开始缓缓流动，如同活物。','香炉里的烟雾形成了一个你认不出的形状。旁边的老祭司说：「{god}已经很久没有回应了。」']},
+  market:{label:'逛逛摊位',results:['一个摊贩向你推销{goods}，价格离谱。但你注意到他摊位下面还藏着别的东西……','集市角落有个沉默的老人在卖空白卷轴。你走近时，卷轴上浮现出文字：「{mystic}」','你用{currency}买了一袋{goods}。摊主找零时，硬币上刻着一个你从未见过的徽记。','一个蒙面商人低声说："想要{topic}的线索吗？{currency}，不二价。"','整条街突然安静下来。所有人的目光转向了同一个方向——然后又恢复正常，仿佛什么都没发生。']},
+  library:{label:'翻阅古籍',results:['你翻开一本古籍，上面记载着{history}。最后一页被人撕掉了。','在书架最深处，你发现一张地图，标注着一个不属于这座城市的位置。','一本日记吸引了你的注意。最后一篇写着：「{mystic}」','你试图阅读一本用未知语言书写的书。奇怪的是，你竟然能看懂——它说的是{topic}。','图书管理员低声说：「这里有些书会自己换位置。尤其是关于{topic}的那些。」']},
+  fortress:{label:'参观要塞',results:['一名老兵告诉你，城墙外并不像人们说的那样危险——"真正危险的，在城墙里面。"','你参观军械库时，发现一把剑上刻着「{mystic}」','哨兵指着远处的地平线说："每到{time}，那里会亮起光。我们已经报告了三次，没人理。"','你在操场上看到新兵在训练。教官的口令是一种你听不懂的古老语言。','深夜，军营里传出铁链拖地的声音。值班士兵说那是老传统，不用在意。']},
+  garden:{label:'休息片刻',results:['你坐在一棵老树下，树干上刻满了名字。你注意到最新的一行——是你的名字。','花园里{flower}的香气让你感到一阵眩晕，仿佛听到了{sound}。','一只受伤的小动物躲在灌木丛中。当你靠近时，它开口说话了：「{mystic}」','池塘里的水倒映出的不是天空，而是一片完全不同的星空。','一个园丁在修剪花枝。他说："这些花只在特定的时候才开，可惜已经没人记得是什么时候了。"']},
+  residential:{label:'拜访居民',results:['一位老奶奶邀请你进屋喝茶。她说："你是今年第{num}个外地人了。之前那些……唉。"','孩子们的歌谣引起了你的注意：「{mystic}」他们唱完就跑开了。','一户人家的门口放着一碗还冒热气的食物，碗边写着「给迷路的旅人」。','巷子深处传来织布机的声音。你走近看，织布机上却没有布——只有空气在被来回穿梭。','一位铁匠正在锻打一块奇异的金属。他说这是从{place}挖出来的，"到了晚上会自己发光。"']},
+  ruins:{label:'探索遗迹',results:['你在墓碑间穿行。一块最新的墓碑上刻着你的名字和今天的日期。','遗迹深处有一扇门。门上没有锁，但你怎么也推不开。门缝里透出微弱的光。','你捡到一本腐烂的笔记本。勉强能辨认出最后一行：「{mystic}」','雾气弥漫。你听到了{sound}，但周围空无一人。声音越来越近。','地面上有一个深不见底的裂缝。你往里扔了一块石头——没有回声。等了很久，传来一声叹息。']},
+  fountain:{label:'投币许愿',results:['你投入一枚{currency}，许了个愿。硬币没有沉下去——它漂浮在水面上，缓缓旋转。','喷泉的水突然变成了酒的颜色。持续了三秒，又恢复清澈。','你低头看水面的倒影，发现身后站着一个人。当你回头时，空无一人。','水面浮现出一行文字：「{mystic}」然后慢慢消散。','一只青蛙从喷泉里跳出来，嘴里叼着一枚古老的{currency}。']},
+};
+const NPC_LINES=[
+  '你是外地人吧？在这里，{topic}可不是开玩笑的。',
+  '想知道都市传说的真相吗？去{place}看看。',
+  '今天天气不错，适合{activity}。',
+  '别去{place}，那里{danger}。',
+  '你听说过{rumor}吗？我倒是信了几分。',
+  '嘘——{mystic}',
+  '如果你有{currency}，去集市看看，今天有好货。',
+  '我从没见过像你这样的旅人。你也是来找{topic}的线索的吗？',
+  '在这座城待久了，你会发现有些东西不太对劲。比如{topic}。',
+  '记住：「{mystic}」这话我只说一次。',
+];
+const NPC_ICONS=['🧙','🧝','🧛','🧞','🧟','👨\u200d🦱','👩\u200d🦰','🧔','👨\u200d🦳','🧓'];
+const MAP_W=700,MAP_H=520;
+function genBuildings(city){
+  const rng=makeRNG(city.seed+42);
+  const types=BLDG_TYPES.filter(t=>!t.center);
+  for(let i=types.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[types[i],types[j]]=[types[j],types[i]]}
+  const count=range(rng,6,9);
+  const cx=MAP_W/2,cy=MAP_H/2;
+  const buildings=[{...BLDG_TYPES[0],x:cx,y:cy,desc:fillTpl(BLDG_DESC.fountain,makeRNG(city.seed+100),city),isCenter:true}];
+  const descRng=makeRNG(city.seed+200);
+  types.slice(0,count).forEach((type,i)=>{
+    const angle=(i/count)*Math.PI*2+(rng()-0.5)*0.6;
+    const dist=range(rng,130,210);
+    const x=Math.max(60,Math.min(MAP_W-60,cx+Math.cos(angle)*dist));
+    const y=Math.max(60,Math.min(MAP_H-60,cy+Math.sin(angle)*dist));
+    buildings.push({...type,x,y,desc:fillTpl(BLDG_DESC[type.id],descRng,city),isCenter:false});
+  });
+  return buildings;
+}
+function genNPCs(city){
+  const rng=makeRNG(city.seed+777);
+  const count=range(rng,3,4);
+  const cx=MAP_W/2,cy=MAP_H/2;
+  const npcs=[];
+  for(let i=0;i<count;i++){
+    const angle=rng()*Math.PI*2;
+    const dist=range(rng,80,180);
+    const x=Math.max(40,Math.min(MAP_W-40,cx+Math.cos(angle)*dist));
+    const y=Math.max(40,Math.min(MAP_H-40,cy+Math.sin(angle)*dist));
+    const lineRng=makeRNG(city.seed+999+i*13);
+    const line=fillTpl(pick(lineRng,NPC_LINES),lineRng,city);
+    npcs.push({x,y,icon:pick(rng,NPC_ICONS),line});
+  }
+  return npcs;
+}
+function renderExploreMap(city){
+  const buildings=genBuildings(city);
+  const npcs=genNPCs(city);
+  const cx=MAP_W/2,cy=MAP_H/2;
+  const rng=makeRNG(city.seed+555);
+  let svg=`<svg viewBox="0 0 ${MAP_W} ${MAP_H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;min-width:${MAP_W}px;min-height:${MAP_H}px">`;
+  svg+=`<defs><filter id="bldgGlow"><feGaussianBlur stdDeviation="3"/></filter><filter id="torchGlow"><feGaussianBlur stdDeviation="6"/></filter><radialGradient id="groundGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2a1a0e"/><stop offset="60%" stop-color="#1a100a"/><stop offset="100%" stop-color="#0a0604"/></radialGradient><radialGradient id="fountainGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#4a7a9a" stop-opacity="0.4"/><stop offset="100%" stop-color="#1a3a5a" stop-opacity="0"/></radialGradient></defs>`;
+  svg+=`<rect width="${MAP_W}" height="${MAP_H}" fill="url(#groundGrad)"/>`;
+  // cobblestone texture
+  for(let i=0;i<200;i++){const sx=range(rng,0,MAP_W),sy=range(rng,0,MAP_H),sr=range(rng,1,3);svg+=`<circle cx="${sx}" cy="${sy}" r="${sr}" fill="rgba(80,60,30,0.12)"/>`}
+  // streets
+  for(const b of buildings){if(b.isCenter)continue;svg+=`<line x1="${cx}" y1="${cy}" x2="${b.x}" y2="${b.y}" stroke="rgba(140,110,60,0.3)" stroke-width="3" stroke-dasharray="6,4"/>`}
+  for(let i=1;i<buildings.length-1;i++){if(rng()>0.6){svg+=`<line x1="${buildings[i].x}" y1="${buildings[i].y}" x2="${buildings[i+1].x}" y2="${buildings[i+1].y}" stroke="rgba(120,90,50,0.18)" stroke-width="2" stroke-dasharray="4,3"/>`}}
+  // fountain glow
+  svg+=`<circle cx="${cx}" cy="${cy}" r="50" fill="url(#fountainGrad)"/>`;
+  // torch lights
+  for(const b of buildings){svg+=`<circle cx="${b.x}" cy="${b.y}" r="25" fill="rgba(255,160,40,0.06)" filter="url(#torchGlow)" class="torch-light"/>`}
+  // water ripples
+  svg+=`<circle cx="${cx}" cy="${cy}" r="3" fill="none" stroke="rgba(120,180,220,0.4)" stroke-width="1"><animate attributeName="r" from="3" to="40" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.5" to="0" dur="3s" repeatCount="indefinite"/></circle>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="3" fill="none" stroke="rgba(120,180,220,0.3)" stroke-width="1"><animate attributeName="r" from="3" to="35" dur="3s" begin="1s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.4" to="0" dur="3s" begin="1s" repeatCount="indefinite"/></circle>`;
+  // smoke particles
+  for(let i=0;i<3;i++){const b=buildings[range(rng,1,buildings.length-1)];if(b){svg+=`<circle cx="${b.x+range(rng,-5,5)}" cy="${b.y-15}" r="3" fill="rgba(100,80,60,0.2)"><animate attributeName="cy" from="${b.y-15}" to="${b.y-50}" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.3" to="0" dur="4s" repeatCount="indefinite"/><animate attributeName="r" from="3" to="8" dur="4s" repeatCount="indefinite"/></circle>`}}
+  // buildings
+  for(const b of buildings){
+    svg+=`<g class="bldg-group" data-bldg-id="${b.id}">`;
+    const pc=b.isCenter?'rgba(60,100,140,0.3)':'rgba(80,55,25,0.4)';
+    svg+=`<circle cx="${b.x}" cy="${b.y}" r="22" fill="${pc}" stroke="rgba(180,150,80,0.4)" stroke-width="1"/>`;
+    svg+=`<text x="${b.x}" y="${b.y+6}" text-anchor="middle" font-size="22" style="pointer-events:none">${b.icon}</text>`;
+    svg+=`<text class="bldg-label" x="${b.x}" y="${b.y+36}" text-anchor="middle">${b.name}</text>`;
+    svg+=`</g>`;
+  }
+  // npcs
+  for(let i=0;i<npcs.length;i++){
+    const n=npcs[i];
+    svg+=`<g class="npc-group" data-npc-id="${i}">`;
+    svg+=`<circle cx="${n.x}" cy="${n.y}" r="14" fill="rgba(100,70,40,0.4)" stroke="rgba(180,150,80,0.5)" stroke-width="1"/>`;
+    svg+=`<text x="${n.x}" y="${n.y+5}" text-anchor="middle" font-size="16" style="pointer-events:none">${n.icon}</text>`;
+    svg+=`</g>`;
+  }
+  svg+=`</svg>`;
+  return{svg,buildings,npcs};
+}
+let exploreData=null;
+function showExplorer(){
+  if(!currentCity)return;
+  const overlay=document.getElementById('cityExplorer');
+  const mapC=document.getElementById('explorerMap');
+  document.getElementById('explorerTitle').textContent=`🗺 ${currentCity.name}`;
+  const r=renderExploreMap(currentCity);
+  mapC.innerHTML=r.svg;
+  exploreData=r;
+  // default panel
+  updatePanel({icon:'🗺',name:currentCity.name,desc:`${currentCity.name}，又名「${currentCity.alias}」。<br><br>👤 人口：${currentCity.pop}<br>🌡 气候：${currentCity.climate.name}<br>✦ 特产：${currentCity.exports.join('、')}<br><br>「${currentCity.motto}」<br><br><em>点击地图上的建筑或NPC来深入探索这座城市的每个角落。</em>`,interactLabel:null});
+  // bind building clicks
+  mapC.querySelectorAll('.bldg-group').forEach(g=>{
+    g.addEventListener('click',()=>{
+      const id=g.dataset.bldgId;
+      const bldg=r.buildings.find(b=>b.id===id);
+      if(!bldg)return;
+      const inter=BLDG_INT[id];
+      const results=inter.results.map((tpl,idx)=>fillTpl(tpl,makeRNG(currentCity.seed+id.charCodeAt(0)*256+idx*17),currentCity));
+      updatePanel({icon:bldg.icon,name:bldg.name,desc:bldg.desc,interactLabel:inter.label,interactResults:results,bldgId:id});
+      mapC.querySelectorAll('.bldg-group').forEach(bg=>bg.style.filter='');
+      g.style.filter='drop-shadow(0 0 12px rgba(255,200,80,0.9)) brightness(1.4)';
+    });
+  });
+  // bind npc clicks
+  mapC.querySelectorAll('.npc-group').forEach(g=>{
+    g.addEventListener('click',()=>{
+      const id=parseInt(g.dataset.npcId);
+      const n=r.npcs[id];if(!n)return;
+      const ex=g.querySelector('.npc-bubble-bg');
+      if(ex){ex.remove();return}
+      mapC.querySelectorAll('.npc-bubble-bg').forEach(b=>b.remove());
+      const ns='http://www.w3.org/2000/svg';
+      const lines=[];const cpl=14;
+      for(let i=0;i<n.line.length;i+=cpl)lines.push(n.line.substring(i,i+cpl));
+      const lh=14,bh=lines.length*lh+12,bw=Math.max(...lines.map(l=>l.length))*11+20;
+      const bx=n.x-bw/2,by=n.y-bh-20;
+      const bubble=document.createElementNS(ns,'g');
+      bubble.classList.add('npc-bubble-bg');
+      const rect=document.createElementNS(ns,'rect');
+      rect.setAttribute('x',bx);rect.setAttribute('y',by);rect.setAttribute('width',bw);rect.setAttribute('height',bh);rect.setAttribute('rx',6);
+      rect.setAttribute('fill','rgba(240,224,192,0.95)');rect.setAttribute('stroke','#b8860b');rect.setAttribute('stroke-width','1');
+      bubble.appendChild(rect);
+      const tail=document.createElementNS(ns,'path');
+      tail.setAttribute('d',`M ${n.x-5} ${by+bh} L ${n.x+5} ${by+bh} L ${n.x} ${by+bh+8} Z`);
+      tail.setAttribute('fill','rgba(240,224,192,0.95)');
+      bubble.appendChild(tail);
+      lines.forEach((line,i)=>{const t=document.createElementNS(ns,'text');t.setAttribute('x',n.x);t.setAttribute('y',by+16+i*lh);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','11');t.setAttribute('font-family',"'Crimson Text',serif");t.setAttribute('fill','#3a2817');t.textContent=line;bubble.appendChild(t)});
+      g.appendChild(bubble);
+      setTimeout(()=>{if(bubble.parentNode)bubble.remove()},5000);
+    });
+  });
+  overlay.classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function hideExplorer(){
+  const o=document.getElementById('cityExplorer');
+  o.style.animation='explorerFadeOut 0.4s ease forwards';
+  setTimeout(()=>{o.classList.remove('active');o.style.animation='';document.body.style.overflow=''},380);
+}
+function updatePanel(data){
+  const panel=document.getElementById('explorerPanel');
+  const iid='pi'+Date.now(),rid='pr'+Date.now();
+  let html=`<div class="panel-content"><div class="panel-title">${data.icon||''} ${data.name||''}</div>`;
+  html+=`<div class="panel-desc">${data.desc||''}</div>`;
+  if(data.interactLabel){html+=`<button class="panel-interact-btn" id="${iid}">✦ ${data.interactLabel}</button><div id="${rid}"></div>`}
+  html+=`</div>`;
+  panel.innerHTML=html;
+  if(data.interactLabel&&data.interactResults){
+    let cnt=0;
+    document.getElementById(iid).addEventListener('click',()=>{
+      const res=data.interactResults[cnt%data.interactResults.length];
+      cnt++;
+      const btn=document.getElementById(iid);
+      if(cnt>=data.interactResults.length)btn.textContent='↻ 再试一次';
+      document.getElementById(rid).innerHTML=`<div class="panel-interact-result">${res}</div>`;
+    });
+  }
+}
+
+// ========================================================================
+//  INIT
+// ========================================================================
+// Check URL hash for shared seed
+const urlHash=window.location.hash.replace('#','');
+if(urlHash&&/^\d+$/.test(urlHash)){
+  renderCity(urlHash,false);
+}else{
+  // Random initial city
+  const initSeed=Math.floor(Math.random()*1000000);
+  renderCity(String(initSeed),false);
+}
+renderFavs();
+
+// Hash change: update hash on render without triggering loop
+let hashUpdating=false;
+const _origRender=renderCity;
+renderCity=function(seedStr,animate=true){
+  _origRender(seedStr,animate);
+  if(currentCity){
+    hashUpdating=true;
+    history.replaceState(null,'','#'+currentCity.seed);
+    setTimeout(()=>{hashUpdating=false},100);
+  }
+};
+
+window.addEventListener('hashchange',()=>{
+  if(hashUpdating)return;
+  const h=window.location.hash.replace('#','');
+  if(h&&/^\d+$/.test(h)){
+    renderCity(h);
+  }
+});
+</script>
+</body>
+</html>
