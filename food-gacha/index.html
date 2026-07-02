@@ -3,193 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>今天吃啥·美食扭蛋机</title>
+<title>今日食运 · Food Fortune</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=ZCOOL+KuaiLe&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=ZCOOL+XiaoWei&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--red:#C8332C;--red-dark:#9E2823;--red-light:#E84A3E;--gold:#C9A84C;--gold-light:#E0C76E;--gold-dark:#A88B35;--ink:#1A1A1A;--ink-light:#333;--cream:#F5F0E8;--cream-dark:#E8DFD3;--white:#FFFDF7;--shadow:0 4px 20px rgba(0,0,0,.15)}
+:root{--red:#C8332C;--red-dark:#9E2823;--red-light:#E84A3E;--gold:#C9A84C;--gold-light:#E0C76E;--gold-dark:#A88B35;--ink:#1a1a1a;--ink-light:#3a3a3a;--ink-faded:#8a8a8a;--cream:#F5F0E8;--cream-dark:#E8DFD3;--white:#FFFDF7;--shadow:0 2px 16px rgba(0,0,0,.08)}
 html{font-size:16px;-webkit-tap-highlight-color:transparent}
-body{font-family:'Noto Serif SC',serif;background:var(--cream);background-image:radial-gradient(circle at 20% 50%,rgba(200,51,44,.03) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(201,168,76,.05) 0%,transparent 50%),repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(26,26,26,.01) 20px,rgba(26,26,26,.01) 21px);color:var(--ink);min-height:100vh;overflow-x:hidden}
-.app{max-width:1100px;margin:0 auto;padding:16px;position:relative}
-@media(max-width:768px){.app{padding:8px}}
-.header{text-align:center;padding:20px 16px 12px}
-.header h1{font-family:'ZCOOL KuaiLe',cursive;font-size:clamp(1.6rem,5vw,2.4rem);color:var(--red);text-shadow:2px 2px 0 var(--gold);letter-spacing:.1em}
-.header .subtitle{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--ink-light);margin-top:4px;letter-spacing:.15em}
-.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:12px}
-@media(max-width:768px){.main-grid{grid-template-columns:1fr}}
-.gacha-stage{display:flex;flex-direction:column;align-items:center;padding:20px 10px}
-.gacha-machine{position:relative;width:300px;height:480px;user-select:none}
-@media(max-width:768px){.gacha-machine{width:260px;height:420px}}
-.machine-body{position:absolute;inset:0;background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);border:4px solid var(--gold);border-radius:24px 24px 16px 16px;box-shadow:inset 0 2px 8px rgba(255,255,255,.15),inset 0 -4px 12px rgba(0,0,0,.3),0 8px 30px rgba(0,0,0,.25);overflow:hidden}
-.machine-top{position:relative;height:52px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--gold-dark) 0%,var(--gold) 50%,var(--gold-dark) 100%);border-bottom:3px solid var(--gold-dark)}
-.machine-top .sign{font-family:'ZCOOL KuaiLe',cursive;font-size:1.1rem;color:var(--red-dark);letter-spacing:.15em;text-shadow:0 1px 0 rgba(255,255,255,.3)}
-.coin-slot{position:absolute;top:58px;right:16px;width:28px;height:6px;background:#1a1a1a;border-radius:3px;box-shadow:inset 0 1px 3px rgba(255,255,255,.1)}
-.coin-slot::after{content:'投币口';position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:.5rem;color:var(--gold-light);white-space:nowrap;font-family:'JetBrains Mono',monospace}
-.dome-container{position:relative;width:240px;height:240px;margin:18px auto 0;border-radius:50%;background:radial-gradient(ellipse at 30% 30%,rgba(255,255,255,.25) 0%,transparent 50%),rgba(245,240,232,.12);border:4px solid var(--gold);box-shadow:inset 0 0 30px rgba(0,0,0,.15),0 2px 10px rgba(0,0,0,.1);overflow:hidden}
-.dome-container::after{content:'';position:absolute;top:8%;left:15%;width:30%;height:25%;background:linear-gradient(135deg,rgba(255,255,255,.4) 0%,transparent 70%);border-radius:50%;pointer-events:none}
-.dome-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;padding:20px}
-.capsule{width:28px;height:36px;border-radius:50% 50% 45% 45%;position:relative;opacity:.85}
-.capsule::before{content:'';position:absolute;top:0;left:0;right:0;height:48%;border-radius:50% 50% 0 0;background:inherit;filter:brightness(1.15)}
-.capsule::after{content:'';position:absolute;top:48%;left:0;right:0;height:1px;background:rgba(0,0,0,.2)}
-.capsule:nth-child(1){background:var(--red-light)}.capsule:nth-child(2){background:var(--gold)}.capsule:nth-child(3){background:#6DBE9F}.capsule:nth-child(4){background:#7BA7D9}.capsule:nth-child(5){background:#E89B5A}.capsule:nth-child(6){background:#CE7BA8}.capsule:nth-child(7){background:var(--red-light)}.capsule:nth-child(8){background:var(--gold)}.capsule:nth-child(9){background:#6DBE9F}.capsule:nth-child(10){background:#7BA7D9}
-@keyframes shake{0%,100%{transform:translate(0,0) rotate(0)}10%{transform:translate(-2px,1px) rotate(-.5deg)}20%{transform:translate(2px,-1px) rotate(.5deg)}30%{transform:translate(-1px,2px) rotate(-.3deg)}40%{transform:translate(1px,-2px) rotate(.3deg)}50%{transform:translate(-2px,-1px) rotate(-.5deg)}60%{transform:translate(2px,1px) rotate(.5deg)}70%{transform:translate(-1px,-2px) rotate(-.3deg)}80%{transform:translate(1px,2px) rotate(.3deg)}90%{transform:translate(-2px,0) rotate(-.5deg)}}
-@keyframes cb{0%,100%{transform:translate(0,0)}25%{transform:translate(3px,-4px)}50%{transform:translate(-3px,2px)}75%{transform:translate(2px,-2px)}}
-.shaking .machine-body{animation:shake .3s infinite}
-.shaking .capsule{animation:cb .25s infinite alternate}
-.shaking .capsule:nth-child(even){animation-delay:.08s}
-.shaking .capsule:nth-child(3n){animation-delay:.15s}
-.handle-area{position:absolute;right:-18px;top:55%;width:60px;height:60px;z-index:5}
-.handle-base{position:absolute;top:50%;left:10px;width:20px;height:20px;background:var(--gold-dark);border-radius:50%;border:2px solid var(--gold);transform:translateY(-50%)}
-.handle-arm{position:absolute;top:50%;left:16px;width:30px;height:5px;background:linear-gradient(180deg,var(--gold) 0%,var(--gold-dark) 100%);border-radius:2px;transform-origin:left center;transform:translateY(-50%)}
-.handle-knob{position:absolute;top:50%;left:42px;width:18px;height:18px;background:radial-gradient(circle at 30% 30%,var(--gold-light) 0%,var(--gold) 50%,var(--gold-dark) 100%);border-radius:50%;transform:translateY(-50%);box-shadow:0 2px 4px rgba(0,0,0,.3)}
-@keyframes hs{from{transform:translateY(-50%) rotate(0)}to{transform:translateY(-50%) rotate(360deg)}}
-.spinning .handle-arm{animation:hs .5s linear 3}
-.spinning .handle-knob{animation:hs .5s linear 3;transform-origin:-26px 50%}
-.dispenser{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:100px;height:50px;background:linear-gradient(180deg,var(--ink) 0%,#0a0a0a 100%);border-radius:0 0 12px 12px;border:3px solid var(--gold);border-top:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.dispenser-flap{width:80%;height:70%;background:linear-gradient(180deg,var(--gold-dark) 0%,var(--gold) 50%,var(--gold-dark) 100%);border-radius:0 0 8px 8px;border:2px solid var(--gold-dark)}
-.dispenser-label{position:absolute;bottom:64px;left:50%;transform:translateX(-50%);font-size:.55rem;color:var(--gold-light);font-family:'JetBrains Mono',monospace;white-space:nowrap}
-@keyframes ed1{0%{transform:translate(-50%,-200px) scale(.5);opacity:0}30%{transform:translate(-50%,-60px) scale(1);opacity:1}50%{transform:translate(-50%,-10px) scale(1.05)}70%{transform:translate(-50%,-25px)}100%{transform:translate(-50%,-15px) scale(1)}}
-@keyframes ed2{0%,15%{transform:translate(-50%,-200px) scale(.5);opacity:0}45%{transform:translate(-50%,-60px) scale(1);opacity:1}65%{transform:translate(-50%,-10px) scale(1.05)}85%{transform:translate(-50%,-25px)}100%{transform:translate(-50%,-15px) scale(1)}}
-@keyframes ed3{0%,30%{transform:translate(-50%,-200px) scale(.5);opacity:0}60%{transform:translate(-50%,-60px) scale(1);opacity:1}80%{transform:translate(-50%,-10px) scale(1.05)}100%{transform:translate(-50%,-15px) scale(1)}}
-.result-egg{position:absolute;bottom:15px;left:50%;width:36px;height:46px;border-radius:50% 50% 45% 45%;z-index:10;transform:translate(-50%,-200px);opacity:0}
-.result-egg .egg-top{position:absolute;top:0;left:0;right:0;height:48%;border-radius:50% 50% 0 0}
-.result-egg .egg-bottom{position:absolute;bottom:0;left:0;right:0;height:52%;border-radius:0 0 45% 45%}
-.result-egg .egg-line{position:absolute;top:48%;left:0;right:0;height:1px;background:rgba(0,0,0,.3)}
-@keyframes cd{0%{transform:translate(-50%,-60px) rotate(0);opacity:1}60%{transform:translate(-50%,-5px) rotate(180deg);opacity:1}70%{transform:translate(-50%,-5px) rotate(180deg);opacity:0}100%{transform:translate(-50%,-5px) rotate(180deg);opacity:0}}
-.coin{position:absolute;top:58px;right:30px;width:16px;height:16px;background:radial-gradient(circle at 30% 30%,var(--gold-light) 0%,var(--gold) 50%,var(--gold-dark) 100%);border-radius:50%;z-index:20;opacity:0;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-.coin::after{content:'¥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--red-dark);font-weight:bold}
-.coin-dropping{animation:cd .6s ease-in forwards}
-.filter-panel{background:var(--white);border:2px solid var(--cream-dark);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
-.filter-toggle{display:none;width:100%;padding:12px;background:var(--red);color:var(--white);border:none;border-radius:8px;font-family:'ZCOOL KuaiLe',cursive;font-size:1rem;cursor:pointer}
-@media(max-width:768px){.filter-toggle{display:block}.filter-content{max-height:0;overflow:hidden;transition:max-height .4s ease}.filter-content.open{max-height:2000px}}
-.filter-group{margin-bottom:14px}.filter-group:last-child{margin-bottom:0}
-.filter-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;color:var(--ink-light);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;display:block}
+body{font-family:'Noto Serif SC',serif;background:var(--cream);background-image:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(26,26,26,.012) 40px,rgba(26,26,26,.012) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(26,26,26,.012) 40px,rgba(26,26,26,.012) 41px),radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.06) 0%,transparent 60%);color:var(--ink);min-height:100vh;overflow-x:hidden}
+.app{max-width:900px;margin:0 auto;padding:24px 16px;position:relative}
+@media(max-width:768px){.app{padding:16px 12px}}
+
+/* ===== HEADER ===== */
+.header{text-align:center;padding:28px 16px 20px}
+.header h1{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(2rem,6vw,3rem);color:var(--ink);letter-spacing:.15em;position:relative;display:inline-block}
+.header h1::after{content:'';position:absolute;bottom:-6px;left:10%;width:80%;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.header .seal{display:inline-block;width:32px;height:32px;background:var(--red);color:var(--white);border-radius:4px;font-size:.6rem;line-height:32px;text-align:center;font-weight:700;vertical-align:middle;margin:0 8px;letter-spacing:0;transform:rotate(-3deg);box-shadow:1px 1px 3px rgba(0,0,0,.15)}
+.header .subtitle{font-family:'ZCOOL XiaoWei',serif;font-size:.9rem;color:var(--ink-faded);margin-top:12px;letter-spacing:.08em}
+
+/* ===== LAYOUT ===== */
+.content{display:flex;flex-direction:column;align-items:center;gap:24px}
+
+/* ===== FORTUNE MACHINE ===== */
+.fortune-stage{display:flex;flex-direction:column;align-items:center;padding:10px 0 0}
+.fortune-machine{position:relative;width:200px;height:340px;user-select:none}
+@media(max-width:768px){.fortune-machine{width:180px;height:310px}}
+
+/* Roof - 中式屋檐 */
+.fortune-roof{position:relative;width:100%;height:40px;display:flex;justify-content:center;align-items:flex-end}
+.fortune-roof::before{content:'';position:absolute;top:0;left:-15%;width:130%;height:32px;background:linear-gradient(180deg,var(--red) 0%,var(--red-dark) 100%);clip-path:polygon(8% 100%,0 100%,15% 30%,50% 0,85% 30%,100% 100%,92% 100%);box-shadow:0 2px 8px rgba(200,50,44,.2)}
+.fortune-roof-eave{position:absolute;top:28px;width:100%;height:6px;background:var(--gold-dark);border-radius:2px}
+
+/* Cylinder body */
+.fortune-body{position:relative;width:160px;height:220px;margin:0 auto;background:linear-gradient(135deg,#2a2018 0%,#3d2e22 30%,#4a3828 50%,#3d2e22 70%,#2a2018 100%);border-radius:80px 80px 12px 12px;box-shadow:inset 0 -8px 20px rgba(0,0,0,.4),inset 0 4px 8px rgba(255,255,255,.06),0 8px 30px rgba(0,0,0,.2);overflow:hidden;border:2px solid #5a4232}
+@media(max-width:768px){.fortune-body{width:144px;height:200px}}
+
+/* Fortune text on cylinder */
+.fortune-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);writing-mode:vertical-rl;font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.8rem;color:var(--gold-light);letter-spacing:.6em;text-shadow:0 0 12px rgba(224,199,110,.3);opacity:.9;z-index:3}
+@media(max-width:768px){.fortune-text{font-size:1.5rem}}
+
+/* Decorative band */
+.fortune-band{position:absolute;left:-4px;right:-4px;height:12px;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light),var(--gold),var(--gold-dark));border-radius:2px}
+.fortune-band-top{top:24px}
+.fortune-band-bottom{bottom:24px}
+
+/* Bouncing balls inside */
+.fortune-balls{position:absolute;inset:36px 12px;overflow:hidden;border-radius:60px}
+.fball{position:absolute;width:14px;height:14px;border-radius:50%;opacity:.7}
+.fball:nth-child(1){background:var(--red-light);top:20%;left:20%}
+.fball:nth-child(2){background:var(--gold);top:50%;left:60%}
+.fball:nth-child(3){background:#6DBE9F;top:30%;left:70%}
+.fball:nth-child(4){background:#CE7BA8;top:60%;left:30%}
+.fball:nth-child(5){background:#7BA7D9;top:15%;left:50%}
+.fball:nth-child(6){background:var(--red-light);top:70%;left:65%}
+
+/* Slot at bottom */
+.fortune-slot{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:50px;height:6px;background:#0a0a0a;border-radius:3px;box-shadow:inset 0 1px 3px rgba(0,0,0,.5)}
+
+/* Shake animation */
+@keyframes fortune-shake{0%,100%{transform:rotate(0)}20%{transform:rotate(1.5deg)}40%{transform:rotate(-1.5deg)}60%{transform:rotate(1deg)}80%{transform:rotate(-1deg)}}
+@keyframes ball-bounce{0%,100%{transform:translate(0,0)}25%{transform:translate(8px,-12px)}50%{transform:translate(-6px,6px)}75%{transform:translate(4px,-4px)}}
+.shaking .fortune-body{animation:fortune-shake .4s ease-in-out infinite}
+.shaking .fball{animation:ball-bounce .3s ease-in-out infinite alternate}
+.fball:nth-child(2){animation-delay:.05s}
+.fball:nth-child(3){animation-delay:.1s}
+.fball:nth-child(4){animation-delay:.08s}
+.fball:nth-child(5){animation-delay:.12s}
+.fball:nth-child(6){animation-delay:.06s}
+
+/* Coin */
+.fortune-coin{position:absolute;top:-10px;left:50%;width:20px;height:20px;background:radial-gradient(circle at 30% 30%,var(--gold-light) 0%,var(--gold) 50%,var(--gold-dark) 100%);border-radius:50%;z-index:20;opacity:0;transform:translateX(-50%)}
+.fortune-coin::after{content:'¥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--red-dark);font-weight:bold}
+@keyframes coin-drop{0%{transform:translateX(-50%) translateY(-20px) rotate(0);opacity:1}60%{transform:translateX(-50%) translateY(180px) rotate(360deg);opacity:1}70%{transform:translateX(-50%) translateY(180px) rotate(360deg);opacity:0}100%{opacity:0}}
+.coin-dropping{animation:coin-drop .8s ease-in forwards}
+
+/* Shake button */
+.shake-btn-area{text-align:center;margin-top:20px}
+.shake-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 40px;background:var(--red);color:var(--white);border:2px solid var(--red-dark);border-radius:4px;font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.15rem;cursor:pointer;box-shadow:0 3px 12px rgba(200,50,44,.25),inset 0 1px 2px rgba(255,255,255,.1);transition:all .2s;letter-spacing:.15em;position:relative}
+.shake-btn::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;border:1px solid var(--gold);border-radius:4px;opacity:.4;pointer-events:none}
+.shake-btn:hover{background:var(--red-dark);transform:translateY(-1px);box-shadow:0 5px 16px rgba(200,50,44,.3)}
+.shake-btn:active{transform:translateY(1px)}
+.shake-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* ===== FILTERS ===== */
+.filter-section{width:100%;max-width:600px;background:var(--white);border:1px solid var(--cream-dark);border-radius:2px;padding:0;box-shadow:var(--shadow)}
+.filter-toggle{width:100%;padding:14px 20px;background:transparent;border:none;font-family:'Noto Serif SC',serif;font-size:.95rem;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.filter-toggle .arrow{transition:transform .3s;font-size:.7rem;color:var(--ink-faded)}
+.filter-toggle.open .arrow{transform:rotate(180deg)}
+.filter-content{max-height:0;overflow:hidden;transition:max-height .4s ease;padding:0 20px}
+.filter-content.open{max-height:800px;padding-bottom:20px}
+.filter-group{margin-top:16px}
+.filter-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:500;color:var(--ink-faded);letter-spacing:.1em;margin-bottom:8px;display:block;text-transform:uppercase}
 .tag-row{display:flex;flex-wrap:wrap;gap:6px}
-.tag{padding:4px 12px;border:1.5px solid var(--cream-dark);border-radius:20px;font-size:.8rem;cursor:pointer;transition:all .2s;background:var(--white);color:var(--ink-light);font-family:'Noto Serif SC',serif}
-.tag:active{transform:scale(.95)}
-.tag.active{background:var(--red);border-color:var(--red);color:var(--white)}
+.tag{padding:4px 14px;border:1px solid var(--cream-dark);border-radius:2px;font-size:.82rem;cursor:pointer;transition:all .15s;background:var(--white);color:var(--ink-light);font-family:'Noto Serif SC',serif}
+.tag:active{transform:scale(.96)}
+.tag.active{background:var(--ink);border-color:var(--ink);color:var(--white)}
 .spice-row{display:flex;gap:4px;flex-wrap:wrap}
-.spice-btn{padding:4px 10px;border:1.5px solid var(--cream-dark);border-radius:8px;font-size:.75rem;cursor:pointer;background:var(--white);color:var(--ink-light);font-family:'Noto Serif SC',serif}
-.spice-btn.active{background:var(--gold);border-color:var(--gold);color:var(--ink)}
-.coin-button-area{text-align:center;margin-top:20px}
-.coin-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 36px;background:linear-gradient(180deg,var(--gold) 0%,var(--gold-dark) 100%);color:var(--red-dark);border:2px solid var(--gold-dark);border-radius:30px;font-family:'ZCOOL KuaiLe',cursive;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 12px rgba(168,139,53,.4),inset 0 1px 2px rgba(255,255,255,.3);transition:transform .15s,box-shadow .15s;letter-spacing:.1em}
-.coin-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(168,139,53,.5)}
-.coin-btn:active{transform:translateY(1px)}
-.coin-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.results-area{margin-top:24px;display:none}
-.results-header{text-align:center;margin-bottom:16px}
-.results-header h2{font-family:'ZCOOL KuaiLe',cursive;font-size:1.4rem;color:var(--red)}
-.results-sub{font-size:0.75rem;color:#999;margin-top:4px;letter-spacing:0.03em}
-.cards-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-@media(max-width:768px){.cards-row{grid-template-columns:1fr}}
-.dish-card{background:var(--white);border:2px solid var(--cream-dark);border-radius:16px;padding:20px 16px;text-align:center;position:relative;box-shadow:var(--shadow);transition:transform .2s;animation:ca .5s ease-out forwards;opacity:0}
-.dish-card:nth-child(1){animation-delay:.1s}.dish-card:nth-child(2){animation-delay:.25s}.dish-card:nth-child(3){animation-delay:.4s}
-@keyframes ca{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
-.dish-card:hover{transform:translateY(-4px)}
-.dish-role{display:inline-block;font-size:0.65rem;padding:3px 10px;border-radius:20px;background:rgba(200,50,30,.15);color:#e63946;margin-bottom:6px;letter-spacing:0.05em}
-.dish-emoji{font-size:3.5rem;line-height:1;margin-bottom:8px}
-.dish-name{font-family:'ZCOOL KuaiLe',cursive;font-size:1.3rem;color:var(--ink);margin-bottom:8px}
-.dish-badges{display:flex;justify-content:center;gap:6px;margin-bottom:6px;flex-wrap:wrap}
-.badge{font-size:.7rem;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace}
-.badge-region{background:var(--cream-dark);color:var(--ink)}
-.badge-type{background:var(--gold);color:var(--ink)}
-.dish-spice{font-size:.85rem;margin:4px 0}
-.dish-desc{font-size:.85rem;color:var(--ink-light);line-height:1.5;margin:6px 0}
+.spice-btn{padding:4px 12px;border:1px solid var(--cream-dark);border-radius:2px;font-size:.78rem;cursor:pointer;background:var(--white);color:var(--ink-light)}
+.spice-btn.active{background:var(--gold);border-color:var(--gold-dark);color:var(--ink)}
+
+/* ===== RESULTS ===== */
+.results-area{width:100%;max-width:900px;margin-top:8px;display:none}
+.results-header{text-align:center;margin-bottom:20px}
+.results-header h2{font-family:'Noto Serif SC',serif;font-weight:900;font-size:1.5rem;color:var(--ink);letter-spacing:.1em}
+.results-header h2 span{color:var(--red)}
+.results-sub{font-family:'ZCOOL XiaoWei',serif;font-size:.82rem;color:var(--ink-faded);margin-top:6px;letter-spacing:.05em}
+.cards-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:768px){.cards-row{grid-template-columns:1fr;gap:12px}}
+.dish-card{background:var(--white);border:1px solid var(--cream-dark);border-radius:4px;padding:24px 18px;text-align:center;position:relative;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;animation:card-in .6s ease-out forwards;opacity:0}
+.dish-card:nth-child(1){animation-delay:.15s}
+.dish-card:nth-child(2){animation-delay:.3s}
+.dish-card:nth-child(3){animation-delay:.45s}
+@keyframes card-in{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.dish-card:hover{transform:translateY(-3px);box-shadow:0 6px 24px rgba(0,0,0,.1)}
+.dish-card-corner{position:absolute;top:10px;right:10px;width:24px;height:24px;background:var(--red);color:var(--white);font-size:.6rem;line-height:24px;border-radius:2px;font-family:'JetBrains Mono',monospace}
+.dish-emoji{font-size:3rem;line-height:1;margin-bottom:10px}
+.dish-name{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.2rem;color:var(--ink);margin-bottom:4px;letter-spacing:.05em}
+.dish-meal-type{font-size:.72rem;color:var(--gold-dark);font-family:'ZCOOL XiaoWei',serif;margin-bottom:8px;letter-spacing:.05em}
+.dish-as-meal{font-size:.78rem;color:var(--ink-light);background:var(--cream);padding:4px 10px;border-radius:2px;display:inline-block;margin:4px 0 8px}
+.dish-badges{display:flex;justify-content:center;gap:5px;margin:4px 0;flex-wrap:wrap}
+.badge{font-size:.65rem;padding:2px 8px;border-radius:1px;font-family:'JetBrains Mono',monospace;letter-spacing:.03em}
+.badge-region{background:var(--cream-dark);color:var(--ink-light)}
+.dish-spice{font-size:.8rem;margin:4px 0}
+.dish-desc{font-size:.82rem;color:var(--ink-light);line-height:1.6;margin:8px 0}
 .dish-taste-tags{display:flex;justify-content:center;gap:4px;flex-wrap:wrap;margin-top:6px}
-.taste-tag{font-size:.7rem;padding:2px 8px;border-radius:10px;background:var(--cream);color:var(--ink-light)}
-.actions{text-align:center;margin-top:20px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
-.action-btn{padding:8px 20px;border-radius:20px;font-size:.9rem;cursor:pointer;border:2px solid;font-family:'Noto Serif SC',serif;transition:all .2s}
-.action-btn:active{transform:scale(.95)}
-.btn-reroll{background:var(--red);color:var(--white);border-color:var(--red)}
-.btn-shuffle{background:var(--white);color:var(--red);border-color:var(--red)}
-.btn-pick{background:var(--gold);color:var(--ink);border-color:var(--gold-dark)}
-.pick-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.taste-tag{font-size:.68rem;padding:2px 8px;border:1px solid var(--cream-dark);color:var(--ink-faded)}
+.actions{text-align:center;margin-top:24px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.action-btn{padding:10px 24px;border-radius:2px;font-size:.88rem;cursor:pointer;border:1px solid;font-family:'Noto Serif SC',serif;transition:all .15s;font-weight:700}
+.action-btn:active{transform:scale(.97)}
+.btn-reroll{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.btn-shuffle{background:var(--white);color:var(--ink);border-color:var(--ink)}
+
+/* ===== PICK OVERLAY ===== */
+.pick-overlay{position:fixed;inset:0;background:rgba(26,26,26,.85);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .pick-overlay.show{display:flex}
-.pick-card{background:var(--white);border-radius:20px;padding:32px 24px;max-width:400px;width:100%;text-align:center;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.3);animation:ca .5s ease-out}
-.pick-emoji{font-size:5rem;margin-bottom:8px}
-.pick-name{font-family:'ZCOOL KuaiLe',cursive;font-size:2rem;color:var(--red);margin-bottom:8px}
-.pick-msg{font-size:1.1rem;color:var(--ink-light);margin:12px 0}
-.pick-info{text-align:left;margin:16px 0;padding:12px;background:var(--cream);border-radius:12px;font-size:.85rem;line-height:1.8}
-.pick-info strong{color:var(--red)}
-.pick-actions{display:flex;gap:12px;justify-content:center;margin-top:16px}
-.confetti-area{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden}
-@keyframes cf{0%{transform:translateY(-100vh) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-.confetti-piece{position:absolute;width:10px;height:10px;top:0}
-.empty-state{text-align:center;padding:40px 20px;color:var(--ink-light)}
-.empty-state h3{font-family:'ZCOOL KuaiLe',cursive;font-size:1.2rem;color:var(--red);margin-bottom:8px}
-.footer{text-align:center;padding:24px 16px;font-size:.7rem;color:var(--ink-light);font-family:'JetBrains Mono',monospace}
+.pick-card{background:var(--cream);border-radius:4px;padding:36px 28px;max-width:380px;width:100%;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pick-in .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pick-in{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.pick-emoji{font-size:4.5rem;margin-bottom:8px}
+.pick-name{font-family:'Noto Serif SC',serif;font-weight:900;font-size:1.8rem;color:var(--red);margin-bottom:4px;letter-spacing:.05em}
+.pick-msg{font-family:'ZCOOL XiaoWei',serif;font-size:1rem;color:var(--ink-light);margin:12px 0}
+.pick-info{text-align:left;margin:16px 0;padding:14px 16px;background:var(--white);border-radius:2px;font-size:.82rem;line-height:1.9;border-left:3px solid var(--red)}
+.pick-info strong{color:var(--red);font-weight:700}
+.pick-actions{display:flex;gap:10px;justify-content:center;margin-top:16px}
+
+/* ===== PETAL FALL ===== */
+.petal-area{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden}
+@keyframes petal-fall{0%{transform:translateY(-20px) translateX(0) rotate(0);opacity:.8}100%{transform:translateY(105vh) translateX(60px) rotate(360deg);opacity:0}}
+.petal-piece{position:absolute;top:0;width:10px;height:14px;border-radius:50% 0 50% 0}
+
+/* ===== FOOTER ===== */
+.footer{text-align:center;padding:32px 16px 20px;font-size:.7rem;color:var(--ink-faded);font-family:'JetBrains Mono',monospace;letter-spacing:.08em}
+.footer .divider{display:inline-block;width:4px;height:4px;background:var(--red);transform:rotate(45deg);margin:0 10px;vertical-align:middle}
 </style>
 </head>
 <body>
 <div class="app" id="app">
   <div class="header">
-    <h1>🍜 今天吃啥 · 美食扭蛋机</h1>
-    <div class="subtitle">FOOD GACHA — 投币，转动手柄，命运为你选菜</div>
+    <h1><span class="seal">食</span>今日食运<span class="seal">运</span></h1>
+    <div class="subtitle">摇签问卜，命运为你定这一餐</div>
   </div>
-  <div class="main-grid">
-    <div class="gacha-stage">
-      <div class="gacha-machine" id="gachaMachine">
-        <div class="machine-body">
-          <div class="machine-top"><span class="sign">🔥 今日吃啥 🔥</span></div>
-          <div class="coin-slot"></div>
-          <div class="coin" id="coin"></div>
-          <div class="dome-container" id="domeContainer">
-            <div class="dome-inner" id="domeInner">
-              <div class="capsule"></div><div class="capsule"></div><div class="capsule"></div><div class="capsule"></div><div class="capsule"></div>
-              <div class="capsule"></div><div class="capsule"></div><div class="capsule"></div><div class="capsule"></div><div class="capsule"></div>
-            </div>
-            <div class="result-egg" id="egg1" style="display:none"><div class="egg-top" style="background:var(--red-light)"></div><div class="egg-line"></div><div class="egg-bottom" style="background:var(--red)"></div></div>
-            <div class="result-egg" id="egg2" style="display:none"><div class="egg-top" style="background:var(--gold-light)"></div><div class="egg-line"></div><div class="egg-bottom" style="background:var(--gold)"></div></div>
-            <div class="result-egg" id="egg3" style="display:none"><div class="egg-top" style="background:#8ED5B0"></div><div class="egg-line"></div><div class="egg-bottom" style="background:#5DA888"></div></div>
+  
+  <div class="content">
+    <div class="fortune-stage">
+      <div class="fortune-machine" id="fortuneMachine">
+        <div class="fortune-coin" id="coin"></div>
+        <div class="fortune-roof"><div class="fortune-roof-eave"></div></div>
+        <div class="fortune-body">
+          <div class="fortune-band fortune-band-top"></div>
+          <div class="fortune-text">今日食运</div>
+          <div class="fortune-balls" id="ballsContainer">
+            <div class="fball"></div><div class="fball"></div><div class="fball"></div>
+            <div class="fball"></div><div class="fball"></div><div class="fball"></div>
           </div>
-          <div class="dispenser-label">取蛋口</div>
-          <div class="dispenser"><div class="dispenser-flap"></div></div>
-        </div>
-        <div class="handle-area" id="handleArea">
-          <div class="handle-base"></div>
-          <div class="handle-arm"><div class="handle-knob"></div></div>
+          <div class="fortune-band fortune-band-bottom"></div>
+          <div class="fortune-slot"></div>
         </div>
       </div>
-      <div class="coin-button-area">
-        <button class="coin-btn" id="spinBtn" onclick="doSpin()">🪙 投币扭蛋</button>
+      <div class="shake-btn-area">
+        <button class="shake-btn" id="spinBtn" onclick="doSpin()">摇 签</button>
       </div>
     </div>
-    <div class="filter-panel">
-      <button class="filter-toggle" onclick="toggleFilters()">⚙️ 筛选设置 ▼</button>
+    
+    <div class="filter-section">
+      <button class="filter-toggle" id="filterToggle" onclick="toggleFilters()">筛 选 <span class="arrow">▾</span></button>
       <div class="filter-content" id="filterContent">
-        <div class="filter-group"><span class="filter-label">口味 Taste</span><div class="tag-row"><span class="tag" data-taste="咸">咸</span><span class="tag" data-taste="甜">甜</span><span class="tag" data-taste="酸">酸</span><span class="tag" data-taste="辣">辣</span><span class="tag" data-taste="鲜">鲜</span><span class="tag" data-taste="清淡">清淡</span></div></div>
-        <div class="filter-group"><span class="filter-label">辣度 Spice Level</span><div class="spice-row"><span class="spice-btn" data-spice="0">不辣</span><span class="spice-btn" data-spice="1">微辣</span><span class="spice-btn" data-spice="2">中辣</span><span class="spice-btn" data-spice="3">辣</span><span class="spice-btn" data-spice="4">变态辣</span></div></div>
-        <div class="filter-group"><span class="filter-label">类型 Type</span><div class="tag-row"><span class="tag" data-type="菜">菜</span><span class="tag" data-type="汤">汤</span><span class="tag" data-type="面">面</span><span class="tag" data-type="饭">饭</span><span class="tag" data-type="小吃">小吃</span><span class="tag" data-type="甜品">甜品</span><span class="tag" data-type="饮品">饮品</span></div></div>
-        <div class="filter-group"><span class="filter-label">身体状态 Body State</span><div class="tag-row"><span class="tag" data-body="上火">🔥 最近上火了</span><span class="tag" data-body="暖胃">🤢 胃不太舒服</span><span class="tag" data-body="减脂">💪 在减脂</span><span class="tag" data-body="熬夜">🌙 熬夜了</span><span class="tag" data-body="解暑">☀️ 天太热</span><span class="tag" data-body="御寒">❄️ 天太冷</span></div></div>
-        <div class="filter-group"><span class="filter-label">地域 Region</span><div class="tag-row"><span class="tag" data-region="川渝">川渝</span><span class="tag" data-region="粤菜">粤菜</span><span class="tag" data-region="北方">北方</span><span class="tag" data-region="江浙">江浙</span><span class="tag" data-region="西北">西北</span><span class="tag" data-region="云贵">云贵</span><span class="tag" data-region="湘鄂">湘鄂</span><span class="tag" data-region="闽台">闽台</span><span class="tag" data-region="东北">东北</span><span class="tag" data-region="其他">其他</span></div></div>
+        <div class="filter-group"><span class="filter-label">口味 · Taste</span><div class="tag-row"><span class="tag" data-taste="咸">咸</span><span class="tag" data-taste="甜">甜</span><span class="tag" data-taste="酸">酸</span><span class="tag" data-taste="辣">辣</span><span class="tag" data-taste="鲜">鲜</span><span class="tag" data-taste="清淡">清淡</span></div></div>
+        <div class="filter-group"><span class="filter-label">辣度 · Spice</span><div class="spice-row"><span class="spice-btn" data-spice="0">不辣</span><span class="spice-btn" data-spice="1">微辣</span><span class="spice-btn" data-spice="2">中辣</span><span class="spice-btn" data-spice="3">辣</span><span class="spice-btn" data-spice="4">变态辣</span></div></div>
+        <div class="filter-group"><span class="filter-label">身体状态 · Condition</span><div class="tag-row"><span class="tag" data-body="上火">🔥 上火了</span><span class="tag" data-body="暖胃">🤢 胃不舒服</span><span class="tag" data-body="减脂">💪 减脂中</span><span class="tag" data-body="熬夜">🌙 熬夜了</span><span class="tag" data-body="解暑">☀️ 太热了</span><span class="tag" data-body="御寒">❄️ 太冷了</span></div></div>
+        <div class="filter-group"><span class="filter-label">地域 · Region</span><div class="tag-row"><span class="tag" data-region="川渝">川渝</span><span class="tag" data-region="粤菜">粤菜</span><span class="tag" data-region="北方">北方</span><span class="tag" data-region="江浙">江浙</span><span class="tag" data-region="西北">西北</span><span class="tag" data-region="云贵">云贵</span><span class="tag" data-region="湘鄂">湘鄂</span><span class="tag" data-region="闽台">闽台</span><span class="tag" data-region="东北">东北</span><span class="tag" data-region="其他">其他</span></div></div>
+      </div>
+    </div>
+    
+    <div class="results-area" id="resultsArea">
+      <div class="results-header"><h2>命运选了<span>三道</span>，你来定</h2><p class="results-sub">每一道都是完整的一餐，选一个吧</p></div>
+      <div class="cards-row" id="cardsRow"></div>
+      <div class="actions">
+        <button class="action-btn btn-reroll" onclick="doSpin()">再摇一签</button>
+        <button class="action-btn btn-shuffle" onclick="doSpin(true)">换三道</button>
       </div>
     </div>
   </div>
-  <div class="results-area" id="resultsArea">
-    <div class="results-header"><h2>🎉 今日简餐已安排！</h2><p class="results-sub">主食 + 主菜 + 配汤/小食，营养均衡的一顿</p></div>
-    <div class="cards-row" id="cardsRow"></div>
-    <div class="actions" id="actionButtons">
-      <button class="action-btn btn-reroll" onclick="doSpin()">🎲 再扭一次</button>
-      <button class="action-btn btn-shuffle" onclick="doSpin(true)">🔄 换换口味</button>
-    </div>
-  </div>
+  
   <div class="pick-overlay" id="pickOverlay">
     <div class="pick-card">
-      <div class="pick-emoji" id="pickEmoji">🍲</div>
-      <div class="pick-name" id="pickName">菜名</div>
+      <div class="pick-emoji" id="pickEmoji">🍽️</div>
+      <div class="pick-name" id="pickName"></div>
       <div class="pick-msg" id="pickMsg"></div>
       <div class="pick-info" id="pickInfo"></div>
       <div class="pick-actions">
         <button class="action-btn btn-shuffle" onclick="closePick()">换一道</button>
-        <button class="action-btn btn-pick" onclick="closePick()">👌 就这个！</button>
+        <button class="action-btn btn-reroll" onclick="closePick()">👌 就这个</button>
       </div>
     </div>
   </div>
-  <div class="confetti-area" id="confettiArea"></div>
-  <div class="footer">Food Gacha v1.0 · 共 <span id="dishCount">0</span> 道菜 · 祝你今天吃得开心</div>
+  
+  <div class="petal-area" id="petalArea"></div>
+  
+  <div class="footer">今日食运 Food Fortune<span class="divider"></span>共 <span id="dishCount">0</span> 道菜<span class="divider"></span>祝你今天吃得开心</div>
 </div>
+
 <script>
 // ==================== DISH DATABASE ====================
 const DISHES=[
@@ -326,15 +359,47 @@ const DISHES=[
 ];
 
 // ==================== STATE ====================
-let selectedTastes=new Set(),selectedTypes=new Set(),selectedRegions=new Set(),selectedBodies=new Set();
+
+
+// ==================== MEAL ENRICHMENT ====================
+// 每道菜转成完整正餐方案
+function toMeal(dish){
+  const isStaple = dish.type==='面' || dish.type==='饭';
+  const isSoup = dish.type==='汤';
+  const isDessert = dish.type==='甜品' || dish.type==='饮品';
+  
+  let asMeal, mealType, calories;
+  
+  if(isStaple){
+    asMeal = dish.name;
+    mealType = dish.type==='面' ? '一碗面就是一顿' : '一碗饭的事';
+    const cal = {'面':550,'饭':600}[dish.type] || 550;
+    calories = '约'+cal+'大卡';
+  } else if(isSoup){
+    asMeal = dish.name + ' + 米饭';
+    mealType = '汤饭组合';
+    calories = '约500大卡';
+  } else if(isDessert){
+    asMeal = dish.name + '（加餐/下午茶）';
+    mealType = '甜嘴小食';
+    calories = '约300大卡';
+  } else {
+    // 菜/小吃 -> 盖饭或配饭
+    asMeal = dish.name + (dish.tags.includes('下饭') ? ' + 米饭' : ' 配米饭');
+    mealType = dish.tags.includes('下饭') ? '下饭神菜组合' : dish.tags.includes('硬菜') ? '硬菜配饭' : '家常一菜一饭';
+    calories = '约600大卡';
+  }
+  
+  return Object.assign({}, dish, {asMeal, mealType, calories});
+}
+
+// ==================== STATE ====================
+let selectedTastes=new Set(),selectedRegions=new Set(),selectedBodies=new Set(),selectedTypes=new Set();
 let selectedSpice=-1;
 let lastResults=[];
 let isSpinning=false;
 
-// ==================== INIT ====================
 document.getElementById('dishCount').textContent=DISHES.length;
-
-// Tag click handlers
 document.querySelectorAll('[data-taste]').forEach(el=>el.addEventListener('click',()=>{toggleTag(el,'taste',selectedTastes)}));
 document.querySelectorAll('[data-type]').forEach(el=>el.addEventListener('click',()=>{toggleTag(el,'type',selectedTypes)}));
 document.querySelectorAll('[data-region]').forEach(el=>el.addEventListener('click',()=>{toggleTag(el,'region',selectedRegions)}));
@@ -349,14 +414,10 @@ function toggleTag(el,attr,set){
 function toggleSpice(el){
   const val=parseInt(el.dataset.spice);
   if(selectedSpice===val){selectedSpice=-1;el.classList.remove('active')}
-  else{
-    selectedSpice=val;
-    document.querySelectorAll('[data-spice]').forEach(e=>e.classList.remove('active'));
-    el.classList.add('active');
-  }
+  else{selectedSpice=val;document.querySelectorAll('[data-spice]').forEach(e=>e.classList.remove('active'));el.classList.add('active')}
 }
-
 function toggleFilters(){
+  document.getElementById('filterToggle').classList.toggle('open');
   document.getElementById('filterContent').classList.toggle('open');
 }
 
@@ -365,141 +426,72 @@ function getFilteredDishes(excludeNames){
   excludeNames=excludeNames||[];
   return DISHES.filter(d=>{
     if(excludeNames.includes(d.name))return false;
-    // taste filter: dish taste intersects selected tastes
-    if(selectedTastes.size>0){
-      let match=false;
-      for(let t of d.taste){if(selectedTastes.has(t)){match=true;break}}
-      if(!match)return false;
-    }
-    // spice filter: dish spice <= selected spice
-    if(selectedSpice>=0){
-      if(d.spice>selectedSpice)return false;
-    }
-    // type filter
-    if(selectedTypes.size>0){
-      if(!selectedTypes.has(d.type))return false;
-    }
-    // region filter
-    if(selectedRegions.size>0){
-      if(!selectedRegions.has(d.region))return false;
-    }
-    // body filter: if any body state selected, dish must include ALL selected body tags
-    if(selectedBodies.size>0){
-      for(let b of selectedBodies){
-        if(!d.body.includes(b))return false;
-      }
-    }
+    if(selectedTastes.size>0){let m=false;for(let t of d.taste){if(selectedTastes.has(t)){m=true;break}}if(!m)return false}
+    if(selectedSpice>=0&&d.spice>selectedSpice)return false;
+    if(selectedTypes.size>0&&!selectedTypes.has(d.type))return false;
+    if(selectedRegions.size>0&&!selectedRegions.has(d.region))return false;
+    if(selectedBodies.size>0){for(let b of selectedBodies){if(!d.body.includes(b))return false}}
     return true;
   });
 }
 
-// ==================== SPIN LOGIC ====================
-function doSpin(excludePrevious){
+// ==================== SPIN ====================
+function doSpin(excludePrev){
   if(isSpinning)return;
   isSpinning=true;
   let exclude=[];
-  if(excludePrevious&&lastResults.length>0){
-    exclude=lastResults.map(d=>d.name);
-  }
-  const pool=getFilteredDishes(exclude);
+  if(excludePrev&&lastResults.length>0)exclude=lastResults.map(d=>d.name);
   
-  // Hide previous results
+  const pool=getFilteredDishes(exclude);
   document.getElementById('resultsArea').style.display='none';
   
-  // Reset eggs
-  ['egg1','egg2','egg3'].forEach(id=>{
-    const e=document.getElementById(id);
-    e.style.display='none';
-    e.style.opacity='0';
-    e.style.animation='';
-  });
-
   if(pool.length<3){
-    // Not enough dishes
-    setTimeout(()=>{
-      showEmptyState();
-      isSpinning=false;
-    },500);
+    setTimeout(()=>{showEmpty();isSpinning=false},300);
     return;
   }
-
-  // Pick 3 dishes that form a balanced work meal combo
-  // Strategy: staple(面/饭) + main(菜) + soup/side(汤/小吃/饮品/甜品)
-  const poolCopy = [...pool];
-  const staplePool = poolCopy.filter(d => d.type==='面' || d.type==='饭');
-  const mainPool = poolCopy.filter(d => d.type==='菜');
-  const sidePool = poolCopy.filter(d => d.type==='汤' || d.type==='小吃' || d.type==='饮品' || d.type==='甜品');
   
-  let picked = [];
-  // Try combo: 1 staple + 1 main + 1 side
-  if(staplePool.length >= 1 && mainPool.length >= 1 && sidePool.length >= 1) {
-    const staple = staplePool[Math.floor(Math.random()*staplePool.length)];
-    const main = mainPool[Math.floor(Math.random()*mainPool.length)];
-    let side = sidePool[Math.floor(Math.random()*sidePool.length)];
-    // avoid duplicates
-    const used = new Set([staple.name, main.name]);
-    if(used.has(side.name)) {
-      const alt = sidePool.filter(d => !used.has(d.name));
-      if(alt.length > 0) side = alt[Math.floor(Math.random()*alt.length)];
-    }
-    picked = [staple, main, side];
-  } else if(staplePool.length >= 1 && mainPool.length >= 2) {
-    // staple + 2 dishes
-    const staple = staplePool[Math.floor(Math.random()*staplePool.length)];
-    const mains = mainPool.filter(d => d.name !== staple.name);
-    const m1 = mains[Math.floor(Math.random()*mains.length)];
-    const mains2 = mains.filter(d => d.name !== m1.name);
-    const m2 = mains2[Math.floor(Math.random()*mains2.length)];
-    picked = [staple, m1, m2];
-  } else {
-    // fallback: pure random 3
-    for(let i=0;i<3;i++){
-      const idx=Math.floor(Math.random()*poolCopy.length);
-      picked.push(poolCopy.splice(idx,1)[0]);
-    }
+  // Pick 3 random complete meals (different regions preferred)
+  const poolCopy=[...pool];
+  const picked=[];
+  const usedRegions=new Set();
+  
+  // First pass: try different regions
+  for(let i=0;i<3&&poolCopy.length>0;i++){
+    const diffRegion=poolCopy.filter(d=>!usedRegions.has(d.region));
+    const arr=diffRegion.length>0?diffRegion:poolCopy;
+    const idx=Math.floor(Math.random()*arr.length);
+    const dish=arr[idx];
+    picked.push(dish);
+    usedRegions.add(dish.region);
+    const realIdx=poolCopy.indexOf(dish);
+    poolCopy.splice(realIdx,1);
   }
-  lastResults=picked;
-
-  // Start animation sequence
-  const machine=document.getElementById('gachaMachine');
+  
+  lastResults=picked.map(toMeal);
+  
+  // Animation
+  const machine=document.getElementById('fortuneMachine');
   const coin=document.getElementById('coin');
   const spinBtn=document.getElementById('spinBtn');
   spinBtn.disabled=true;
-
-  // Phase 1: Coin drop (0-600ms)
+  
+  // Phase 1: coin drop
   coin.classList.remove('coin-dropping');
   void coin.offsetWidth;
   coin.classList.add('coin-dropping');
-
-  // Phase 2: Shake (600-2400ms)
+  
+  // Phase 2: shake
   setTimeout(()=>{
     machine.classList.add('shaking');
-    machine.classList.add('spinning');
-  },600);
-
-  // Phase 3: Stop shaking, show eggs (2400ms)
+  },300);
+  
+  // Phase 3: stop and show
   setTimeout(()=>{
     machine.classList.remove('shaking');
-    machine.classList.remove('spinning');
-    // Show result eggs with drop animation
-    const eggs=[
-      {id:'egg1',anim:'ed1',delay:0},
-      {id:'egg2',anim:'ed2',delay:200},
-      {id:'egg3',anim:'ed3',delay:400}
-    ];
-    eggs.forEach(e=>{
-      const el=document.getElementById(e.id);
-      el.style.display='block';
-      el.style.animation=`${e.anim} 0.6s ease-out ${e.delay}ms forwards`;
-    });
-  },2400);
-
-  // Phase 4: Show results (3400ms)
-  setTimeout(()=>{
-    showResults(picked);
     spinBtn.disabled=false;
     isSpinning=false;
-  },3400);
+    showResults(lastResults);
+  },2400);
 }
 
 function showResults(dishes){
@@ -512,27 +504,20 @@ function showResults(dishes){
     card.className='dish-card';
     let spiceStr='';
     for(let i=0;i<d.spice;i++)spiceStr+='🌶️';
-    if(d.spice===0)spiceStr='😐 不辣';
-    
-    // Role label based on position in combo
-    const roleMap={'面':'🍚 主食','饭':'🍚 主食','菜':'🥘 主菜','汤':'🍲 配汤','小吃':'🥟 小食','甜品':'🍮 甜点','饮品':'🥤 饮品'};
-    const role = roleMap[d.type] || '🍽️ 推荐';
+    if(d.spice===0)spiceStr='不辣';
     
     card.innerHTML=`
-      <div class="dish-role">${role}</div>
+      <div class="dish-card-corner">${idx+1}</div>
       <div class="dish-emoji">${d.emoji}</div>
       <div class="dish-name">${d.name}</div>
-      <div class="dish-badges">
-        <span class="badge badge-region">${d.region}</span>
-        <span class="badge badge-type">${d.type}</span>
-      </div>
+      <div class="dish-meal-type">${d.mealType}</div>
+      <div class="dish-as-meal">${d.asMeal}</div>
+      <div class="dish-badges"><span class="badge badge-region">${d.region}</span></div>
       <div class="dish-spice">${spiceStr}</div>
       <div class="dish-desc">${d.desc}</div>
-      <div class="dish-taste-tags">
-        ${d.taste.map(t=>`<span class="taste-tag">${t}</span>`).join('')}
-      </div>
-      <div style="margin-top:10px">
-        <button class="action-btn btn-pick" onclick="pickDish(${idx})">就吃这个了！</button>
+      <div class="dish-taste-tags">${d.taste.map(t=>'<span class="taste-tag">'+t+'</span>').join('')}</div>
+      <div style="margin-top:12px">
+        <button class="action-btn btn-reroll" onclick="pickDish(${idx})" style="font-size:.8rem;padding:6px 18px">就吃这个</button>
       </div>
     `;
     row.appendChild(card);
@@ -542,72 +527,63 @@ function showResults(dishes){
   area.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-function showEmptyState(){
+function showEmpty(){
   const area=document.getElementById('resultsArea');
   const row=document.getElementById('cardsRow');
-  row.innerHTML=`<div class="empty-state"><h3>😅 条件太严格了</h3><p>放宽一点筛选条件试试？</p></div>`;
+  row.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--ink-faded)"><p style="font-size:1.1rem;margin-bottom:8px">条件太严格了 😅</p><p>放宽一点筛选试试？</p></div>';
   area.style.display='block';
 }
 
-// ==================== PICK DISH ====================
 function pickDish(idx){
   const d=lastResults[idx];
   document.getElementById('pickEmoji').textContent=d.emoji;
   document.getElementById('pickName').textContent=d.name;
   
-  const encouragements=[
-    `今天就去吃${d.name}吧！😋`,
-    `命运说今天适合吃${d.name}！🎉`,
-    `你的胃需要这个：${d.name}！🔥`,
-    `${d.name}在召唤你！🤤`,
-    `今天就它了——${d.name}！✨`
+  const msgs=[
+    '今天就去吃'+d.name+'吧！',
+    '命运说今天适合'+d.name+'。',
+    '你的胃需要这个：'+d.name+'！',
+    d.name+'在召唤你。',
+    '今天就它了——'+d.name+'。'
   ];
-  document.getElementById('pickMsg').textContent=encouragements[Math.floor(Math.random()*encouragements.length)];
+  document.getElementById('pickMsg').textContent=msgs[Math.floor(Math.random()*msgs.length)];
   
   let spiceStr='';
   for(let i=0;i<d.spice;i++)spiceStr+='🌶️';
   if(d.spice===0)spiceStr='不辣';
   
-  let bodyStr=d.body.length>0?d.body.map(b=>{
-    const map={'上火':'清淡降火','暖胃':'暖胃易消化','减脂':'低卡高蛋白','熬夜':'补充能量','解暑':'清凉解暑','御寒':'暖身御寒'};
-    return map[b]||b;
-  }).join('、'):'无特殊';
-  
-  document.getElementById('pickInfo').innerHTML=`
-    <strong>地域：</strong>${d.region}<br>
-    <strong>类型：</strong>${d.type}<br>
-    <strong>辣度：</strong>${spiceStr}<br>
-    <strong>口味：</strong>${d.taste.join('、')}<br>
-    <strong>推荐场景：</strong>${bodyStr}<br>
-    <strong>描述：</strong>${d.desc}
-  `;
+  document.getElementById('pickInfo').innerHTML=
+    '<strong>这一餐：</strong>'+d.asMeal+'<br>'+
+    '<strong>风格：</strong>'+d.mealType+'<br>'+
+    '<strong>热量：</strong>'+d.calories+'<br>'+
+    '<strong>地域：</strong>'+d.region+'<br>'+
+    '<strong>辣度：</strong>'+spiceStr+'<br>'+
+    '<strong>口味：</strong>'+d.taste.join('、')+'<br>'+
+    '<strong>描述：</strong>'+d.desc;
   
   document.getElementById('pickOverlay').classList.add('show');
-  
-  // Confetti!
-  launchConfetti();
+  launchPetals();
 }
 
 function closePick(){
   document.getElementById('pickOverlay').classList.remove('show');
-  document.getElementById('confettiArea').innerHTML='';
+  document.getElementById('petalArea').innerHTML='';
 }
 
-// ==================== CONFETTI ====================
-function launchConfetti(){
-  const area=document.getElementById('confettiArea');
+// ==================== PETAL FALL ====================
+function launchPetals(){
+  const area=document.getElementById('petalArea');
   area.innerHTML='';
-  const colors=['#C8332C','#C9A84C','#E0C76E','#6DBE9F','#7BA7D9','#CE7BA8','#E89B5A'];
-  for(let i=0;i<80;i++){
-    const piece=document.createElement('div');
-    piece.className='confetti-piece';
-    piece.style.left=Math.random()*100+'%';
-    piece.style.background=colors[Math.floor(Math.random()*colors.length)];
-    piece.style.width=(6+Math.random()*8)+'px';
-    piece.style.height=(6+Math.random()*8)+'px';
-    piece.style.borderRadius=Math.random()>0.5?'50%':'2px';
-    piece.style.animation=`cf ${2+Math.random()*2}s ease-in ${Math.random()*0.5}s forwards`;
-    area.appendChild(piece);
+  const colors=['#C8332C','#C9A84C','#E0C76E','#6DBE9F','#7BA7D9','#CE7BA8'];
+  for(let i=0;i<50;i++){
+    const p=document.createElement('div');
+    p.className='petal-piece';
+    p.style.left=Math.random()*100+'%';
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    p.style.opacity=.6+Math.random()*.3;
+    p.style.animation='petal-fall '+(3+Math.random()*3)+'s ease-in '+Math.random()*1+'s forwards';
+    p.style.transform='rotate('+Math.random()*360+'deg)';
+    area.appendChild(p);
   }
 }
 </script>
