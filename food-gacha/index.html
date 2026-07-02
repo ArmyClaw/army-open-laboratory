@@ -425,6 +425,7 @@ function doSpin(excludePrevious){
 
   // Pick 3 dishes that form a balanced work meal combo
   // Strategy: staple(面/饭) + main(菜) + soup/side(汤/小吃/饮品/甜品)
+  const poolCopy = [...pool];
   const staplePool = poolCopy.filter(d => d.type==='面' || d.type==='饭');
   const mainPool = poolCopy.filter(d => d.type==='菜');
   const sidePool = poolCopy.filter(d => d.type==='汤' || d.type==='小吃' || d.type==='饮品' || d.type==='甜品');
