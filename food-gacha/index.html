@@ -81,12 +81,14 @@ body{font-family:'Noto Serif SC',serif;background:var(--cream);background-image:
 .results-area{margin-top:24px;display:none}
 .results-header{text-align:center;margin-bottom:16px}
 .results-header h2{font-family:'ZCOOL KuaiLe',cursive;font-size:1.4rem;color:var(--red)}
+.results-sub{font-size:0.75rem;color:#999;margin-top:4px;letter-spacing:0.03em}
 .cards-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:768px){.cards-row{grid-template-columns:1fr}}
 .dish-card{background:var(--white);border:2px solid var(--cream-dark);border-radius:16px;padding:20px 16px;text-align:center;position:relative;box-shadow:var(--shadow);transition:transform .2s;animation:ca .5s ease-out forwards;opacity:0}
 .dish-card:nth-child(1){animation-delay:.1s}.dish-card:nth-child(2){animation-delay:.25s}.dish-card:nth-child(3){animation-delay:.4s}
 @keyframes ca{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
 .dish-card:hover{transform:translateY(-4px)}
+.dish-role{display:inline-block;font-size:0.65rem;padding:3px 10px;border-radius:20px;background:rgba(200,50,30,.15);color:#e63946;margin-bottom:6px;letter-spacing:0.05em}
 .dish-emoji{font-size:3.5rem;line-height:1;margin-bottom:8px}
 .dish-name{font-family:'ZCOOL KuaiLe',cursive;font-size:1.3rem;color:var(--ink);margin-bottom:8px}
 .dish-badges{display:flex;justify-content:center;gap:6px;margin-bottom:6px;flex-wrap:wrap}
@@ -166,7 +168,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--cream);background-image:
     </div>
   </div>
   <div class="results-area" id="resultsArea">
-    <div class="results-header"><h2>🎉 命运为你选了这三道菜</h2></div>
+    <div class="results-header"><h2>🎉 今日简餐已安排！</h2><p class="results-sub">主食 + 主菜 + 配汤/小食，营养均衡的一顿</p></div>
     <div class="cards-row" id="cardsRow"></div>
     <div class="actions" id="actionButtons">
       <button class="action-btn btn-reroll" onclick="doSpin()">🎲 再扭一次</button>
@@ -421,12 +423,39 @@ function doSpin(excludePrevious){
     return;
   }
 
-  // Pick 3 random dishes
-  const picked=[];
-  const poolCopy=[...pool];
-  for(let i=0;i<3;i++){
-    const idx=Math.floor(Math.random()*poolCopy.length);
-    picked.push(poolCopy.splice(idx,1)[0]);
+  // Pick 3 dishes that form a balanced work meal combo
+  // Strategy: staple(面/饭) + main(菜) + soup/side(汤/小吃/饮品/甜品)
+  const staplePool = poolCopy.filter(d => d.type==='面' || d.type==='饭');
+  const mainPool = poolCopy.filter(d => d.type==='菜');
+  const sidePool = poolCopy.filter(d => d.type==='汤' || d.type==='小吃' || d.type==='饮品' || d.type==='甜品');
+  
+  let picked = [];
+  // Try combo: 1 staple + 1 main + 1 side
+  if(staplePool.length >= 1 && mainPool.length >= 1 && sidePool.length >= 1) {
+    const staple = staplePool[Math.floor(Math.random()*staplePool.length)];
+    const main = mainPool[Math.floor(Math.random()*mainPool.length)];
+    let side = sidePool[Math.floor(Math.random()*sidePool.length)];
+    // avoid duplicates
+    const used = new Set([staple.name, main.name]);
+    if(used.has(side.name)) {
+      const alt = sidePool.filter(d => !used.has(d.name));
+      if(alt.length > 0) side = alt[Math.floor(Math.random()*alt.length)];
+    }
+    picked = [staple, main, side];
+  } else if(staplePool.length >= 1 && mainPool.length >= 2) {
+    // staple + 2 dishes
+    const staple = staplePool[Math.floor(Math.random()*staplePool.length)];
+    const mains = mainPool.filter(d => d.name !== staple.name);
+    const m1 = mains[Math.floor(Math.random()*mains.length)];
+    const mains2 = mains.filter(d => d.name !== m1.name);
+    const m2 = mains2[Math.floor(Math.random()*mains2.length)];
+    picked = [staple, m1, m2];
+  } else {
+    // fallback: pure random 3
+    for(let i=0;i<3;i++){
+      const idx=Math.floor(Math.random()*poolCopy.length);
+      picked.push(poolCopy.splice(idx,1)[0]);
+    }
   }
   lastResults=picked;
 
@@ -484,7 +513,12 @@ function showResults(dishes){
     for(let i=0;i<d.spice;i++)spiceStr+='🌶️';
     if(d.spice===0)spiceStr='😐 不辣';
     
+    // Role label based on position in combo
+    const roleMap={'面':'🍚 主食','饭':'🍚 主食','菜':'🥘 主菜','汤':'🍲 配汤','小吃':'🥟 小食','甜品':'🍮 甜点','饮品':'🥤 饮品'};
+    const role = roleMap[d.type] || '🍽️ 推荐';
+    
     card.innerHTML=`
+      <div class="dish-role">${role}</div>
       <div class="dish-emoji">${d.emoji}</div>
       <div class="dish-name">${d.name}</div>
       <div class="dish-badges">
